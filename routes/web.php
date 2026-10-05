@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Catalog\BoutiqueController;
 use App\Http\Controllers\Catalog\HomeController;
 use App\Http\Controllers\Catalog\ProductController;
+use App\Http\Controllers\Compte\AccountController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -23,10 +24,12 @@ Route::get('/{category:slug}', [BoutiqueController::class, 'category'])
     // (voir docs/DECISIONS.md, T07).
     ->where('category', '(?!boutique|produit|panier|mon-compte|connexion|inscription|admin).*');
 
-// Stub de l'espace client (PLAN.md §13) : le tableau de bord complet est
-// construit en T18. Ce stub sert uniquement de cible de redirection pour
-// Fortify (connexion, inscription, vérification d'email) et de preuve que
-// le parcours d'authentification fonctionne de bout en bout (T03).
-Route::middleware(['auth', 'verified'])->get('/mon-compte', function () {
-    return view('compte.stub');
-})->name('compte.dashboard');
+// Espace client (PLAN.md §13, T18). Email/mot de passe : routes Fortify
+// déjà en place (T03, `user-profile-information.update`, `user-password.update`).
+Route::middleware(['auth', 'verified'])->prefix('mon-compte')->name('compte.')->group(function () {
+    Route::get('/', [AccountController::class, 'dashboard'])->name('dashboard');
+    Route::get('/commandes', [AccountController::class, 'orders'])->name('orders');
+    Route::get('/informations', [AccountController::class, 'informations'])->name('informations');
+    Route::put('/adresse', [AccountController::class, 'updateAddress'])->name('address.update');
+    Route::post('/supprimer', [AccountController::class, 'requestDeletion'])->name('deletion.request');
+});

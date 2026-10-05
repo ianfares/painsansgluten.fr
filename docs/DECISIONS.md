@@ -41,6 +41,13 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — T18 — Espace client (anticipé, sans T12/T16 complets)
+
+- **Tâche avancée hors ordre** sur demande explicite du client ("surtout l'interface cliente"), sous contrainte de temps. T18 dépend officiellement de T12 (commandes) et T16 (factures), qui ne sont **pas encore faites** : le tableau de bord et "Mes commandes" fonctionnent déjà (le modèle `Order` existe depuis T02) mais aucune vraie commande ne peut encore être créée (le tunnel/paiement n'existent pas). **"Mes factures" n'a pas été construit** (dépend entièrement de T16, non fait) — à ajouter dès que T16 est livrée.
+- Email et mot de passe : **réutilisation directe des routes Fortify** déjà posées en T03 (`user-profile-information.update`, `user-password.update`) plutôt que de redévelopper un contrôleur — aucune duplication de logique d'authentification.
+- `deletion_requested_at` volontairement **exclu du `#[Fillable]`** de `User` (T03) : affectation directe + `save()` dans le contrôleur plutôt que mass-assignment, pour qu'un client ne puisse jamais positionner ce champ par un autre biais qu'une action serveur explicite.
+- IDOR vérifié : "Mes commandes" ne liste que `auth()->user()->orders()`, jamais une requête globale sur la table `orders`.
+
 ## 2026-10-06 — T08 — Panier
 
 - `CartService` (hors Livewire, QUALITE.md §4.2) consomme directement `ShippingCostCalculator`/`ShippingDateCalculator` (T09/T10) : pas de texte de repli "calculés à l'étape suivante" grâce au réordonnancement de tâches décidé en T10.
