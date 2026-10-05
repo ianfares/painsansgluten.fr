@@ -86,3 +86,39 @@ DOCUMENTATION : `docs/DECISIONS.md` complété (5 entrées : séparation users, 
 POINTS À RELIRE PAR UN HUMAIN : choix de stocker `relay_snapshot` en JSON plutôt qu'en colonnes dédiées — à reconfirmer une fois T01 fait et la forme exacte de la réponse Chronopost connue.
 AJOUTÉ AU BACKLOG : aucun ajout pour cette tâche.
 PROCHAINE TÂCHE SUGGÉRÉE : T03 — Authentification clients et administrateurs (dépend de T02, aucun blocage externe) ; T01 (Chronopost) reste la priorité dès réception des identifiants.
+
+---
+
+## [2026-10-06 01:10] — Claude Sonnet 5 — (décision) — 2FA admin reporté en V2
+STATUT : terminée
+RÉSUMÉ : Décision du client, en cours de préparation de T03 : le 2FA obligatoire sur le back-office (mentionné à plusieurs endroits dans PLAN.md, QUALITE.md, CHECKLIST-PROD.md, tasks/T03) est retiré du périmètre V1 et reporté en V2.
+FICHIERS CRÉÉS / MODIFIÉS : `PLAN.md` (amendement en tête), `QUALITE.md` §2.4, `CHECKLIST-PROD.md`, `tasks/T03-authentification.md`, `docs/BACKLOG.md`, `docs/DECISIONS.md`.
+ANALYSE D'IMPACT : Aucun sur T00/T02 (déjà livrées, ne touchaient pas à l'auth). Change directement le périmètre de T03 (pas de package 2FA à installer).
+SÉCURITÉ : Risque accepté par le client (connexion admin par mot de passe seul en V1, guard séparé + rate limiting restent en place).
+À RENSEIGNER / QUESTIONS OUVERTES : aucune.
+AJOUTÉ AU BACKLOG : 2FA admin (V2).
+PROCHAINE TÂCHE SUGGÉRÉE : T03, sans 2FA.
+
+---
+
+## [2026-10-06 01:45] — Claude Sonnet 5 — T03 — Authentification clients et administrateurs
+STATUT : terminée
+RÉSUMÉ : Authentification client complète via Laravel Fortify (guard `web`) : inscription (prénom/nom/téléphone/email/mot de passe), connexion, mot de passe oublié/réinitialisation, vérification d'email obligatoire avant `/mon-compte`, mise à jour profil/mot de passe. URLs en français. 2FA et passkeys explicitement désactivés (décision ci-dessus) ; leurs migrations ont été supprimées plutôt que laissées mortes. Guard `admin` (T00) non affecté, testé à nouveau étanche.
+FICHIERS CRÉÉS / MODIFIÉS :
+- `config/fortify.php`, `app/Providers/FortifyServiceProvider.php` (+ enregistré dans `bootstrap/providers.php`)
+- `app/Actions/Fortify/{CreateNewUser,UpdateUserProfileInformation}.php` (adaptés first_name/last_name/phone)
+- `app/Models/User.php` (implémente `MustVerifyEmail`, accesseur `name`)
+- `resources/views/components/layouts/auth.blade.php`, `resources/views/auth/{login,register,forgot-password,reset-password,verify-email}.blade.php`, `resources/views/compte/stub.blade.php`
+- `routes/web.php` (`/mon-compte` protégée `auth`+`verified`)
+- `tests/Feature/Auth/{RegistrationTest,LoginTest,PasswordResetTest}.php`
+- Supprimés : migrations `add_two_factor_columns_to_users_table`, `create_passkeys_table`
+ANALYSE D'IMPACT : Aucun appelant existant cassé (T00/T02 n'utilisaient pas l'auth client). `App\Models\User` modifié (ajout interface + trait + accesseur) : rétrocompatible, testé.
+SÉCURITÉ : Rate limiting 5/min (email+IP) sur la connexion, testé (HTTP 429 au-delà). Vérification d'email obligatoire avant tout accès à l'espace client, testée. Validation serveur systématique (Form via Fortify + règles explicites). Aucun secret, aucun mécanisme cryptographique maison (Hash::make natif). Séparation guard `admin`/`web` re-testée après l'installation de Fortify.
+PERFORMANCE : Sans objet (pas de requêtes N+1 introduites).
+TESTS : 10 nouveaux tests Pest (inscription + validation téléphone obligatoire, vérification email bloquante puis déblocante, connexion succès/échec, rate limiting, demande + exécution + échec de réinitialisation de mot de passe). Suite complète : **23 passés / 0 échec**.
+QUALITÉ : `pint --test` ✓, `phpstan` niveau 5 ✓ (0 erreur, après correction d'un `instanceof` toujours vrai détecté par l'outil), `composer audit` ✓ (0 faille — note : `laravel/passkeys`, `pragmarx/google2fa`, `bacon/bacon-qr-code` installés comme dépendances dures de Fortify mais non utilisés par notre code).
+DOCUMENTATION : `docs/DECISIONS.md` complété (choix Fortify, désactivation 2FA/passkeys, URLs françaises, vues non stylées).
+À RENSEIGNER / QUESTIONS OUVERTES : aucune pour T03.
+POINTS À RELIRE PAR UN HUMAIN : vues d'authentification volontairement non stylées (texte brut) — à ne pas prendre pour la version finale, le design arrive en T06/T18.
+AJOUTÉ AU BACKLOG : rien de nouveau (2FA déjà ajouté dans la décision ci-dessus).
+PROCHAINE TÂCHE SUGGÉRÉE : T04 — Paramètres boutique et apparence (dépend de T02, T03 ; aucun blocage externe pour construire l'infrastructure de paramètres, mais les **valeurs réelles** resteront "À RENSEIGNER" tant que la cliente/le comptable n'ont pas répondu). T01 (Chronopost) reste prioritaire dès réception des identifiants.
