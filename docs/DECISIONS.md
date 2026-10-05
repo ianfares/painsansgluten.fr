@@ -41,6 +41,16 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — T03 — Authentification
+
+- **Laravel Fortify ^1.40** pour l'authentification client (guard `web`) : inscription, connexion, mot de passe oublié/réinitialisation, vérification d'email, mise à jour du profil/mot de passe — toutes "officielles", aucun mécanisme maison (CLAUDE.md §3.1).
+- **2FA et passkeys désactivés** dans `config/fortify.php` (`features`) : non requis en V1 (voir décision ci-dessous). Les migrations publiées par le package pour ces fonctionnalités (`two_factor_columns`, `passkeys_table`) ont été **supprimées** plutôt que migrées : elles créeraient des colonnes/tables mortes (QUALITE.md §4.3 YAGNI). Les paquets `laravel/passkeys`, `pragmarx/google2fa`, `bacon/bacon-qr-code` restent installés (dépendances dures de Fortify), mais aucun code applicatif ne les utilise.
+- **URLs en français** pour les routes d'authentification (`config/fortify.php` → `paths`) : `/connexion`, `/inscription`, `/mot-de-passe-oublie`, `/verifier-email`, etc., conformément à CLAUDE.md §5 ("nommage routes FR côté public"). Les noms de routes Laravel restent en anglais (`login`, `register`…), seule l'URL change.
+- **`App\Models\User`** implémente `MustVerifyEmail` (email obligatoire avant accès à `/mon-compte`, PLAN §13) et expose un accesseur `name` calculé (`first_name` + `last_name`) pour la compatibilité avec les notifications Fortify/Laravel qui l'attendent.
+- **Vues Blade minimales, non stylées** (`resources/views/auth/*.blade.php`, `resources/views/compte/stub.blade.php`) : fonctionnelles mais sans design, conformément à la fiche T03 ("finalisées en T06/T18"). `/mon-compte` est un stub de redirection, le vrai tableau de bord client se construit en T18.
+- **Rate limiting** : 5 tentatives/minute par (email + IP) sur la connexion (limiteur `login`), comportement par défaut de Laravel (middleware `throttle`), réponse HTTP 429 au-delà — testé.
+- Guard `admin` (Filament, T00) non affecté par l'installation de Fortify (`fortify.guard = web` uniquement) ; testé que la séparation reste étanche.
+
 ## 2026-10-06 — Changement de périmètre : 2FA admin reporté en V2
 
 - **Décision client**, pendant la préparation de T03. Le PLAN.md (et QUALITE.md, CHECKLIST-PROD.md) mentionnaient à plusieurs endroits un 2FA **obligatoire** sur le back-office Filament en V1.
