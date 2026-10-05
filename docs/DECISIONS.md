@@ -32,6 +32,15 @@
 
 - Extension PHP `bcmath` **non installée** sur la machine de développement (vérifié, absente). Non bloquant : ni Laravel, ni les packages installés en T00 n'en dépendent. Montants gérés en entiers (centimes) conformément à CLAUDE.md §3.6, qui ne nécessite pas `bcmath`. À surveiller si une future dépendance (T14 Stripe ?) venait à le requérir.
 
+## 2026-10-05 — T02 — Modèle de données
+
+- **Table `users`** : la migration par défaut de Laravel (`name`) a été adaptée dans une **nouvelle** migration (`adjust_users_table_for_v1`) plutôt que modifiée directement, conformément à CLAUDE.md §3.4 (une migration déjà mergée dans `develop` ne se modifie jamais). Résultat : `first_name`/`last_name` séparés (PLAN.md §22), `phone` (obligatoire pour le SMS Chronopost, PLAN §9.1), `deletion_requested_at` (PLAN §13).
+- **`orders.relay_snapshot`** stocké en JSON plutôt qu'en colonnes séparées (`relay_address_*`) : PLAN.md §9.4 identifie explicitement cette zone comme ambiguë ("quels champs exacts pour le snapshot complet ?"). Le JSON permet de capturer tout ce que l'API Chronopost renvoie (nom, adresse, horaires, distance) sans décider prématurément d'un schéma rigide ; `relay_id` et `relay_name` restent des colonnes dédiées (recherche/affichage rapides).
+- **Pas de table `vat_rates`** : le modèle de données `PLAN.md §22` ne prévoit pas de table séparée pour les taux de TVA, seulement une colonne `products.vat_rate` (decimal). La "liste paramétrable" des taux sélectionnables en BO (mentionnée dans la fiche T02) relève de `spatie/laravel-settings`, installé en **T04** — non disponible en T02. Reporté à T04 : seeding réel des taux à ce moment-là (valeurs toujours **À CONFIRMER** par le comptable, CLAUDE.md §3.1).
+- **Redirection générique `/products/{slug}` → `/produit/{slug}`** (PLAN §23) : non seedée dans `redirects` (table de correspondances exactes). C'est une règle de motif, implémentée dans le middleware de redirection (**T20**), pas une ligne de données.
+- **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
+- Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
+
 ## 2026-10-05 — Rangement des fichiers non applicatifs
 
 - `audit-painsansgluten.html` (audit du site Shopify existant) et `documents/` (archive brute reçue de la cliente) déplacés dans `docs/reference/` pour ne pas mélanger matériel de référence et structure applicative Laravel (qui doit rester à la racine du dépôt — conventions `artisan`/`public/index.php`/déploiement Nginx déjà décrites dans `CHECKLIST-PROD.md` et la tâche T25).
