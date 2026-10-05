@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Events\Orders\OrderPaid;
+use App\Events\Orders\OrderRefunded;
+use App\Listeners\Orders\GenerateCreditNoteOnOrderRefunded;
+use App\Listeners\Orders\GenerateInvoiceOnOrderPaid;
 use App\Models\User;
 use App\Services\Cart\CartService;
 use App\View\Composers\CartCountComposer;
@@ -39,5 +43,9 @@ class AppServiceProvider extends ServiceProvider
                 app(CartService::class)->mergeIntoUser($event->user);
             }
         });
+
+        // Facturation (PLAN.md §12, T16).
+        Event::listen(OrderPaid::class, GenerateInvoiceOnOrderPaid::class);
+        Event::listen(OrderRefunded::class, GenerateCreditNoteOnOrderRefunded::class);
     }
 }

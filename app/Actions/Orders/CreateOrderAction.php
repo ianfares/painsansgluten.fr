@@ -8,10 +8,10 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Models\Cart;
 use App\Models\CartItem;
-use App\Models\InvoiceSequence;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Services\Cart\CartService;
+use App\Services\Sequencing\SequenceGenerator;
 use App\Settings\ShippingSettings;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +25,10 @@ use RuntimeException;
  */
 class CreateOrderAction
 {
-    public function __construct(private readonly CartService $cartService) {}
+    public function __construct(
+        private readonly CartService $cartService,
+        private readonly SequenceGenerator $sequenceGenerator,
+    ) {}
 
     /**
      * @param  array{email: string, first_name: string, last_name: string, phone: string}  $customer
@@ -47,7 +50,7 @@ class CreateOrderAction
                 throw new RuntimeException($totals['shipping_error']);
             }
 
-            $number = $this->nextOrderNumber();
+            $number = $this->sequenceGenerator->next('order', 'C');
 
             $order = Order::query()->create([
                 'number' => $number,
@@ -107,32 +110,6 @@ class CreateOrderAction
 
             return $order->fresh(['items']);
         });
-    }
-
-    /**
-     * Numéro séquentiel continu, sans trou (PLAN.md §9.1, format
-     * `C{année}-{numéro}`), attribué sous verrou — réutilise la table
-     * `invoice_sequences` (générique `type`/`year`/`last_number`) avec
-     * `type = 'order'` plutôt que de créer une table dédiée identique
-     * (voir docs/DECISIONS.md, T12).
-     */
-    private function nextOrderNumber(): string
-    {
-        $year = (int) now()->year;
-
-        $sequence = InvoiceSequence::query()
-            ->where('type', 'order')
-            ->where('year', $year)
-            ->lockForUpdate()
-            ->first();
-
-        if (! $sequence) {
-            $sequence = InvoiceSequence::query()->create(['type' => 'order', 'year' => $year, 'last_number' => 0]);
-        }
-
-        $sequence->increment('last_number');
-
-        return sprintf('C%d-%05d', $year, $sequence->last_number);
     }
 
     /**

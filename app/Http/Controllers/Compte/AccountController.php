@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Compte;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,15 @@ class AccountController extends Controller
     {
         return view('compte.orders', [
             'orders' => Auth::user()->orders()->latest()->paginate(10),
+        ]);
+    }
+
+    public function invoices(): View
+    {
+        $orderIds = Auth::user()->orders()->pluck('id');
+
+        return view('compte.invoices', [
+            'invoices' => Invoice::query()->whereIn('order_id', $orderIds)->latest('issued_at')->paginate(10),
         ]);
     }
 

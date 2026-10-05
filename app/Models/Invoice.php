@@ -11,6 +11,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property InvoiceType $type
+ * @property array<string, mixed> $snapshot
+ */
 #[Fillable(['order_id', 'type', 'number', 'issued_at', 'snapshot', 'total_ht', 'total_vat', 'total_ttc', 'pdf_path', 'related_invoice_id'])]
 class Invoice extends Model
 {

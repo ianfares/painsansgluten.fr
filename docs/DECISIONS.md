@@ -41,6 +41,16 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — T16 — Factures et avoirs PDF
+
+- **Bug de schéma corrigé** : `invoices.total_ht/total_vat/total_ttc` créées en `unsignedInteger` en T02, avant que les avoirs (montants **négatifs**, PLAN §12) ne soient conçus. Migration séparée (`alter_invoices_totals_signed`) plutôt que de modifier la migration T02 déjà mergée (CLAUDE.md §3.4) — colonnes passées en `INT` signé via SQL brut (`DB::statement`), plus fiable que `->change()` (doctrine/dbal) sur MariaDB pour ce cas précis.
+- **`SequenceGenerator`** extrait de `CreateOrderAction` (T12) en service partagé : factures (`type='invoice'`, préfixe `F`) et avoirs (`type='credit_note'`, préfixe `A`) réutilisent la même mécanique de verrouillage que les commandes.
+- **`barryvdh/laravel-dompdf` ^3.1**. PDF stocké sur le disque `local` (privé par défaut en Laravel 11+, `storage/app/private`) — jamais sur le disque `public`.
+- **Téléchargement** : `Gate::authorize('view', $invoice)` (policy : facture liée à une commande du client connecté) **sauf** si l'URL porte une signature valide (`hasValidSignature()`), auquel cas l'accès est autorisé sans authentification — pour le lien envoyé à un client invité (30 jours, à générer lors de l'envoi de l'email en T19).
+- **Répartition HT/TVA par taux** : `vat_summary` dans le snapshot regroupe les lignes de commande par `vat_rate` — résout proprement le relevé approximatif (taux moyen pondéré) posé en T12 pour `orders.total_ht/total_vat`, qui reste une approximation sur la commande elle-même (non modifiée ici) mais est correctement détaillé par taux **sur la facture**, qui est le document qui compte réglementairement.
+- **Listeners idempotents** : `GenerateInvoiceOnOrderPaid`/`GenerateCreditNoteOnOrderRefunded` vérifient l'absence de facture/avoir existant avant d'en émettre un nouveau — protège contre un événement rejoué (ex. webhook Stripe livré deux fois, T14).
+- **Non fait, à prévoir séparément** : ressource Filament "Factures & avoirs" + export comptable CSV (PLAN §14) — reporté faute de temps, le cœur (génération, snapshot immuable, téléchargement sécurisé) était la priorité. Le montant/texte des mentions légales (raison sociale, SIRET, formats de numéros) reste `À VALIDER` par le comptable (CLAUDE.md §3.1) : le PDF affiche des placeholders explicites tant que `BillingSettings` n'est pas renseigné.
+
 ## 2026-10-06 — T12 — Commandes : création, statuts et transitions
 
 - **Numérotation des commandes réutilise la table `invoice_sequences`** (déjà créée en T02, colonnes génériques `type`/`year`/`last_number`) avec `type = 'order'`, plutôt qu'une table dédiée identique. Incrément sous `lockForUpdate()` dans la même transaction que la création de la commande.

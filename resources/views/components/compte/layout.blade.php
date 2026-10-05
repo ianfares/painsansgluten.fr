@@ -6,6 +6,7 @@
             @foreach ([
                 ['key' => 'dashboard', 'label' => 'Tableau de bord', 'route' => 'compte.dashboard'],
                 ['key' => 'orders', 'label' => 'Mes commandes', 'route' => 'compte.orders'],
+                ['key' => 'invoices', 'label' => 'Mes factures', 'route' => 'compte.invoices'],
                 ['key' => 'informations', 'label' => 'Mes informations', 'route' => 'compte.informations'],
             ] as $item)
                 <a
