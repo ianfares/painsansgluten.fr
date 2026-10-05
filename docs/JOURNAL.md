@@ -192,3 +192,16 @@ DOCUMENTATION : `docs/DECISIONS.md` complété (tokens relevés, choix police/Al
 POINTS À RELIRE PAR UN HUMAIN : **critère d'acceptation de cette tâche** = captures desktop/mobile comparées côte à côte avec le site actuel, validées par Ian — nécessite une revue humaine visuelle, non automatisable. Auto-corrigé en cours de tâche une tentative d'injection HTML non échappée (`{!! !!}` avec `old()`) dans le composant `<x-ui.input>` avant tout commit — jamais exposée.
 AJOUTÉ AU BACKLOG : rien de nouveau.
 PROCHAINE TÂCHE SUGGÉRÉE : T07 — Accueil, boutique, catégories, fiche produit (dépend de T05, T06 ; aucun blocage externe, peut être fait maintenant).
+
+---
+
+## [2026-10-06 05:20] — Claude Sonnet 5 — T07 — Pages catalogue (accueil, boutique, catégories, fiche produit)
+STATUT : terminée
+RÉSUMÉ : Pages publiques du catalogue : accueil (bannière, catégories, produits mis en avant depuis les paramètres, info livraison), `/boutique` + pages catégories (grille filtrable), fiche produit complète (galerie, prix, allergènes, nutrition, blocs PLAN §6.3 dans l'ordre et masqués si vides, "vous aimerez aussi"). Ajout de `mews/purifier` pour purifier à l'écriture les champs RichEditor affichés en `{!! !!}`.
+FICHIERS : `app/Http/Controllers/Catalog/{Home,Boutique,Product}Controller.php`, `resources/views/catalog/{home,boutique,product}.blade.php`, routes catégories/produit/boutique, `Product::scopePublished()` + mutateurs de purification, `welcome.blade.php` supprimé (remplacé par `catalog.home`).
+SÉCURITÉ : purification à l'écriture (`description`, `ingredients`), produit non publié → 404 (testé), visibilité catalogue strictement sur `is_published`.
+TESTS : 7 nouveaux (pages 200, 404 si non publié, bouton ajouter absent si indisponible/non expédiable avec message paramétré, blocs vides masqués, grille sans brouillon). Suite complète : **53 passés / 0 échec**.
+QUALITÉ : pint/phpstan niveau 5/composer+npm audit : tout vert.
+À RENSEIGNER : aucun blocage pour cette tâche.
+POINTS À RELIRE PAR UN HUMAIN : route catégorie générique à la racine (regex d'exclusion) — à mettre à jour à chaque nouvelle route racine (ex. `/faq`, `/contact` en T20). Bouton "Ajouter au panier" encore non fonctionnel (T08).
+PROCHAINE TÂCHE SUGGÉRÉE : T08 — Panier.
