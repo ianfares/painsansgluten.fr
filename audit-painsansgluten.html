@@ -1,0 +1,352 @@
+<title>Audit Mon Sans Gluten</title>
+<style>
+/* Layout concept: editorial audit report — sticky left TOC on desktop
+   collapsing to a top accordion on mobile; numbered sections with
+   tagged finding cards; a stat strip up top for scannability. */
+:root{
+  --bg:#efeee9; --surface:#ffffff; --ink:#262320; --muted:#6b6560;
+  --accent:#9c5a2e; --accent-soft:#f0e2d4; --line:rgba(38,35,32,.14);
+  --critical:#b23a2e; --critical-soft:#f6e4e1;
+  --warning:#9c7a1f; --warning-soft:#f3ebd4;
+  --good:#3f7a5c; --good-soft:#e2eee7;
+  --info:#3a6ea5; --info-soft:#e2ebf3;
+  --display:'Fraunces',Georgia,'Times New Roman',serif;
+  --body:'Source Sans 3',-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1a1714; --surface:#242019; --ink:#ece7e0; --muted:#a69c92;
+    --accent:#dd9c64; --accent-soft:#3a2c1f; --line:rgba(236,231,224,.14);
+    --critical:#e2695b; --critical-soft:#3a211e;
+    --warning:#e0ad5a; --warning-soft:#3a2f1a;
+    --good:#6fbf96; --good-soft:#1e3328;
+    --info:#7badd6; --info-soft:#1c2c3a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1a1714; --surface:#242019; --ink:#ece7e0; --muted:#a69c92;
+  --accent:#dd9c64; --accent-soft:#3a2c1f; --line:rgba(236,231,224,.14);
+  --critical:#e2695b; --critical-soft:#3a211e;
+  --warning:#e0ad5a; --warning-soft:#3a2f1a;
+  --good:#6fbf96; --good-soft:#1e3328;
+  --info:#7badd6; --info-soft:#1c2c3a;
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--body);
+  margin:0; padding-inline:16px; line-height:1.55; font-size:16px;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:var(--display); font-weight:600; line-height:1.15; text-wrap:balance; margin:0;}
+a{color:var(--accent);}
+code, .mono{font-family:var(--mono); font-size:.86em;}
+
+.wrap{max-width:1180px; margin:0 auto; padding-block:28px 80px;}
+
+/* ---------- Masthead ---------- */
+.mast{display:flex; flex-direction:column; gap:14px; padding-bottom:28px; border-bottom:1px solid var(--line); margin-bottom:28px;}
+.mast .kicker{font-family:var(--mono); font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
+.mast h1{font-size:clamp(30px,4.6vw,46px);}
+.mast .url{font-family:var(--mono); font-size:15px; color:var(--accent);}
+.mast .dek{max-width:62ch; color:var(--muted); font-size:17px;}
+
+.callout{
+  display:flex; gap:14px; align-items:flex-start; background:var(--info-soft);
+  border:1px solid color-mix(in srgb, var(--info) 35%, transparent);
+  border-radius:10px; padding:18px 20px; margin-top:6px;
+}
+.callout .icon{font-size:22px; line-height:1;}
+.callout p{margin:0; color:var(--ink);}
+.callout b{color:var(--info);}
+
+/* ---------- Stat strip ---------- */
+.stats{display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin:28px 0;}
+.stat{background:var(--surface); padding:18px 16px; display:flex; flex-direction:column; gap:4px; min-width:0;}
+.stat b{font-family:var(--display); font-size:26px; font-variant-numeric:tabular-nums;}
+.stat span{font-size:12.5px; color:var(--muted); line-height:1.3;}
+@media (max-width:860px){ .stats{grid-template-columns:repeat(2,1fr);} }
+
+/* ---------- Page grid: TOC + content ---------- */
+.page{display:grid; grid-template-columns:230px minmax(0,1fr); gap:48px; align-items:start;}
+@media (max-width:900px){ .page{grid-template-columns:1fr;} }
+
+.toc{position:sticky; top:calc(env(safe-area-inset-top,0px) + 20px);}
+.toc nav{display:flex; flex-direction:column; gap:2px; border-left:1px solid var(--line); padding-left:14px;}
+.toc a{font-size:14px; color:var(--muted); text-decoration:none; padding:5px 0; border-left:2px solid transparent; margin-left:-15px; padding-left:13px; transition:color .15s, border-color .15s;}
+.toc a:hover{color:var(--ink);}
+.toc a.active{color:var(--accent); border-left-color:var(--accent); font-weight:600;}
+.toc-mobile{display:none;}
+@media (max-width:900px){
+  .toc{display:none;}
+  .toc-mobile{display:block; margin-bottom:28px;}
+  .toc-mobile summary{cursor:pointer; font-family:var(--display); font-size:17px; padding:12px 16px; background:var(--surface); border:1px solid var(--line); border-radius:8px;}
+  .toc-mobile nav{display:flex; flex-direction:column; gap:2px; padding:10px 16px; background:var(--surface); border:1px solid var(--line); border-top:none; border-radius:0 0 8px 8px;}
+  .toc-mobile a{font-size:14.5px; color:var(--muted); text-decoration:none; padding:6px 0;}
+}
+
+/* ---------- Sections ---------- */
+section{padding-top:44px; margin-top:-20px; scroll-margin-top:20px;}
+section:first-of-type{padding-top:0;}
+.sec-head{display:flex; align-items:baseline; gap:12px; margin-bottom:16px;}
+.sec-num{font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600;}
+.sec-head h2{font-size:clamp(22px,3vw,28px);}
+section > p{max-width:70ch; color:var(--ink);}
+section > p.muted{color:var(--muted);}
+
+/* ---------- Tags ---------- */
+.tag{display:inline-flex; align-items:center; gap:5px; font-family:var(--body); font-size:12px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; padding:3px 9px; border-radius:999px; white-space:nowrap;}
+.tag-critical{background:var(--critical-soft); color:var(--critical);}
+.tag-warning{background:var(--warning-soft); color:var(--warning);}
+.tag-good{background:var(--good-soft); color:var(--good);}
+.tag-info{background:var(--info-soft); color:var(--info);}
+
+/* ---------- Finding cards ---------- */
+.findings{display:flex; flex-direction:column; gap:12px; margin:18px 0;}
+.finding{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:8px; padding:14px 18px; min-width:0;}
+.finding.critical{border-left-color:var(--critical);}
+.finding.warning{border-left-color:var(--warning);}
+.finding.good{border-left-color:var(--good);}
+.finding.info{border-left-color:var(--info);}
+.finding .fhead{display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;}
+.finding .ftitle{font-weight:700; font-size:15.5px;}
+.finding p{margin:0; font-size:15px; color:var(--ink);}
+.finding p + p{margin-top:6px;}
+.finding .evidence{display:block; margin-top:8px; background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-family:var(--mono); font-size:12.8px; color:var(--muted); overflow-x:auto; white-space:pre-wrap; word-break:break-word;}
+
+/* ---------- Keep list ---------- */
+.keep{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:18px 0;}
+@media (max-width:700px){ .keep{grid-template-columns:1fr;} }
+.keep li{list-style:none; background:var(--good-soft); border:1px solid color-mix(in srgb, var(--good) 30%, transparent); border-radius:8px; padding:12px 14px; font-size:14.5px;}
+.keep{padding:0; margin-left:0;}
+
+/* ---------- Priority list ---------- */
+.priorities{display:flex; flex-direction:column; gap:10px; margin:18px 0; padding:0;}
+.priorities li{list-style:none; display:flex; gap:14px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:14px 16px;}
+.priorities .pnum{font-family:var(--display); font-size:20px; color:var(--accent); min-width:28px;}
+.priorities .ptitle{font-weight:700; display:block; margin-bottom:2px;}
+.priorities .pwhy{color:var(--muted); font-size:14px;}
+
+footer{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+
+<div class="wrap">
+
+  <header class="mast">
+    <div class="kicker">Audit externe · e-commerce</div>
+    <h1>Mon Sans Gluten <span style="color:var(--muted);font-weight:500;">— painsansgluten.fr</span></h1>
+    <div class="url">https://painsansgluten.fr</div>
+    <p class="dek">Boulangerie-pâtisserie artisanale 100&nbsp;% sans gluten, Avranches (Manche). Audit préparatoire avant une refonte complète du site en code.</p>
+
+    <div class="callout">
+      <span class="icon">🔜</span>
+      <p><b>Point clé avant tout le reste :</b> ce n'est pas une boutique en activité qui galère — c'est un site « bientôt disponible » pré-lancement. La bannière d'accueil l'indique noir sur blanc : <em>« Ouverture prochaine — Octobre 2026 »</em>. Ça recontextualise presque tous les constats ci-dessous (catalogue épuisé, prix à 0&nbsp;€, mentions légales à trous) : c'est de la mise en place, pas du dysfonctionnement — mais ça donne aussi un calendrier clair.</p>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><b>7</b><span>produits au catalogue</span></div>
+    <div class="stat"><b>0</b><span>en stock actuellement</span></div>
+    <div class="stat"><b>0,00&nbsp;€</b><span>prix affiché par produit</span></div>
+    <div class="stat"><b>0</b><span>app tierce installée</span></div>
+    <div class="stat"><b>Oct. 2026</b><span>ouverture annoncée</span></div>
+  </div>
+
+  <details class="toc-mobile">
+    <summary>Sommaire</summary>
+    <nav id="toc-mobile-nav"></nav>
+  </details>
+
+  <div class="page">
+    <aside class="toc">
+      <nav id="toc-nav">
+        <a href="#identite">01 · Identité &amp; structure</a>
+        <a href="#catalogue">02 · Catalogue produits</a>
+        <a href="#contenu">03 · Pages de contenu</a>
+        <a href="#juridique">04 · Juridique &amp; conformité</a>
+        <a href="#seo">05 · SEO &amp; données structurées</a>
+        <a href="#technique">06 · Technique, perf, a11y</a>
+        <a href="#garder">07 · Ce qui est déjà bien fait</a>
+        <a href="#priorites">08 · Priorités pour la refonte</a>
+      </nav>
+    </aside>
+
+    <main>
+
+      <section id="identite">
+        <div class="sec-head"><span class="sec-num">01</span><h2>Identité &amp; structure</h2></div>
+        <p>Marque <strong>« Mon Sans Gluten by Angélique »</strong>, exploitée par <strong>SASU AGUYAPI</strong> (Mme&nbsp;Angélique Bogaert), 71&nbsp;bis rue du commandant Bindel, 50300&nbsp;Avranches. Boulangerie-pâtisserie artisanale 100&nbsp;% sans gluten, vendue annoncée sur trois canaux : marchés, vente en ligne, professionnels (B2B).</p>
+        <p>Baseline : <em>« Le gluten s'efface, le goût reste. »</em> — accrocheuse, bien trouvée, à garder telle quelle.</p>
+        <div class="findings">
+          <div class="finding warning">
+            <div class="fhead"><span class="ftitle">Arborescence minimaliste</span><span class="tag tag-warning">Contenu</span></div>
+            <p>Seulement 3 pages : Accueil / Boutique sans Gluten / Contact. Pas de page « Qui sommes-nous », pas de blog, pas de FAQ.</p>
+          </div>
+          <div class="finding info">
+            <div class="fhead"><span class="ftitle">Thème Shopify du Theme Store</span><span class="tag tag-info">Technique</span></div>
+            <p>Thème payant récent (store&nbsp;ID&nbsp;2481), architecture à base de web components et import maps — pas un vieux thème bricolé.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="catalogue">
+        <div class="sec-head"><span class="sec-num">02</span><h2>Catalogue produits</h2></div>
+        <p>7 produits, tous listés « Épuisé » et tous à <strong>0,00&nbsp;€</strong> — confirmé dans les données structurées : <code>"price":"0.00"</code>, <code>"availability":"http://schema.org/OutOfStock"</code>. Cohérent avec le pré-lancement, mais à surveiller si Google indexe ces pages avant l'ouverture réelle : un prix à 0&nbsp;€ dans les résultats de recherche donne une impression de bug.</p>
+        <p>Noms travaillés avec jeux de mots — <em>La Cabosse, Le Brownheur, Le Bunheur, Le Mie'miam, Le Miel'lleux, Le Pain Nordique, Le Zest'moelleux à l'Orange</em> — identité sympathique à conserver.</p>
+        <div class="findings">
+          <div class="finding good">
+            <div class="fhead"><span class="ftitle">Fiches produit bien structurées</span><span class="tag tag-good">Déjà bien</span></div>
+            <p>Accordéons détaillés : Ingrédients, Allergènes, Valeurs nutritionnelles, Conditionnement, Conseils de dégustation, Conservation, Expédition. Bon niveau de détail pour du frais — à répliquer tel quel.</p>
+            <p>Allergènes bien gérés : <em>« Garanti sans gluten. Fabriqué dans un atelier qui utilise des fruits à coques, graines de sésame, lactose et œuf. »</em></p>
+          </div>
+          <div class="finding warning">
+            <div class="fhead"><span class="ftitle">Pas d'avis clients, pas d'alerte stock</span><span class="tag tag-warning">Produit</span></div>
+            <p>Aucune app de notation (Judge.me/Loox/Yotpo), aucun bouton « Me prévenir quand disponible », aucune sous-catégorisation (pains / viennoiseries / pâtisseries) — tout est dans une collection unique.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="contenu">
+        <div class="sec-head"><span class="sec-num">03</span><h2>Pages de contenu</h2></div>
+        <div class="findings">
+          <div class="finding critical">
+            <div class="fhead"><span class="ftitle">Page Contact = formulaire nu</span><span class="tag tag-critical">Contenu</span></div>
+            <p>Nom / E-mail / Téléphone / Commentaire, et rien d'autre. Aucune adresse, aucun horaire, aucun numéro affiché — à corriger pour une boulangerie physique présente sur les marchés.</p>
+          </div>
+          <div class="finding warning">
+            <div class="fhead"><span class="ftitle">Pas de page « Notre histoire »</span><span class="tag tag-warning">Contenu</span></div>
+            <p>Aucun portrait d'Angélique, aucun récit de marque — manque pour une identité où le prénom de la fondatrice est la marque elle-même.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="juridique">
+        <div class="sec-head"><span class="sec-num">04</span><h2>Juridique &amp; conformité</h2></div>
+        <p>Les pages légales sont <strong>bien rédigées et juridiquement sérieuses</strong> — CGV complètes, bonne gestion de l'exception « produit périssable » (article&nbsp;L.221-28), garanties légales correctement citées. Mais plusieurs espaces-réservés sont publiés tels quels :</p>
+        <div class="findings">
+          <div class="finding critical">
+            <div class="fhead"><span class="ftitle">Identifiants d'entreprise non renseignés</span><span class="tag tag-critical">Juridique</span></div>
+            <p>Mentions légales :</p>
+            <span class="evidence">SIREN : [NUMÉRO SIREN]
+SIRET : [NUMÉRO SIRET]
+N° TVA intracommunautaire : [NUMÉRO DE TVA ]</span>
+          </div>
+          <div class="finding critical">
+            <div class="fhead"><span class="ftitle">Médiateur de la consommation absent</span><span class="tag tag-critical">Juridique</span></div>
+            <p>Mention légalement obligatoire pour un site e-commerce français, actuellement vide dans les CGV :</p>
+            <span class="evidence">[NOM DU MÉDIATEUR]
+[ADRESSE DU MÉDIATEUR]
+[SITE INTERNET DU MÉDIATEUR]</span>
+          </div>
+        </div>
+        <p class="muted">À compléter avant toute mise en ligne commerciale réelle (pas juste un détail de style — une obligation légale).</p>
+      </section>
+
+      <section id="seo">
+        <div class="sec-head"><span class="sec-num">05</span><h2>SEO &amp; données structurées</h2></div>
+        <div class="findings">
+          <div class="finding warning">
+            <div class="fhead"><span class="ftitle">Title générique partout</span><span class="tag tag-warning">SEO</span></div>
+            <p>Le <code>&lt;title&gt;</code> de la home est juste « Mon Sans Gluten by Angélique », sans ville ni produit — alors que la meta description, elle, est bien écrite et orientée mots-clés :</p>
+            <span class="evidence">Enfin du pain sans gluten artisanal français élaboré à
+Avranches dans la Manche. Découvrez tous nos produits
+totalement sans gluten (gluten free)</span>
+            <p>Facile à corriger : reprendre ce même texte dans le title.</p>
+          </div>
+          <div class="finding warning">
+            <div class="fhead"><span class="ftitle">Image de partage social faible</span><span class="tag tag-warning">SEO</span></div>
+            <p>L'image Open Graph est juste le logo (512×512) — une vraie photo produit ferait un bien meilleur aperçu sur les réseaux sociaux.</p>
+          </div>
+          <div class="finding good">
+            <div class="fhead"><span class="ftitle">Base technique propre</span><span class="tag tag-good">Déjà bien</span></div>
+            <p>Meta description correcte, balise canonique correcte, <code>lang="fr"</code> correct, JSON-LD (Organization + Product) présent et valide, sitemap.xml et robots.txt générés automatiquement par Shopify sans anomalie.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="technique">
+        <div class="sec-head"><span class="sec-num">06</span><h2>Technique, performance, accessibilité</h2></div>
+        <div class="findings">
+          <div class="finding critical">
+            <div class="fhead"><span class="ftitle">Le bandeau principal est une image plate</span><span class="tag tag-critical">Accessibilité</span></div>
+            <p>Toute la promesse de marque — tagline, « Boulangerie &amp; créations artisanales », date d'ouverture, pictos des canaux de vente — est un seul <code>banniere_principale.png</code> (jusqu'à 3840&nbsp;px de large), <strong>sans aucun attribut <code>alt</code></strong>.</p>
+            <p>Conséquences : texte invisible pour Google, invisible pour les lecteurs d'écran, fichier lourd (PNG pour un visuel photo+texte), texte non traduisible.</p>
+            <p><strong>Recommandation forte pour la refonte :</strong> refaire ce bloc en vrai HTML/CSS avec une police web, pas en image.</p>
+          </div>
+          <div class="finding warning">
+            <div class="fhead"><span class="ftitle">Aucun outil tiers installé</span><span class="tag tag-warning">Technique</span></div>
+            <p>Pas de Google Analytics/GTM, pas de Meta Pixel, pas de TikTok Pixel, pas d'app avis clients, pas de chat, pas d'email marketing au-delà du champ newsletter natif Shopify. Base vierge — tout est à prévoir dans la refonte si un tracking/remarketing est souhaité.</p>
+          </div>
+          <div class="finding warning">
+            <div class="fhead"><span class="ftitle">Images non optimisées au format moderne</span><span class="tag tag-warning">Performance</span></div>
+            <p>Photos produits servies en JPG avec tailles responsives correctes (<code>width=240</code>, <code>352</code>…), mais sans conversion WebP/AVIF — optimisation facile à ajouter côté CDN.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="garder">
+        <div class="sec-head"><span class="sec-num">07</span><h2>Ce qui est déjà bien fait</h2></div>
+        <p class="muted">À transposer tel quel dans la refonte, indépendamment de la plateforme.</p>
+        <ul class="keep">
+          <li>Identité visuelle cohérente — palette verte/crème/terracotta, logo soigné, typographie de marque reconnaissable.</li>
+          <li>Structure de fiche produit (accordéons) très adaptée à l'alimentaire artisanal.</li>
+          <li>CGV et politique de remboursement rédigées sérieusement, avec la bonne exception légale « produit périssable ».</li>
+          <li>Navigation simple, sans friction inutile — 3 entrées claires.</li>
+        </ul>
+      </section>
+
+      <section id="priorites">
+        <div class="sec-head"><span class="sec-num">08</span><h2>Priorités pour la refonte en code</h2></div>
+        <ol class="priorities">
+          <li><span class="pnum">1</span><div><span class="ptitle">Reconstruire le hero en HTML/CSS réel</span><span class="pwhy">Texte + police web plutôt qu'une image plate — indexable, accessible, traduisible.</span></div></li>
+          <li><span class="pnum">2</span><div><span class="ptitle">Ajouter une page « Notre histoire »</span><span class="pwhy">Photo et récit d'Angélique — levier de confiance fort pour une marque artisanale locale.</span></div></li>
+          <li><span class="pnum">3</span><div><span class="ptitle">Étoffer la page Contact</span><span class="pwhy">Adresse, horaires de marché, téléphone, carte.</span></div></li>
+          <li><span class="pnum">4</span><div><span class="ptitle">Prévoir dès le départ analytics et avis clients</span><span class="pwhy">GA4, outil d'avis, vraie stratégie email — rien n'existe à reprendre de l'existant.</span></div></li>
+          <li><span class="pnum">5</span><div><span class="ptitle">Catégoriser le catalogue</span><span class="pwhy">Pains / viennoiseries / pâtisseries, si le nombre de produits grandit après l'ouverture.</span></div></li>
+          <li><span class="pnum">6</span><div><span class="ptitle">Compléter SIREN / SIRET / TVA / médiateur</span><span class="pwhy">Obligation légale avant la mise en ligne commerciale réelle — pas un détail de style.</span></div></li>
+          <li><span class="pnum">7</span><div><span class="ptitle">Soigner l'image de partage social</span><span class="pwhy">Remplacer le logo par une vraie photo produit en image Open Graph.</span></div></li>
+        </ol>
+      </section>
+
+      <footer>
+        <span>Audit réalisé par Claude · navigation directe sur painsansgluten.fr</span>
+        <span id="footer-date"></span>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  try{
+    var d = document.getElementById('footer-date');
+    if(d) d.textContent = new Date().toLocaleDateString('fr-FR', {year:'numeric', month:'long', day:'numeric'});
+  }catch(e){}
+
+  try{
+    var nav = document.getElementById('toc-nav');
+    var mobileNav = document.getElementById('toc-mobile-nav');
+    if(nav && mobileNav) mobileNav.innerHTML = nav.innerHTML;
+
+    var links = Array.prototype.slice.call(document.querySelectorAll('#toc-nav a'));
+    var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+
+    function onScroll(){
+      var pos = window.scrollY + 120;
+      var activeIdx = 0;
+      for(var i=0;i<sections.length;i++){
+        if(sections[i] && sections[i].offsetTop <= pos) activeIdx = i;
+      }
+      links.forEach(function(a,i){ a.classList.toggle('active', i===activeIdx); });
+    }
+    window.addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+  }catch(e){}
+})();
+</script>
