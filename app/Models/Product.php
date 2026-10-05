@@ -6,11 +6,14 @@ namespace App\Models;
 
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Mews\Purifier\Facades\Purifier;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -89,12 +92,50 @@ class Product extends Model implements HasMedia
         ];
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    /**
+     * `description` et `ingredients` sont édités en RichEditor (BO) et
+     * affichés via `{!! !!}` côté public : purifiés à l'écriture (liste
+     * blanche de balises), conformément à QUALITE.md §2.3. Un admin
+     * compromis ne doit pas pouvoir injecter de script via ces champs.
+     */
+    protected function description(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value): ?string => $value !== null ? Purifier::clean($value) : null,
+        );
+    }
+
+    protected function ingredients(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value): ?string => $value !== null ? Purifier::clean($value) : null,
+        );
+    }
+
     /**
      * @return BelongsTo<Category, $this>
      */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Produits visibles dans le catalogue public (PLAN.md §5.3) : les
+     * brouillons ne sont jamais visibles, même indisponibles/non
+     * expédiables (ceux-là restent visibles, juste non commandables).
+     *
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('is_published', true);
     }
 
     /**

@@ -24,7 +24,7 @@
             <nav class="hidden items-center gap-6 lg:flex" aria-label="Navigation principale">
                 <a href="{{ route('home') }}" class="text-sm font-medium text-ink hover:text-sage">Accueil</a>
                 <div class="relative" x-on:mouseenter="megaOpen = true" x-on:mouseleave="megaOpen = false">
-                    <a href="{{ \Illuminate\Support\Facades\Route::has('boutique.index') ? route('boutique.index') : '#' }}" class="text-sm font-medium text-ink hover:text-sage">
+                    <a href="{{ route('boutique.index') }}" class="text-sm font-medium text-ink hover:text-sage">
                         Boutique
                     </a>
 
@@ -36,7 +36,7 @@
                     >
                         <div class="grid grid-cols-4 gap-4">
                             @foreach ($headerCategories as $category)
-                                <a href="#" class="group flex flex-col items-center gap-2 text-center">
+                                <a href="{{ route('categories.show', $category) }}" class="group flex flex-col items-center gap-2 text-center">
                                     <span class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-cream-alt">
                                         @if ($url = $category->getFirstMediaUrl('cover', 'menu'))
                                             <img src="{{ $url }}" alt="" class="h-full w-full object-cover">
@@ -86,9 +86,9 @@
         <nav class="relative flex h-full w-64 flex-col gap-4 bg-white p-6" aria-label="Navigation mobile">
             <button type="button" class="self-end text-ink-muted" x-on:click="mobileOpen = false" aria-label="Fermer le menu">✕</button>
             <a href="{{ route('home') }}" class="text-ink hover:text-sage">Accueil</a>
-            <a href="{{ \Illuminate\Support\Facades\Route::has('boutique.index') ? route('boutique.index') : '#' }}" class="text-ink hover:text-sage">Boutique</a>
+            <a href="{{ route('boutique.index') }}" class="text-ink hover:text-sage">Boutique</a>
             @foreach ($headerCategories as $category)
-                <a href="#" class="pl-4 text-sm text-ink-muted hover:text-sage">{{ $category->name }}</a>
+                <a href="{{ route('categories.show', $category) }}" class="pl-4 text-sm text-ink-muted hover:text-sage">{{ $category->name }}</a>
             @endforeach
             <a href="{{ \Illuminate\Support\Facades\Route::has('contact') ? route('contact') : '#' }}" class="text-ink hover:text-sage">Contact</a>
         </nav>

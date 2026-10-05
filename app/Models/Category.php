@@ -54,4 +54,9 @@ class Category extends Model implements HasMedia
     {
         return $this->hasMany(Product::class);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }
