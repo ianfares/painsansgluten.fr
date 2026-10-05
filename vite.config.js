@@ -9,8 +9,11 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
             fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
+                // Inter : police du site existant painsansgluten.fr relevée en T06.
+                // Auto-hébergée via Bunny Fonts au build (RGPD/perf, CLAUDE.md §2) —
+                // jamais de CDN Google Fonts en production.
+                bunny('Inter', {
+                    weights: [400, 500, 600, 700],
                 }),
             ],
         }),

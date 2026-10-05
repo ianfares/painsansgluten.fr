@@ -7,6 +7,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Models\Category;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -51,6 +52,11 @@ class CategoryResource extends Resource
                 TextInput::make('seo_title')->label('Title SEO')->maxLength(255),
                 TextInput::make('seo_description')->label('Description SEO')->maxLength(300),
                 Toggle::make('is_active')->label('Active')->default(true),
+                SpatieMediaLibraryFileUpload::make('cover')
+                    ->label('Visuel (méga-menu)')
+                    ->collection('cover')
+                    ->image()
+                    ->columnSpanFull(),
             ])->columns(2),
         ]);
     }

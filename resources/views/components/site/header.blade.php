@@ -1,0 +1,96 @@
+@php
+    // Variables injectées par App\View\Composers\HeaderComposer :
+    // $homepageSettings, $shopSettings, $headerCategories.
+@endphp
+
+<header x-data="{ mobileOpen: false, megaOpen: false }">
+    @if ($homepageSettings->announcement_active && $homepageSettings->announcement_text)
+        <div class="bg-sage px-4 py-2 text-center text-sm text-white">
+            {{ $homepageSettings->announcement_text }}
+        </div>
+    @endif
+
+    <div class="border-b border-line bg-cream">
+        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 lg:grid lg:grid-cols-3">
+            <button
+                type="button"
+                class="lg:hidden"
+                aria-label="Ouvrir le menu"
+                x-on:click="mobileOpen = true"
+            >
+                <span aria-hidden="true" class="text-2xl">☰</span>
+            </button>
+
+            <nav class="hidden items-center gap-6 lg:flex" aria-label="Navigation principale">
+                <a href="{{ route('home') }}" class="text-sm font-medium text-ink hover:text-sage">Accueil</a>
+                <div class="relative" x-on:mouseenter="megaOpen = true" x-on:mouseleave="megaOpen = false">
+                    <a href="{{ \Illuminate\Support\Facades\Route::has('boutique.index') ? route('boutique.index') : '#' }}" class="text-sm font-medium text-ink hover:text-sage">
+                        Boutique
+                    </a>
+
+                    <div
+                        x-show="megaOpen"
+                        x-cloak
+                        x-transition
+                        class="absolute left-1/2 top-full z-40 w-[40rem] -translate-x-1/2 rounded-card border border-line bg-white p-6 shadow-drawer"
+                    >
+                        <div class="grid grid-cols-4 gap-4">
+                            @foreach ($headerCategories as $category)
+                                <a href="#" class="group flex flex-col items-center gap-2 text-center">
+                                    <span class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-cream-alt">
+                                        @if ($url = $category->getFirstMediaUrl('cover', 'menu'))
+                                            <img src="{{ $url }}" alt="" class="h-full w-full object-cover">
+                                        @else
+                                            <span aria-hidden="true">🥖</span>
+                                        @endif
+                                    </span>
+                                    <span class="text-xs font-medium text-ink group-hover:text-sage">{{ $category->name }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ \Illuminate\Support\Facades\Route::has('contact') ? route('contact') : '#' }}" class="text-sm font-medium text-ink hover:text-sage">Contact</a>
+            </nav>
+
+            <a href="{{ route('home') }}" class="justify-self-center text-lg font-semibold text-ink">
+                {{ $shopSettings->shop_name ?? "Mon Sans Gluten" }}
+            </a>
+
+            <div class="flex items-center justify-end gap-4">
+                <a href="{{ auth()->check() ? route('compte.dashboard') : route('login') }}" aria-label="Mon compte" class="text-ink hover:text-sage">
+                    <span aria-hidden="true">👤</span>
+                </a>
+                <button type="button" x-on:click="window.dispatchEvent(new CustomEvent('open-drawer-cart'))" class="relative text-ink hover:text-sage" aria-label="Panier">
+                    <span aria-hidden="true">🛍️</span>
+                    @if (($cartCount ?? 0) > 0)
+                        <span class="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-ochre text-[10px] text-white">
+                            {{ $cartCount }}
+                        </span>
+                    @endif
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Menu mobile --}}
+    <div
+        x-show="mobileOpen"
+        x-cloak
+        class="fixed inset-0 z-50 lg:hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu"
+    >
+        <div class="absolute inset-0 bg-black/40" x-on:click="mobileOpen = false"></div>
+        <nav class="relative flex h-full w-64 flex-col gap-4 bg-white p-6" aria-label="Navigation mobile">
+            <button type="button" class="self-end text-ink-muted" x-on:click="mobileOpen = false" aria-label="Fermer le menu">✕</button>
+            <a href="{{ route('home') }}" class="text-ink hover:text-sage">Accueil</a>
+            <a href="{{ \Illuminate\Support\Facades\Route::has('boutique.index') ? route('boutique.index') : '#' }}" class="text-ink hover:text-sage">Boutique</a>
+            @foreach ($headerCategories as $category)
+                <a href="#" class="pl-4 text-sm text-ink-muted hover:text-sage">{{ $category->name }}</a>
+            @endforeach
+            <a href="{{ \Illuminate\Support\Facades\Route::has('contact') ? route('contact') : '#' }}" class="text-ink hover:text-sage">Contact</a>
+        </nav>
+    </div>
+</header>
