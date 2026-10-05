@@ -3,6 +3,8 @@
 > Version 1.0 — 05/10/2026 — Rédigé pour exécution par Claude Code.
 > Les éléments marqués **`À RENSEIGNER`** sont des valeurs métier non connues à ce jour : ils deviennent des **paramètres back-office** ou des **placeholders**, jamais des valeurs inventées.
 > Les encadrés **⚠️** sont des avertissements à respecter impérativement.
+>
+> **Amendement du 2026-10-06 (décision client)** : toutes les mentions « 2FA obligatoire » ci-dessous pour le back-office sont **reportées en V2**. Ne pas implémenter de 2FA en V1. Voir `docs/DECISIONS.md` et `docs/BACKLOG.md`.
 
 ---
 

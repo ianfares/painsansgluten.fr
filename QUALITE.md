@@ -77,7 +77,7 @@ Si un test existant échoue : **c'est une régression**. Tu corriges le code, pa
 - **Jamais** de `Order::find($request->id)` sans vérifier que la commande appartient à l'utilisateur. Toujours partir de la relation : `$user->orders()->findOrFail($id)`.
 - Les composants Livewire : toute propriété publique est modifiable par le client → **revérifier** droits et valeurs dans chaque méthode d'action. Utiliser `#[Locked]` pour les IDs.
 - Ressources publiques identifiées par un **token aléatoire** (pas un ID séquentiel). Liens de téléchargement : **URL signées** avec expiration.
-- Back-office : guard séparé, 2FA, aucune route admin accessible sans authentification admin.
+- Back-office : guard séparé, aucune route admin accessible sans authentification admin. (2FA reporté en V2 — décision client 2026-10-06, voir docs/DECISIONS.md.)
 
 ### 2.5 Mass assignment
 - `$fillable` explicite sur chaque modèle. **`$guarded = []` interdit.**

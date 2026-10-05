@@ -5,6 +5,7 @@
 ## V1.1 / V2 (déjà identifiées dans PLAN.md §3)
 - Blog (V1.1)
 - Choix date d'expédition par client, codes promo, newsletter, recherche produits, import/export CSV, rapprochement Stripe, rapports détaillés, remboursement partiel, rôles admin différenciés, couleurs/polices modifiables en BO, étiquettes Chronopost par API, plafonds production, filtres allergènes, FAQ contextuelle, GA4 purchase pour virements (V2)
+- **2FA (double authentification) pour les comptes administrateurs back-office** — retiré du périmètre V1 par décision client le 2026-10-06 (initialement "obligatoire" dans PLAN.md/QUALITE.md). Voir `docs/DECISIONS.md`. En V1 : connexion admin simple (email + mot de passe), guard séparé, rate limiting.
 
 ## Ajouts discutés pendant le cadrage V1
 

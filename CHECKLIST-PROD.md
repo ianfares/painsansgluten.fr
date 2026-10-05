@@ -27,7 +27,7 @@
 - [ ] Mot de passe oublié
 
 ### Parcours administrateur
-- [ ] Connexion admin + 2FA
+- [ ] Connexion admin (2FA reporté en V2, décision client 2026-10-06 — voir docs/DECISIONS.md)
 - [ ] Créer un produit complet, le dupliquer, le publier, le désactiver
 - [ ] Publication refusée si champs obligatoires vides
 - [ ] Valider un virement (modale de vérification) → date recalculée, facture, email

@@ -41,6 +41,14 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — Changement de périmètre : 2FA admin reporté en V2
+
+- **Décision client**, pendant la préparation de T03. Le PLAN.md (et QUALITE.md, CHECKLIST-PROD.md) mentionnaient à plusieurs endroits un 2FA **obligatoire** sur le back-office Filament en V1.
+- **Changement** : le 2FA n'est plus exigé pour la V1. La connexion admin reste guard `admin` séparé + rate limiting, mais sans second facteur.
+- **Documents amendés** (note visible, texte original conservé en historique via Git) : `PLAN.md` (amendement en tête de document), `QUALITE.md` §2.4, `CHECKLIST-PROD.md` §recette parcours admin, `tasks/T03-authentification.md`.
+- Ajouté à `docs/BACKLOG.md` pour V2.
+- Impact : aucun sur T00/T02 déjà livrées. T03 ne doit pas installer de package 2FA.
+
 ## 2026-10-05 — Rangement des fichiers non applicatifs
 
 - `audit-painsansgluten.html` (audit du site Shopify existant) et `documents/` (archive brute reçue de la cliente) déplacés dans `docs/reference/` pour ne pas mélanger matériel de référence et structure applicative Laravel (qui doit rester à la racine du dépôt — conventions `artisan`/`public/index.php`/déploiement Nginx déjà décrites dans `CHECKLIST-PROD.md` et la tâche T25).
