@@ -32,7 +32,7 @@
             <span class="font-semibold text-ink">{{ number_format($product->price_ttc / 100, 2, ',', ' ') }} €</span>
 
             @if ($orderable)
-                <x-ui.button variant="primary" type="button" class="px-4 py-2 text-xs">Ajouter</x-ui.button>
+                <livewire:add-to-cart-button :product="$product" :key="'add-'.$product->id" />
             @elseif (! $product->is_shippable)
                 <x-ui.badge variant="warning">Non expédiable</x-ui.badge>
             @else

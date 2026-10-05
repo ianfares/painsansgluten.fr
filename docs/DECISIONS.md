@@ -41,6 +41,15 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — T08 — Panier
+
+- `CartService` (hors Livewire, QUALITE.md §4.2) consomme directement `ShippingCostCalculator`/`ShippingDateCalculator` (T09/T10) : pas de texte de repli "calculés à l'étape suivante" grâce au réordonnancement de tâches décidé en T10.
+- **Retrait silencieux** des lignes devenues invalides (produit dépublié/indisponible/non expédiable) à chaque lecture du panier (`validItems()`), avec restitution des noms retirés pour affichage d'un message — pas de suppression différée par tâche planifiée.
+- **IDOR** : `CartWidget::authorizeItem()` vérifie que la ligne manipulée appartient bien au panier courant (session ou utilisateur) avant toute mutation — sinon 403.
+- Fusion panier invité → client faite sur l'événement `Illuminate\Auth\Events\Login` (écouté dans `AppServiceProvider`), pas dans le contrôleur Fortify : fonctionne quel que soit le point d'entrée de connexion.
+- Deux composants Livewire : `CartWidget` (tiroir + page `/panier`) et `AddToCartButton` (bouton réutilisable carte produit/fiche produit, avec sélecteur de quantité optionnel).
+- Commande planifiée quotidienne `cart:purge-old-guests` (paniers invités > 30 jours uniquement — jamais ceux d'un client identifié).
+
 ## 2026-10-06 — T09 — Date d'expédition
 
 - `ShippingDateCalculator::forInstant()` : algorithme PLAN §8.4 implémenté au pied de la lettre, y compris la frontière **stricte** ("si heure **>** heure limite" — pile à l'heure limite = encore dans les temps, pas `>=`).
