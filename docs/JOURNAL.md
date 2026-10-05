@@ -272,3 +272,12 @@ TESTS : 7 nouveaux. Suite complète : **120 passés / 0 échec**. pint/phpstan n
 À RENSEIGNER : mentions légales de facturation, formats de numéros, taux de TVA — toujours en attente du comptable (PLAN §27).
 POINTS À RELIRE PAR UN HUMAIN : **bug de schéma découvert et corrigé en cours de tâche** (colonnes `invoices.total_*` non signées, incompatibles avec les avoirs négatifs) — migration séparée ajoutée, à vérifier en relecture. Export CSV comptable et ressource Filament factures restent à faire.
 PROCHAINE TÂCHE SUGGÉRÉE : ressource Filament "Factures & avoirs" + export CSV (complément T16), ou T20 (contenus : pages légales, FAQ, redirections) qui est entièrement débloquée et indépendante.
+
+---
+
+## [2026-10-06 08:15] — Claude Sonnet 5 — T20 — Contenus (pages, FAQ, redirections)
+STATUT : terminée
+RÉSUMÉ : Ressources Filament Pages/FAQ/Redirections. Résolveur d'URL unique (`SlugController`) pour catégories et pages au niveau racine. Page FAQ groupée avec JSON-LD. Middleware global `HandleLegacyRedirects` (redirections 301 Shopify depuis la table + règle générique `/products/{slug}`).
+FICHIERS : `app/Filament/Resources/{Page,FaqItem,Redirect}Resource.php`, `app/Http/Controllers/Content/{SlugController,FaqController}.php`, `app/Http/Middleware/HandleLegacyRedirects.php`, `resources/views/content/{page,faq}.blade.php`, `routes/web.php` (route `content.show` remplace `categories.show`), `tests/Feature/Content/ContentPagesTest.php`.
+TESTS : 8 nouveaux. Suite complète : **128 passés / 0 échec**. pint/phpstan niveau 5/audits : tout vert.
+PROCHAINE TÂCHE SUGGÉRÉE : T21 (SEO technique, débloquée par T07+T20) ou finir la ressource BO Factures/export CSV (T16).
