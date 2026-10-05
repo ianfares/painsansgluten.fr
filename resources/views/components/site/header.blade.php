@@ -36,7 +36,7 @@
                     >
                         <div class="grid grid-cols-4 gap-4">
                             @foreach ($headerCategories as $category)
-                                <a href="{{ route('categories.show', $category) }}" class="group flex flex-col items-center gap-2 text-center">
+                                <a href="{{ route('content.show', $category) }}" class="group flex flex-col items-center gap-2 text-center">
                                     <span class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-cream-alt">
                                         @if ($url = $category->getFirstMediaUrl('cover', 'menu'))
                                             <img src="{{ $url }}" alt="" class="h-full w-full object-cover">
@@ -88,7 +88,7 @@
             <a href="{{ route('home') }}" class="text-ink hover:text-sage">Accueil</a>
             <a href="{{ route('boutique.index') }}" class="text-ink hover:text-sage">Boutique</a>
             @foreach ($headerCategories as $category)
-                <a href="{{ route('categories.show', $category) }}" class="pl-4 text-sm text-ink-muted hover:text-sage">{{ $category->name }}</a>
+                <a href="{{ route('content.show', $category) }}" class="pl-4 text-sm text-ink-muted hover:text-sage">{{ $category->name }}</a>
             @endforeach
             <a href="{{ \Illuminate\Support\Facades\Route::has('contact') ? route('contact') : '#' }}" class="text-ink hover:text-sage">Contact</a>
         </nav>

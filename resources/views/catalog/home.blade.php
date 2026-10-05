@@ -33,7 +33,7 @@
             <h2 class="mb-6 text-xl font-semibold text-ink">Nos catégories</h2>
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 @foreach ($categories as $category)
-                    <a href="{{ route('categories.show', $category) }}" class="flex flex-col items-center gap-3 rounded-card border border-line bg-white p-6 text-center hover:border-sage">
+                    <a href="{{ route('content.show', $category) }}" class="flex flex-col items-center gap-3 rounded-card border border-line bg-white p-6 text-center hover:border-sage">
                         <span class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-cream-alt">
                             @if ($url = $category->getFirstMediaUrl('cover', 'menu'))
                                 <img src="{{ $url }}" alt="" class="h-full w-full object-cover">

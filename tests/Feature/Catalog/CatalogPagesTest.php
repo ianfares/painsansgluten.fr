@@ -11,7 +11,7 @@ test('l\'accueil, la boutique et une page catégorie répondent 200', function (
 
     $this->get(route('home'))->assertOk();
     $this->get(route('boutique.index'))->assertOk();
-    $this->get(route('categories.show', $category))->assertOk();
+    $this->get(route('content.show', $category))->assertOk();
 });
 
 test('la fiche d\'un produit publié répond 200 et affiche son nom', function () {

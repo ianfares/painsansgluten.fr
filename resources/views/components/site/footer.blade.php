@@ -21,9 +21,10 @@
         <div>
             <p class="font-semibold text-ink">Informations</p>
             <ul class="mt-2 space-y-1 text-sm text-ink-muted">
+                <li><a href="{{ route('faq') }}" class="hover:text-sage">FAQ</a></li>
                 @foreach ($footerPages as $page)
                     <li>
-                        <a href="{{ \Illuminate\Support\Facades\Route::has('pages.show') ? route('pages.show', $page) : '#' }}" class="hover:text-sage">
+                        <a href="{{ route('content.show', $page) }}" class="hover:text-sage">
                             {{ $page->title }}
                         </a>
                     </li>
