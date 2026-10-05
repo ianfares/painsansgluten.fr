@@ -41,6 +41,13 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — T07 — Pages catalogue
+
+- **URLs catégories à la racine** (`/{category:slug}`, ex. `/pains-sans-gluten`), avec contrainte regex d'exclusion des autres routes nommées (`boutique`, `produit`, `mon-compte`, etc.) pour éviter toute collision — cohérent avec les redirections 301 Shopify déjà seedées en T02. **À maintenir** : toute nouvelle route racine (ex. `/faq`, `/contact` en T20) devra être ajoutée à la liste d'exclusion.
+- **`mews/purifier` ^3.4** ajouté : les champs RichEditor (`description`, `ingredients`) sont affichés via `{!! !!}` côté public — purifiés **à l'écriture** (mutateur sur `Product`), pas à la lecture, pour une seule passe et un point d'application unique. Un admin compromis ne peut pas injecter de script via ces champs. Anticipe partiellement T23 ("revue purification contenu riche"), qui devra vérifier `Page`/`FaqItem` de la même façon.
+- **`Product::scopePublished()`** : seul filtre de visibilité catalogue (`is_published`). `is_available`/`is_shippable` n'affectent que la commandabilité (produit toujours visible), conformément à PLAN §5.3.
+- Bouton « Ajouter au panier » **non fonctionnel en V1 de cette tâche** (placeholder visuel) : le service de panier réel arrive en T08.
+
 ## 2026-10-06 — T06 — Design système et layout public
 
 - **Tokens visuels relevés sur https://painsansgluten.fr** via les custom properties CSS de son thème (devtools, pas de code Liquid/CSS copié) : fond crème `#FEFCF2`, vert sauge `#5D6E41` (titres + boutons primaires), ocre `#B47C38` (accent/hover), texte `rgba(0,0,0,.81)`, rayons (boutons/pills 10px, champs 4px, cartes 0.8rem), ombres (`0 2px 3px rgb(0 0 0/20%)` boutons, `0px 4px 20px rgb(0 0 0/.15)` tiroirs/popovers). Transposés en thème Tailwind v4 (`@theme` dans `resources/css/app.css`), jamais de valeur inventée.

@@ -13,7 +13,7 @@
 
         <div class="flex flex-wrap justify-center gap-3">
             @foreach (\App\Models\Category::query()->where('is_active', true)->orderBy('position')->get() as $category)
-                <x-ui.button variant="outline" href="#">{{ $category->name }}</x-ui.button>
+                <x-ui.button variant="outline" :href="route('categories.show', $category)">{{ $category->name }}</x-ui.button>
             @endforeach
         </div>
 

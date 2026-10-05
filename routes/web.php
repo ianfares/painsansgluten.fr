@@ -2,11 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Catalog\BoutiqueController;
+use App\Http\Controllers\Catalog\HomeController;
+use App\Http\Controllers\Catalog\ProductController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', HomeController::class)->name('home');
+
+// Catalogue public (PLAN.md §5, §23 : slugs de catégories repris au niveau
+// racine pour matcher les redirections 301 Shopify déjà seedées en T02).
+Route::get('/boutique', [BoutiqueController::class, 'index'])->name('boutique.index');
+Route::get('/produit/{product:slug}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/{category:slug}', [BoutiqueController::class, 'category'])
+    ->name('categories.show')
+    ->where('category', '(?!boutique|produit|mon-compte|connexion|inscription|admin).*');
 
 // Stub de l'espace client (PLAN.md §13) : le tableau de bord complet est
 // construit en T18. Ce stub sert uniquement de cible de redirection pour
