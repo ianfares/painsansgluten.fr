@@ -205,3 +205,12 @@ QUALITÉ : pint/phpstan niveau 5/composer+npm audit : tout vert.
 À RENSEIGNER : aucun blocage pour cette tâche.
 POINTS À RELIRE PAR UN HUMAIN : route catégorie générique à la racine (regex d'exclusion) — à mettre à jour à chaque nouvelle route racine (ex. `/faq`, `/contact` en T20). Bouton "Ajouter au panier" encore non fonctionnel (T08).
 PROCHAINE TÂCHE SUGGÉRÉE : T08 — Panier.
+
+---
+
+## [2026-10-06 05:35] — Claude Sonnet 5 — T10 — Frais de port
+STATUT : terminée
+RÉSUMÉ : `ShippingCostCalculator::forWeight()` — tranches de poids, franco optionnel, exceptions `ShippingNotConfigured`/`WeightOutOfRange`. **Ordre réordonné** (T10/T09 avant T08, voir docs/DECISIONS.md) sous contrainte de temps réel annoncée par le client — T08 consommera directement ces services au lieu d'un texte de repli temporaire.
+FICHIERS : `app/Services/Shipping/ShippingCostCalculator.php`, `app/Exceptions/Shipping/{ShippingNotConfigured,WeightOutOfRange}.php`, `tests/Feature/Shipping/ShippingCostCalculatorTest.php`.
+TESTS : 5 nouveaux (grille vide, hors grille, bornes de tranches, franco atteint/désactivé). Suite complète : **58 passés / 0 échec**. pint/phpstan niveau 5 : vert.
+PROCHAINE TÂCHE SUGGÉRÉE : T09 — Date d'expédition, puis T08 — Panier.
