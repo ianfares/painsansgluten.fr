@@ -1,7 +1,9 @@
 # CLAUDE.md — Règles permanentes du projet « Mon Sans Gluten by Angélique »
 
 > Ce fichier est lu par Claude Code à chaque session. Il prime sur toute habitude par défaut.
-> Document de référence fonctionnel : `PLAN.md`. Tâches : dossier `tasks/`. Recette : `CHECKLIST-PROD.md`.
+> Document de référence fonctionnel : `PLAN.md`. Tâches : dossier `tasks/`. Recette : `CHECKLIST-PROD.md`. Historique : `docs/JOURNAL.md`.
+>
+> **`QUALITE.md` est un document complémentaire OBLIGATOIRE, à lire en entier avant toute ligne de code** (sécurité OWASP, performance, tests, bonnes pratiques PHP/Laravel, checklist d'auto-revue). En cas de doute entre les deux fichiers, l'ordre de priorité est : **Sécurité > Exactitude > Non-régression > Performance > Rapidité de livraison** (défini par `QUALITE.md`). Le **format de compte rendu de fin de tâche à utiliser est celui de `QUALITE.md` §10** (plus complet que l'esquisse de ce fichier), à la fois pour l'humain et pour l'entrée dans `docs/JOURNAL.md`.
 
 ## 1. Contexte en 5 lignes
 - Boutique en ligne sur mesure pour une boulangerie artisanale **100 % sans gluten** à Avranches (Manche).
@@ -31,6 +33,11 @@
 | Analytics | GTM → GA4 |
 
 Toute nouvelle dépendance Composer/NPM doit être **justifiée dans `docs/DECISIONS.md`** (pourquoi, alternative écartée). Pas de package abandonné ou à faible maintenance.
+
+**Sécurité des dépendances — NON NÉGOCIABLE** : avant d'installer ou de monter en version une dépendance (Composer ou NPM), vérifier :
+1. Qu'elle n'est pas **obsolète / non maintenue** (dernière release récente, pas de dépréciation annoncée).
+2. Qu'**aucune CVE active sans correctif** n'est connue sur la version installée (`composer audit`, `npm audit`, et vérification manuelle si doute — changelog, advisories GitHub).
+En cas de CVE active sans fix disponible, ou de doute sérieux sur la maintenance d'un package : **s'arrêter et demander validation à l'humain avant d'installer**, ne jamais installer "en espérant que ça passe". `composer audit` / `npm audit` doivent tourner propres (0 faille critique/haute) avant de clore toute tâche qui touche aux dépendances — résultat à consigner dans `docs/DECISIONS.md`.
 
 ## 3. Règles de travail NON NÉGOCIABLES
 1. **Ne jamais inventer.** Si une information manque (valeur métier, texte juridique, taux de TVA, identifiant API, comportement Chronopost), tu **t'arrêtes et tu poses la question**, ou tu crées un paramètre/placeholder explicitement marqué `À RENSEIGNER`. Aucune clause juridique, aucun taux, aucun tarif inventé.
@@ -68,31 +75,12 @@ Toute nouvelle dépendance Composer/NPM doit être **justifiée dans `docs/DECIS
 - Branches : `main` (prod) ← `develop` (intégration) ← `feature/*`, `fix/*`.
 
 ## 6. Fin de chaque tâche — format de compte rendu attendu
-```
-TÂCHE : TXX — nom
-FAIT : ...
-FICHIERS : ...
-TESTS : résultat php artisan test / pint / phpstan
-À RENSEIGNER / QUESTIONS OUVERTES : ...
-RISQUES / POINTS À RELIRE PAR UN HUMAIN : ...
-AJOUTÉ AU BACKLOG : ...
-```
+**Voir `QUALITE.md` §10 — c'est le format officiel, ne pas utiliser un format simplifié.** Il couvre en plus : analyse d'impact, sécurité, performance, qualité (pint/phpstan/composer audit), documentation.
 
 ## 7. Journal de session — OBLIGATOIRE (plusieurs IA travaillent sur ce projet)
 
 Plusieurs IA (plusieurs comptes Claude Code + ChatGPT) interviennent tour à tour sur ce dépôt, en séquentiel. Pour que chaque session reprenne le contexte sans rien redemander à l'humain :
 
 1. **En DÉBUT de session** : lire `docs/JOURNAL.md` en entier (pas seulement ce fichier et PLAN.md) pour savoir où en est le projet, qui a fait quoi, et quelles questions sont restées ouvertes.
-2. **En FIN de tâche** : ajouter une entrée dans `docs/JOURNAL.md` (ne jamais réécrire/supprimer les entrées précédentes), en plus du compte rendu §6 donné à l'humain et du commit Git. Format de l'entrée dans `docs/JOURNAL.md` :
-```
-## [AAAA-MM-JJ HH:MM] — [IA : ex. Claude Sonnet 5 / ChatGPT] — TXX — [titre]
-STATUT : terminée / bloquée / partielle
-FAIT : ...
-FICHIERS : ...
-TESTS : ...
-À RENSEIGNER / QUESTIONS OUVERTES : ...
-RISQUES / À RELIRE PAR UN HUMAIN : ...
-AJOUTÉ AU BACKLOG : ...
-PROCHAINE TÂCHE SUGGÉRÉE : ...
-```
+2. **En FIN de tâche** : ajouter une entrée dans `docs/JOURNAL.md` (ne jamais réécrire/supprimer les entrées précédentes), reprenant le **compte rendu complet au format `QUALITE.md` §10** (même contenu que celui donné à l'humain), précédé d'un en-tête `## [AAAA-MM-JJ HH:MM] — [IA : ex. Claude Sonnet 5 / ChatGPT] — TXX` et suivi d'une ligne `PROCHAINE TÂCHE SUGGÉRÉE : ...`. Ne jamais utiliser un format allégé pour cette entrée.
 3. Ne jamais traiter une tâche comme commencée si une entrée du journal dit déjà qu'elle est en cours ailleurs — vérifier avant de commencer.
