@@ -260,3 +260,15 @@ TESTS : 27 nouveaux (les 12 transitions autorisées, les 5 interdites rejetées 
 À RENSEIGNER : aucun pour cette tâche.
 POINTS À RELIRE PAR UN HUMAIN : répartition HT/TVA par taux moyen pondéré sur `orders` (une commande peut mélanger des produits à taux de TVA différents) — à affiner en T16 où la facture, elle, doit présenter un récapitulatif par taux.
 PROCHAINE TÂCHE SUGGÉRÉE : T16 — Factures et avoirs (débloque "Mes factures" dans l'espace client déjà construit en T18). T11/T13/T14/T15 restent bloquées par T01.
+
+---
+
+## [2026-10-06 07:45] — Claude Sonnet 5 — T16 (partielle) — Factures et avoirs PDF
+STATUT : partielle
+RÉSUMÉ : `IssueInvoiceAction`/`IssueCreditNoteAction` (numérotation séquentielle via `SequenceGenerator` partagé avec T12, snapshot JSON immuable, PDF dompdf en stockage privé), listeners idempotents sur `OrderPaid`/`OrderRefunded`, téléchargement sécurisé (policy propriétaire ou URL signée invité 30j). "Mes factures" dans l'espace client (T18) est maintenant fonctionnel. **Non fait** : ressource Filament BO "Factures & avoirs" et export comptable CSV (PLAN §14) — reportés faute de temps.
+FICHIERS : `app/Actions/Invoicing/{IssueInvoiceAction,IssueCreditNoteAction}.php`, `app/Services/Sequencing/SequenceGenerator.php` (refactor partagé avec `CreateOrderAction`), `app/Listeners/Orders/Generate{Invoice,CreditNote}On*.php`, `app/Policies/InvoicePolicy.php`, `app/Http/Controllers/Compte/InvoiceDownloadController.php`, `resources/views/pdf/invoice.blade.php`, `resources/views/compte/invoices.blade.php`, migration `alter_invoices_totals_signed` (correctif schéma).
+SÉCURITÉ : policy IDOR testée (tiers refusé), URL signée pour invités, listeners idempotents (pas de doublon si événement rejoué), aucun texte/mention légale inventé (placeholders explicites si `BillingSettings` vide).
+TESTS : 7 nouveaux. Suite complète : **120 passés / 0 échec**. pint/phpstan niveau 5 (annotations `@property` ajoutées sur `Invoice`)/audits : tout vert.
+À RENSEIGNER : mentions légales de facturation, formats de numéros, taux de TVA — toujours en attente du comptable (PLAN §27).
+POINTS À RELIRE PAR UN HUMAIN : **bug de schéma découvert et corrigé en cours de tâche** (colonnes `invoices.total_*` non signées, incompatibles avec les avoirs négatifs) — migration séparée ajoutée, à vérifier en relecture. Export CSV comptable et ressource Filament factures restent à faire.
+PROCHAINE TÂCHE SUGGÉRÉE : ressource Filament "Factures & avoirs" + export CSV (complément T16), ou T20 (contenus : pages légales, FAQ, redirections) qui est entièrement débloquée et indépendante.
