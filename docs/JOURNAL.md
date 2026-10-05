@@ -147,3 +147,24 @@ DOCUMENTATION : `docs/DECISIONS.md` complété (choix du package, FileUpload sim
 POINTS À RELIRE PAR UN HUMAIN : **déviation de process repérée après coup** — cette tâche a été commencée et commitée directement sur `develop` au lieu de `feature/T04-settings` (oubli, CLAUDE.md §3.2 non respecté sur le coup). Corrigé a posteriori en posant une branche `feature/T04-settings` sur le même commit pour garder une référence nommée, mais l'historique ne montre pas de merge `--no-ff` comme pour T00/T02/T03. Sans conséquence fonctionnelle, mais à surveiller pour les tâches suivantes : **toujours vérifier `git branch` avant le premier commit d'une tâche.**
 AJOUTÉ AU BACKLOG : rien de nouveau.
 PROCHAINE TÂCHE SUGGÉRÉE : T05 — Catalogue dans le back-office (dépend de T02, T04 ; aucun blocage externe, peut être fait intégralement maintenant).
+
+---
+
+## [2026-10-06 03:40] — Claude Sonnet 5 — T05 — Catalogue dans le back-office
+STATUT : terminée
+RÉSUMÉ : Ressources Filament Catégories (tri glisser-déposer) et Produits (8 onglets conformes à PLAN §6.2 : Général, Descriptions, Composition, Nutrition, Conditionnement, Conseils, Images, SEO). Allergènes en 2 groupes de 14 cases. Prix saisi en euros dans le formulaire, stocké en centimes. `spatie/laravel-medialibrary` installé (a nécessité l'extension PHP `gd`, absente puis installée en cours de tâche) : image principale + galerie, conversions WebP (miniature/liste/fiche/zoom), texte alternatif obligatoire par image via un Repeater dédié (limite du plugin Filament documentée). Publication bloquée tant que les champs "obligatoires pour publier" manquent (brouillon toujours autorisé). Dupliquer, bascule disponible/indisponible, suppression bloquée si le produit a déjà été commandé.
+FICHIERS CRÉÉS / MODIFIÉS :
+- `app/Filament/Resources/{Category,Product}Resource.php` (+ pages Create/Edit/List)
+- `app/Models/Product.php` (HasMedia, collections/conversions médias, relation `orderItems`, `hasBeenOrdered()`)
+- `config/media-library.php`, `database/migrations/2026_10_06_020100_create_media_table.php`
+- `tests/Feature/Catalog/{CategoryResourceTest,ProductResourceTest}.php`
+ANALYSE D'IMPACT : Aucun appelant existant cassé. `Product` gagne une interface (`HasMedia`) et deux méthodes, rétrocompatible.
+SÉCURITÉ : Suppression de produit commandé bloquée à 3 endroits (action ligne, ForceDelete, suppression groupée) — pas de contrainte BDD équivalente (`nullOnDelete`), donc règle strictement applicative, documentée comme telle pour éviter qu'une future IA s'y fie à tort comme garde-fou BDD.
+PERFORMANCE : Conversions d'images **non queued** (exécutées à l'upload, pas en file d'attente) — choix délibéré pour un back-office à faible volume, documenté dans DECISIONS.md avec le compromis assumé.
+TESTS : 10 nouveaux tests Pest : création en brouillon, blocage de publication si champs manquants, génération réelle d'une conversion WebP (vérifiée sur disque, `Storage::fake('public')`), duplication, blocage de suppression si commandé, persistance des textes alternatifs de galerie. Suite complète : **42 passés / 0 échec**.
+QUALITÉ : `pint --test` ✓, `phpstan` niveau 5 ✓ (0 erreur, après correction d'un piège d'ordre d'appel `nonQueued()` avant `fit()`/`format()` sur les conversions), `composer audit` ✓, `npm audit` ✓.
+DOCUMENTATION : `docs/DECISIONS.md` complété (medialibrary + gd, piège nonQueued/fit, solution alt-texte par Repeater, taux de TVA en Select de paliers légaux, suppression bloquée).
+À RENSEIGNER / QUESTIONS OUVERTES : aucune pour T05 lui-même. Les ~70 vraies fiches produits (photos, textes) restent à saisir par la cliente une fois l'outil livré.
+POINTS À RELIRE PAR UN HUMAIN : vérifier manuellement qu'une fiche complète (type « Mie'miam ») est saisissable en moins de 5 minutes (critère d'acceptation PLAN.md, non automatisable par un test).
+AJOUTÉ AU BACKLOG : rien de nouveau.
+PROCHAINE TÂCHE SUGGÉRÉE : T06 — Design système et layout public (dépend de T00 ; peut être fait en parallèle du reste, aucun blocage externe).
