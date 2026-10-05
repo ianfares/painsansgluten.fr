@@ -236,3 +236,15 @@ TESTS : 11 nouveaux (service + Livewire). Suite complète : **81 passés / 0 éc
 À RENSEIGNER : aucun pour cette tâche (dépend des paramètres déjà en place depuis T04/T09/T10).
 POINTS À RELIRE PAR UN HUMAIN : le panier calcule déjà le total avec frais de port — à re-vérifier visuellement une fois T06 pleinement appliqué au tiroir (styles Livewire).
 PROCHAINE TÂCHE SUGGÉRÉE : T11 (sélecteur de relais Chronopost) reste bloquée par T01 (identifiants Chronopost). À défaut, T12 (commandes : création, statuts, transitions) peut démarrer sans Chronopost pour la partie machine à états, ou T03/T18 (espace client) pour enrichir l'authentification déjà posée.
+
+---
+
+## [2026-10-06 06:45] — Claude Sonnet 5 — T18 (anticipée, partielle) — Espace client
+STATUT : partielle
+RÉSUMÉ : À la demande explicite du client ("surtout l'interface cliente"), espace client construit par anticipation malgré la dépendance officielle à T12/T16 (non faites). Tableau de bord, "Mes commandes" (liste, IDOR vérifié), "Mes informations" (profil + mot de passe via les routes Fortify de T03, adresse de facturation), demande de suppression de compte. **"Mes factures" non construit** (dépend entièrement de T16).
+FICHIERS : `app/Http/Controllers/Compte/AccountController.php`, `resources/views/compte/{dashboard,orders,informations}.blade.php`, `resources/views/components/compte/layout.blade.php`, routes `compte.*`, `tests/Feature/Compte/AccountTest.php`.
+SÉCURITÉ : IDOR vérifié ("Mes commandes" filtré sur l'utilisateur connecté), `deletion_requested_at` non fillable (affectation directe + save), non connecté → redirigé vers connexion.
+TESTS : 6 nouveaux. Suite complète : **87 passés / 0 échec**. pint/phpstan niveau 5/audits : tout vert.
+À RENSEIGNER / QUESTIONS OUVERTES : aucun blocage technique, mais fonctionnellement incomplet tant que T12 (création de vraies commandes) et T16 (factures) ne sont pas faites.
+POINTS À RELIRE PAR UN HUMAIN : **tâche volontairement anticipée hors du graphe de dépendances officiel** — à valider que ça ne pose pas de problème de cohérence avec une IA qui, en lisant tasks/T18-espace-client.md isolément, pourrait croire la tâche entièrement neuve. Le présent compte rendu et docs/DECISIONS.md documentent l'état réel (partiel).
+PROCHAINE TÂCHE SUGGÉRÉE : T12 — Commandes : création, statuts et transitions (débloque T16 pour compléter "Mes factures", et T13/T14/T15 pour un vrai tunnel d'achat). T11 (Chronopost) reste bloquée par T01.
