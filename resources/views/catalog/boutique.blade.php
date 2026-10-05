@@ -11,7 +11,7 @@
             @foreach ($categories as $category)
                 <x-ui.button
                     variant="{{ $activeCategory?->is($category) ? 'primary' : 'outline' }}"
-                    :href="route('categories.show', $category)"
+                    :href="route('content.show', $category)"
                     class="px-4 py-2 text-xs"
                 >
                     {{ $category->name }}

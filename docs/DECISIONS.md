@@ -41,6 +41,14 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — T20 — Contenus (pages, FAQ, redirections)
+
+- **Résolveur d'URL unique** (`SlugController`, route `content.show`) : catégories et pages de contenu partagent le même niveau d'URL racine (ex. `/pains-sans-gluten`, `/mentions-legales`), pour matcher les redirections 301 Shopify déjà seedées en T02. Remplace l'ancienne route `categories.show` (toutes les références Blade/tests mises à jour).
+- **Middleware global** `HandleLegacyRedirects` (exécuté avant la résolution de route, `prepend` sur le groupe `web`) plutôt qu'une route catch-all classique : une ancienne URL Shopify qui ne correspond à **aucune route actuelle** (ex. `/collections/all`) doit quand même rediriger, pas 404.
+- **Règle générique `/products/{slug}` → `/produit/{slug}`** implémentée dans ce middleware (regex), comme annoncé en T02 — jamais seedée en base (ce n'est pas une redirection ligne à ligne).
+- Contenu riche de `Page::content` et `FaqItem::answer` purifié à l'écriture (même mécanisme que `Product`, T07).
+- FAQ : JSON-LD `FAQPage` généré uniquement si au moins une question publiée.
+
 ## 2026-10-06 — T16 — Factures et avoirs PDF
 
 - **Bug de schéma corrigé** : `invoices.total_ht/total_vat/total_ttc` créées en `unsignedInteger` en T02, avant que les avoirs (montants **négatifs**, PLAN §12) ne soient conçus. Migration séparée (`alter_invoices_totals_signed`) plutôt que de modifier la migration T02 déjà mergée (CLAUDE.md §3.4) — colonnes passées en `INT` signé via SQL brut (`DB::statement`), plus fiable que `->change()` (doctrine/dbal) sur MariaDB pour ce cas précis.

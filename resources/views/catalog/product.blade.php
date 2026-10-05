@@ -8,7 +8,7 @@
 <x-layouts.app :title="$product->name">
     <div class="mx-auto max-w-6xl px-4 py-10">
         <x-ui.breadcrumb :items="[
-            ['label' => $product->category->name, 'url' => route('categories.show', $product->category)],
+            ['label' => $product->category->name, 'url' => route('content.show', $product->category)],
             ['label' => $product->name],
         ]" class="mb-6" />
 
