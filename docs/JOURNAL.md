@@ -224,3 +224,15 @@ FICHIERS : `app/Services/Shipping/ShippingDateCalculator.php`, `tests/Feature/Sh
 TESTS : 12 nouveaux cas (tous ceux listés par la fiche T09). Suite complète : **70 passés / 0 échec**. pint/phpstan niveau 5/audits : tout vert.
 POINTS À RELIRE PAR UN HUMAIN : interprétation de "jours fermés" vs "jours non ouvrés" dans le calcul du budget de délai — voir docs/DECISIONS.md, à reconfirmer en recette (T24).
 PROCHAINE TÂCHE SUGGÉRÉE : T08 — Panier (peut maintenant consommer directement T09/T10, pas de texte de repli nécessaire).
+
+---
+
+## [2026-10-06 06:15] — Claude Sonnet 5 — T08 — Panier
+STATUT : terminée
+RÉSUMÉ : `CartService` (add/update/remove/merge/totals), tiroir latéral + page `/panier` en Livewire (`CartWidget`), bouton "Ajouter au panier" réutilisable (`AddToCartButton`, avec sélecteur de quantité sur la fiche produit). Retrait automatique des lignes devenues invalides avec message. Fusion du panier invité dans celui du client à la connexion. Purge planifiée quotidienne des paniers invités > 30 jours.
+FICHIERS : `app/Services/Cart/CartService.php`, `app/Livewire/{CartWidget,AddToCartButton}.php` + vues, `app/Console/Commands/PurgeOldGuestCarts.php`, `routes/console.php` (schedule), `routes/web.php` (`/panier`), `app/Providers/AppServiceProvider.php` (listener Login, composer `CartCountComposer`), `resources/views/components/layouts/app.blade.php` (Livewire scripts/styles, tiroir réel).
+SÉCURITÉ : IDOR vérifié (`CartWidget::authorizeItem`), quantité plafonnée côté serveur (jamais confiance au client), produit non commandable → 403 explicite sur `AddToCartButton::add()`.
+TESTS : 11 nouveaux (service + Livewire). Suite complète : **81 passés / 0 échec**. pint/phpstan niveau 5/audits : tout vert.
+À RENSEIGNER : aucun pour cette tâche (dépend des paramètres déjà en place depuis T04/T09/T10).
+POINTS À RELIRE PAR UN HUMAIN : le panier calcule déjà le total avec frais de port — à re-vérifier visuellement une fois T06 pleinement appliqué au tiroir (styles Livewire).
+PROCHAINE TÂCHE SUGGÉRÉE : T11 (sélecteur de relais Chronopost) reste bloquée par T01 (identifiants Chronopost). À défaut, T12 (commandes : création, statuts, transitions) peut démarrer sans Chronopost pour la partie machine à états, ou T03/T18 (espace client) pour enrichir l'authentification déjà posée.
