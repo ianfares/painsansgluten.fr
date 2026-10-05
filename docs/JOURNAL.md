@@ -62,3 +62,27 @@ DOCUMENTATION : `README.md` créé (installation locale, commandes, structure du
 POINTS À RELIRE PAR UN HUMAIN : choix de faire tourner les tests sur MariaDB plutôt que SQLite (léger surcoût de configuration, mais cohérence avec la prod) ; abandon des fichiers `AGENTS.md`/`CLAUDE.md`/`README.md` générés par défaut par Laravel 13 au profit des fichiers du projet.
 AJOUTÉ AU BACKLOG : aucun ajout pour cette tâche.
 PROCHAINE TÂCHE SUGGÉRÉE : T01 — Spike Chronopost (CRITIQUE, priorité absolue J1 selon le README de cadrage) : nécessite les identifiants Chronopost (compte + mot de passe WS), actuellement en placeholder dans `.env`.
+
+---
+
+## [2026-10-06 00:20] — Claude Sonnet 5 — T02 — Modèle de données, migrations, seeders
+STATUT : terminée
+RÉSUMÉ : T01 (Chronopost) reste bloquée en attendant les identifiants du client — passage à T02, qui ne dépend que de T00. Modèle de données complet créé : 18 migrations (table `users` adaptée sans toucher à la migration déjà mergée, + 17 nouvelles tables), 4 enums PHP (`OrderStatus` avec la table de transitions PLAN §9.2, `PaymentMethod`, `InvoiceType`, `Allergen` avec les 14 allergènes réglementaires), 17 modèles Eloquent avec relations et casts typés, 17 factories, et 4 seeders (catégories, pages légales placeholder, redirections Shopify, données de démo garde-foutées contre la production).
+FICHIERS CRÉÉS / MODIFIÉS :
+- `database/migrations/2026_10_05_223132..223152_*.php` (18 fichiers)
+- `app/Enums/{OrderStatus,PaymentMethod,InvoiceType,Allergen}.php`
+- `app/Models/{Address,Category,Product,Cart,CartItem,Order,OrderItem,OrderStatusHistory,Payment,StripeEvent,Invoice,InvoiceSequence,ShippingRate,ClosedDate,Page,FaqItem,Redirect}.php` + `User.php` modifié
+- `database/factories/*Factory.php` (17 fichiers)
+- `database/seeders/{CategorySeeder,PageSeeder,RedirectSeeder,DemoSeeder,DatabaseSeeder}.php`
+- `tests/Feature/DatabaseSchemaTest.php` (9 tests)
+- `docs/DECISIONS.md` (5 décisions documentées)
+ANALYSE D'IMPACT : Modifie `users` (migration additive, pas de perte de données possible : base encore vide en dev/test) ; `App\Models\User` et sa factory mis à jour en conséquence (seul appelant existant, couvert par les tests T00 déjà verts après la modif).
+SÉCURITÉ : Montants systématiquement en centimes (`unsignedInteger`), jamais de float. `$fillable` explicite (attribut `#[Fillable]`) sur chaque modèle, aucun `$guarded = []`. Contraintes d'unicité en base (pas seulement applicatives) : `orders.number`, `orders.token`, `stripe_events.event_id`, `invoices.number`, `cart_items` (cart_id+product_id) — toutes testées (`QueryException` attendue). Suppression en cascade jamais appliquée aux commandes/factures (`restrictOnDelete`/`nullOnDelete` choisis consciemment). Aucun texte juridique inventé : pages légales seedées non publiées avec placeholder neutre.
+PERFORMANCE : Index ajoutés sur toutes les colonnes de recherche/tri fréquentes (slugs, `reference`, `orders.status`, `orders.planned_ship_date`, `products.is_published+is_available`, etc.), en plus des unicités qui indexent déjà `number`/`token`/`event_id`.
+TESTS : 9 nouveaux tests Pest (factories valides, relations catégorie/produit et commande/lignes/historique/factures, cast enum, 3 contraintes d'unicité, `migrate:fresh --seed`). Suite complète : **13 passés / 0 échec** (4 T00 + 9 T02).
+QUALITÉ : `pint --test` ✓, `phpstan analyse` niveau 5 ✓ (0 erreur), `composer audit` ✓ (0 faille).
+DOCUMENTATION : `docs/DECISIONS.md` complété (5 entrées : séparation users, JSON du snapshot relais, report du seed des taux de TVA à T04, règle de redirection générique reportée à T20, encodage des transitions de statut sur l'enum).
+À RENSEIGNER / QUESTIONS OUVERTES : taux de TVA réels (reporté à T04, nécessite le comptable) ; contenu des 6 pages légales (nécessite la cliente/un juriste) ; champs exacts du "snapshot relais" une fois le WS Chronopost testé en T01 (actuellement JSON libre, pourra être affiné).
+POINTS À RELIRE PAR UN HUMAIN : choix de stocker `relay_snapshot` en JSON plutôt qu'en colonnes dédiées — à reconfirmer une fois T01 fait et la forme exacte de la réponse Chronopost connue.
+AJOUTÉ AU BACKLOG : aucun ajout pour cette tâche.
+PROCHAINE TÂCHE SUGGÉRÉE : T03 — Authentification clients et administrateurs (dépend de T02, aucun blocage externe) ; T01 (Chronopost) reste la priorité dès réception des identifiants.
