@@ -122,3 +122,28 @@ DOCUMENTATION : `docs/DECISIONS.md` complété (choix Fortify, désactivation 2F
 POINTS À RELIRE PAR UN HUMAIN : vues d'authentification volontairement non stylées (texte brut) — à ne pas prendre pour la version finale, le design arrive en T06/T18.
 AJOUTÉ AU BACKLOG : rien de nouveau (2FA déjà ajouté dans la décision ci-dessus).
 PROCHAINE TÂCHE SUGGÉRÉE : T04 — Paramètres boutique et apparence (dépend de T02, T03 ; aucun blocage externe pour construire l'infrastructure de paramètres, mais les **valeurs réelles** resteront "À RENSEIGNER" tant que la cliente/le comptable n'ont pas répondu). T01 (Chronopost) reste prioritaire dès réception des identifiants.
+
+---
+
+## [2026-10-06 02:30] — Claude Sonnet 5 — T04 — Paramètres boutique et apparence
+STATUT : terminée
+RÉSUMÉ : Infrastructure complète de paramètres via `spatie/laravel-settings` : 6 groupes (boutique, facturation, virement, expédition, accueil/apparence, SEO), chacun avec sa page Filament. CRUD Filament pour `shipping_rates` et `closed_dates`. Service unique `ConfigurationStatus` + widget d'alerte "Configuration incomplète" sur le tableau de bord. Règle de validation IBAN maison. Toutes les valeurs métier restent vides sauf les 2 explicitement validées (délai virement 5j, quantité max 20) et 2 textes déjà rédigés dans PLAN.md lui-même.
+FICHIERS CRÉÉS / MODIFIÉS :
+- `app/Settings/{Shop,Billing,BankTransfer,Shipping,Homepage,Seo}Settings.php`
+- `app/Filament/Pages/Manage{Shop,Billing,BankTransfer,Shipping,Homepage,Seo}Settings.php`
+- `app/Filament/Resources/{ShippingRate,ClosedDate}Resource.php` (+ pages générées)
+- `app/Filament/Widgets/ConfigurationAlertsWidget.php` + vue associée
+- `app/Services/Settings/ConfigurationStatus.php`, `app/Rules/Iban.php`
+- `database/migrations/2026_10_05_225200_create_settings_table.php`, `database/settings/2026_10_05_225201_create_settings_groups.php`
+- `app/Models/Admin.php` (+ `HasFactory`), `database/factories/AdminFactory.php` (manquait depuis T00)
+- Tests : `tests/Unit/IbanRuleTest.php`, `tests/Feature/Settings/{ConfigurationStatusTest,SettingsPagesTest}.php`
+ANALYSE D'IMPACT : Ajout de `HasFactory` sur `App\Models\Admin` (manquait depuis T00, découvert en écrivant les tests de ce groupe) — rétrocompatible, aucun appelant cassé.
+SÉCURITÉ : IBAN validé côté serveur (format + somme de contrôle). Aucun secret ajouté en dur. Upload de fichiers (logo/bannière) limité aux images (`FileUpload::image()`), stockage disque `public` standard Filament.
+PERFORMANCE : Widget d'alerte volontairement non lazy (calcul trivial) ; pas de requêtes N+1 (lectures settings mises en cache par le package lui-même).
+TESTS : 9 nouveaux tests Pest (IBAN valide/invalide/espaces, statut de configuration incomplet puis complet, accès aux 6 pages de paramètres, CRUD frais de port/jours fermés, alerte visible sur le dashboard). Suite complète : **32 passés / 0 échec**.
+QUALITÉ : `pint --test` ✓, `phpstan` niveau 5 ✓ (0 erreur), `composer audit` ✓, `npm audit` ✓ (0 faille).
+DOCUMENTATION : `docs/DECISIONS.md` complété (choix du package, FileUpload simple vs medialibrary différé à T05, service unique, widget non lazy, ordre des migrations settings).
+À RENSEIGNER / QUESTIONS OUVERTES : toutes les valeurs métier des 6 groupes de paramètres (voir PLAN.md §27) — infrastructure prête, en attente des réponses cliente/Ian/comptable.
+POINTS À RELIRE PAR UN HUMAIN : **déviation de process repérée après coup** — cette tâche a été commencée et commitée directement sur `develop` au lieu de `feature/T04-settings` (oubli, CLAUDE.md §3.2 non respecté sur le coup). Corrigé a posteriori en posant une branche `feature/T04-settings` sur le même commit pour garder une référence nommée, mais l'historique ne montre pas de merge `--no-ff` comme pour T00/T02/T03. Sans conséquence fonctionnelle, mais à surveiller pour les tâches suivantes : **toujours vérifier `git branch` avant le premier commit d'une tâche.**
+AJOUTÉ AU BACKLOG : rien de nouveau.
+PROCHAINE TÂCHE SUGGÉRÉE : T05 — Catalogue dans le back-office (dépend de T02, T04 ; aucun blocage externe, peut être fait intégralement maintenant).
