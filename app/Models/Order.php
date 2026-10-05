@@ -12,7 +12,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property OrderStatus $status
+ * @property PaymentMethod $payment_method
+ * @property Carbon|null $paid_at
+ * @property Carbon|null $shipped_at
+ * @property Carbon|null $delivered_at
+ * @property Carbon|null $cancelled_at
+ */
 #[Fillable([
     'number', 'token', 'user_id', 'status', 'payment_method',
     'email', 'first_name', 'last_name', 'phone',

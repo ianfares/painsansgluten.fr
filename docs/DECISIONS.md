@@ -41,6 +41,14 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — T12 — Commandes : création, statuts et transitions
+
+- **Numérotation des commandes réutilise la table `invoice_sequences`** (déjà créée en T02, colonnes génériques `type`/`year`/`last_number`) avec `type = 'order'`, plutôt qu'une table dédiée identique. Incrément sous `lockForUpdate()` dans la même transaction que la création de la commande.
+- **`OrderStateMachine::transition()`** : unique point d'écriture de `orders.status`, verrouillé (`lockForUpdate`), historise systématiquement, déclenche l'événement correspondant (`OrderPaid`/`OrderShipped`/`OrderCancelled`/`OrderRefunded`) une seule fois par transition. **Aucun listener branché pour l'instant** (facture, email) : ils arriveront avec T16/T19, qui se contenteront d'écouter ces événements déjà en place.
+- **`CreateOrderAction`** ne fait confiance à aucune valeur externe pour les montants : tout vient de `CartService::totals()` (déjà validé en T08/T09/T10). Accepte relais/paiement en paramètres **génériques** (pas d'appel Chronopost/Stripe réel) : testable dès maintenant, bien que T11/T13/T14/T15 (qui fourniront ces paramètres depuis un vrai tunnel) restent bloquées par T01.
+- **Larastan ne déduisait pas les types castés** (`OrderStatus`, `PaymentMethod`, `Carbon`) sur les écritures de propriétés (`$order->status = $to`), seulement les lectures — ajout d'annotations `@property` explicites sur `Order` pour corriger, plutôt qu'un baseline/ignore (jamais de suppression d'erreur sans corriger la cause, QUALITE.md).
+- `total_ht`/`total_vat` calculés via un **taux de TVA moyen pondéré** des lignes (une seule TVA possible sur `orders`, alors que chaque produit a son propre taux) — approximation documentée, à affiner en T16 avec le détail par taux sur la facture (qui, elle, a un récapitulatif multi-taux).
+
 ## 2026-10-06 — T18 — Espace client (anticipé, sans T12/T16 complets)
 
 - **Tâche avancée hors ordre** sur demande explicite du client ("surtout l'interface cliente"), sous contrainte de temps. T18 dépend officiellement de T12 (commandes) et T16 (factures), qui ne sont **pas encore faites** : le tableau de bord et "Mes commandes" fonctionnent déjà (le modèle `Order` existe depuis T02) mais aucune vraie commande ne peut encore être créée (le tunnel/paiement n'existent pas). **"Mes factures" n'a pas été construit** (dépend entièrement de T16, non fait) — à ajouter dès que T16 est livrée.
