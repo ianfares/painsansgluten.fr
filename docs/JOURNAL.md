@@ -248,3 +248,15 @@ TESTS : 6 nouveaux. Suite complète : **87 passés / 0 échec**. pint/phpstan ni
 À RENSEIGNER / QUESTIONS OUVERTES : aucun blocage technique, mais fonctionnellement incomplet tant que T12 (création de vraies commandes) et T16 (factures) ne sont pas faites.
 POINTS À RELIRE PAR UN HUMAIN : **tâche volontairement anticipée hors du graphe de dépendances officiel** — à valider que ça ne pose pas de problème de cohérence avec une IA qui, en lisant tasks/T18-espace-client.md isolément, pourrait croire la tâche entièrement neuve. Le présent compte rendu et docs/DECISIONS.md documentent l'état réel (partiel).
 PROCHAINE TÂCHE SUGGÉRÉE : T12 — Commandes : création, statuts et transitions (débloque T16 pour compléter "Mes factures", et T13/T14/T15 pour un vrai tunnel d'achat). T11 (Chronopost) reste bloquée par T01.
+
+---
+
+## [2026-10-06 07:10] — Claude Sonnet 5 — T12 — Commandes : création, statuts et transitions
+STATUT : terminée
+RÉSUMÉ : `CreateOrderAction` (snapshot complet, numéro séquentiel sans trou en réutilisant `invoice_sequences` avec `type='order'`, token aléatoire, totaux recalculés serveur) et `OrderStateMachine` (seul point d'écriture du statut, verrouillé, historisé, événements `OrderPaid/Shipped/Cancelled/Refunded`). Pas de listeners branchés sur les événements pour l'instant (arriveront avec T16/T19).
+FICHIERS : `app/Actions/Orders/CreateOrderAction.php`, `app/Services/Orders/OrderStateMachine.php`, `app/Events/Orders/*.php`, `app/Exceptions/Orders/InvalidOrderTransition.php`, `app/Models/Order.php` (annotations `@property`), `tests/Feature/Orders/{CreateOrderActionTest,OrderStateMachineTest}.php`.
+SÉCURITÉ : transition verrouillée (`lockForUpdate`), totaux jamais acceptés depuis une entrée externe (toujours `CartService::totals()`), aucune écriture directe de `status` ailleurs dans le code (vérifié).
+TESTS : 27 nouveaux (les 12 transitions autorisées, les 5 interdites rejetées avec statut inchangé, historique, événements déclenchés une fois, numéros séquentiels, panier vidé, panier vide refusé). Suite complète : **113 passés / 0 échec**. pint/phpstan niveau 5 (annotations `@property` ajoutées pour corriger une lacune d'inférence Larastan sur les écritures de propriétés castées)/audits : tout vert.
+À RENSEIGNER : aucun pour cette tâche.
+POINTS À RELIRE PAR UN HUMAIN : répartition HT/TVA par taux moyen pondéré sur `orders` (une commande peut mélanger des produits à taux de TVA différents) — à affiner en T16 où la facture, elle, doit présenter un récapitulatif par taux.
+PROCHAINE TÂCHE SUGGÉRÉE : T16 — Factures et avoirs (débloque "Mes factures" dans l'espace client déjà construit en T18). T11/T13/T14/T15 restent bloquées par T01.
