@@ -41,6 +41,12 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — T09 — Date d'expédition
+
+- `ShippingDateCalculator::forInstant()` : algorithme PLAN §8.4 implémenté au pied de la lettre, y compris la frontière **stricte** ("si heure **>** heure limite" — pile à l'heure limite = encore dans les temps, pas `>=`).
+- Les jours fermés (`closed_dates`) comptent dans le budget de jours de délai de fabrication **uniquement s'ils sont fermés** ; un jour non-ouvré (ex. samedi) qui n'est pas explicitement fermé compte quand même comme un jour de délai écoulé — seule l'étape finale (avancer jusqu'au premier jour d'expédition) filtre sur `shipping_weekdays`. Comportement déduit du texte PLAN ("en sautant les jours fermés" ≠ "en sautant les jours non ouvrés") — à reconfirmer avec la cliente si le comportement observé en recette (T24) ne correspond pas à son intuition métier.
+- Réutilisation de `App\Exceptions\Shipping\ShippingNotConfigured` (déjà créée en T10) pour la configuration de date incomplète : même famille d'erreur "paramètre d'expédition manquant, tunnel bloqué".
+
 ## 2026-10-06 — T10 — Frais de port
 
 - **Priorité réordonnée** : la liste de tâches transmise (T07→T08→T09→T10) a été traitée **T07, puis T10, T09, T08** — T10/T09 sont des services de calcul purs sans dépendance à T08, et T08 (panier) les consomme directement. Évite de coder un panier avec un texte de repli temporaire ("calculés à l'étape suivante") puis de le retirer juste après. Décision prise sous contrainte de temps (session limitée), signalée au client.
