@@ -168,3 +168,27 @@ DOCUMENTATION : `docs/DECISIONS.md` complété (medialibrary + gd, piège nonQue
 POINTS À RELIRE PAR UN HUMAIN : vérifier manuellement qu'une fiche complète (type « Mie'miam ») est saisissable en moins de 5 minutes (critère d'acceptation PLAN.md, non automatisable par un test).
 AJOUTÉ AU BACKLOG : rien de nouveau.
 PROCHAINE TÂCHE SUGGÉRÉE : T06 — Design système et layout public (dépend de T00 ; peut être fait en parallèle du reste, aucun blocage externe).
+
+---
+
+## [2026-10-06 04:50] — Claude Sonnet 5 — T06 — Design système et layout public
+STATUT : terminée
+RÉSUMÉ : Tokens visuels (couleurs, rayons, ombres) relevés directement sur https://painsansgluten.fr via les custom properties CSS de son thème (inspection navigateur, aucun code Liquid/CSS copié), transposés en thème Tailwind v4. Police Inter auto-hébergée (mécanisme natif Laravel 13 `laravel-vite-plugin/fonts`, pas de CDN). En-tête (bandeau d'annonce, méga-menu catégories avec visuel, icônes compte/panier), pied de page (pages légales, contact, Facebook, gestion cookies), composants Blade réutilisables (bouton, badge, carte produit, fil d'Ariane, alerte, champ de formulaire, tiroir, modale), menu mobile, page 404 personnalisée avec liens catégories. Alpine.js pour l'interactivité UI pure (tiroir/modale/menus), sans solliciter Livewire.
+FICHIERS CRÉÉS / MODIFIÉS :
+- `resources/css/app.css` (thème Tailwind), `vite.config.js` (police Inter), `resources/js/app.js` (Alpine)
+- `resources/views/components/layouts/app.blade.php`, `components/site/{header,footer}.blade.php`
+- `resources/views/components/ui/{button,badge,breadcrumb,alert,field,input,drawer,modal,product-card}.blade.php`
+- `resources/views/errors/404.blade.php`, `resources/views/welcome.blade.php` (minimal, contenu réel en T07)
+- `app/View/Composers/{Header,Footer}Composer.php`, `app/Providers/AppServiceProvider.php`
+- `app/Models/Category.php` (+ visuel medialibrary `cover`), `app/Filament/Resources/CategoryResource.php` (champ image ajouté a posteriori)
+- `tests/Feature/Site/PublicLayoutTest.php`
+ANALYSE D'IMPACT : Ajout d'un visuel à `Category` (T05 déjà mergée) — rétrocompatible, n'affecte aucun test existant. `welcome.blade.php` remplacé : seule la page d'accueil Laravel par défaut, sans utilisateur réel à ce stade.
+SÉCURITÉ : Liens externes (Facebook) avec `rel="noopener"`. `alt` systématique sur les images (y compris repli explicite quand absent). Focus visible sur les boutons (`focus-visible:outline`). Bouton "passer au contenu" (`skip to content`) pour la navigation clavier.
+PERFORMANCE : Police auto-hébergée en WOFF2 (pas de requête tierce), images en `loading="lazy"` sur les cartes produit, visuel de catégorie en conversion WebP 200×200.
+TESTS : 4 nouveaux tests Pest (en-tête/pied de page affichés avec les vraies données de paramètres, bandeau d'annonce conditionnel, méga-menu filtré sur les catégories actives, page 404 avec liens de catégories). Suite complète : **46 passés / 0 échec**.
+QUALITÉ : `pint --test` ✓, `phpstan` niveau 5 ✓ (0 erreur), `composer audit` ✓, `npm audit` ✓ (0 faille, y compris `alpinejs` et le changement de police).
+DOCUMENTATION : `docs/DECISIONS.md` complété (tokens relevés, choix police/Alpine, ajout du visuel catégorie, exception documentée pour la page 404 hors cycle de View Composer).
+À RENSEIGNER / QUESTIONS OUVERTES : le vrai logo et les visuels HD (PLAN §27, point 17) restent à fournir — en attendant, le nom de la boutique s'affiche en texte dans l'en-tête.
+POINTS À RELIRE PAR UN HUMAIN : **critère d'acceptation de cette tâche** = captures desktop/mobile comparées côte à côte avec le site actuel, validées par Ian — nécessite une revue humaine visuelle, non automatisable. Auto-corrigé en cours de tâche une tentative d'injection HTML non échappée (`{!! !!}` avec `old()`) dans le composant `<x-ui.input>` avant tout commit — jamais exposée.
+AJOUTÉ AU BACKLOG : rien de nouveau.
+PROCHAINE TÂCHE SUGGÉRÉE : T07 — Accueil, boutique, catégories, fiche produit (dépend de T05, T06 ; aucun blocage externe, peut être fait maintenant).
