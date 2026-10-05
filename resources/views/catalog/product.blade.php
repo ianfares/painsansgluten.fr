@@ -42,10 +42,7 @@
                 <div class="text-2xl font-semibold text-ink">{{ number_format($product->price_ttc / 100, 2, ',', ' ') }} €</div>
 
                 @if ($product->isOrderable())
-                    <div class="flex items-center gap-4">
-                        <x-ui.input name="quantity" type="number" value="1" class="w-20" min="1" max="{{ $shippingSettings->max_quantity_per_line }}" />
-                        <x-ui.button variant="primary" type="button">Ajouter au panier</x-ui.button>
-                    </div>
+                    <livewire:add-to-cart-button :product="$product" :with-quantity="true" />
                 @elseif (! $product->is_shippable)
                     <x-ui.alert variant="warning">{{ $shippingSettings->non_shippable_message }}</x-ui.alert>
                 @else
