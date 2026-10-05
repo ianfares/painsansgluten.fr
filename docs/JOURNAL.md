@@ -36,3 +36,29 @@ RISQUES / À RELIRE PAR UN HUMAIN :
 AJOUTÉ AU BACKLOG :
 - QR code de traçabilité produit (page publique par token, allergènes/composition/date de fabrication) — voir docs/BACKLOG.md.
 PROCHAINE TÂCHE SUGGÉRÉE : T00 — Initialisation du projet (aucune dépendance aux 17 éléments "À RENSEIGNER" ; environnement local vérifié OK : PHP 8.3.6, Composer, Node, MariaDB 10.11 actifs).
+
+---
+
+## [2026-10-05 23:45] — Claude Sonnet 5 — T00 — Initialisation du projet
+STATUT : terminée
+RÉSUMÉ : Squelette Laravel 13.34 installé à la racine du dépôt, avec Filament 3.3.56 (panneau `/admin`, guard `admin` dédié, table `admins` distincte de `users`), Livewire (dépendance de Filament), Tailwind 4 + Vite (déjà fournis par le scaffold Laravel), Pest 4.7 (remplace PHPUnit), Larastan niveau 5, Pint (avec `declare_strict_types` auto-appliqué). Commande `php artisan make:admin` créée et testée. `QUALITE.md` reçu du client et relié à `CLAUDE.md` (document complémentaire obligatoire, son format de compte rendu §10 devient la référence unique). Règle CVE/obsolescence ajoutée à `CLAUDE.md` §2. Fichiers non applicatifs rangés dans `docs/reference/`.
+FICHIERS CRÉÉS / MODIFIÉS :
+- Squelette Laravel complet (`app/`, `routes/`, `resources/`, `database/`, `config/`, `public/`, `tests/`, `composer.json`, `package.json`, etc.)
+- `app/Models/Admin.php`, migration `create_admins_table`, `app/Console/Commands/MakeAdminCommand.php`
+- `config/admin.php` (nouveau), `config/auth.php` (guard + provider `admin`), `config/app.php` (timezone lu depuis env)
+- `app/Providers/Filament/AdminPanelProvider.php` (guard + path configurables)
+- `phpstan.neon`, `pint.json`, `phpunit.xml` (DB de test MariaDB dédiée)
+- `.env`, `.env.example`, `.gitignore`, `.editorconfig`, `.gitattributes`, `.npmrc`
+- `tests/Feature/AdminPanelTest.php`, `tests/Feature/ExampleTest.php` et `tests/Unit/ExampleTest.php` (convertis en Pest)
+- `README.md` (nouveau), `docs/DECISIONS.md` (nouveau)
+- Déplacés : `audit-painsansgluten.html` et `documents/` → `docs/reference/`
+ANALYSE D'IMPACT : Aucun code métier préexistant — initialisation pure, aucun appelant à mettre à jour. Le changement de `config/app.php` (`timezone`) et l'ajout de `config/admin.php` sont des fondations utilisées par toutes les tâches suivantes (Europe/Paris partout, chemin BO configurable).
+SÉCURITÉ : Guard `admin` strictement séparé du guard `web` (testé : un client connecté ne peut pas accéder à `/admin`, redirigé vers la connexion BO). `ADMIN_PATH` exposé uniquement via `config/admin.php` (jamais `env()` hors `config/`). Aucun secret dans les fichiers versionnés (mot de passe DB local vérifié absent de `phpunit.xml` et de `.env.example`, uniquement dans `.env` gitignoré). `composer audit` et `npm audit` : 0 vulnérabilité. 2FA admin non implémentée (prévue T03, hors périmètre T00).
+PERFORMANCE : Sans objet à ce stade (aucune route métier, pas de requête N+1 possible).
+TESTS : 4 tests Pest (2 préexistants convertis + 2 nouveaux sur le panneau admin), exécutés sur une vraie base MariaDB de test (`boulangerie_gluten_test`), pas SQLite — choix documenté dans `docs/DECISIONS.md`. Suite complète : 4 passés / 0 échec.
+QUALITÉ : `pint --test` ✓ (`declare_strict_types` appliqué à tout le squelette), `phpstan analyse` niveau 5 ✓ (0 erreur), `composer audit` ✓ (0 faille), `npm audit` ✓ (0 faille, exécuté à l'install).
+DOCUMENTATION : `README.md` créé (installation locale, commandes, structure du dépôt), `docs/DECISIONS.md` créé (versions, choix MariaDB pour les tests, rangement `docs/reference/`), `.env.example` complet et commenté, `CLAUDE.md` mis à jour (§2 règle CVE, lien vers `QUALITE.md`, §6/§7 pointent vers le format de compte rendu `QUALITE.md` §10).
+À RENSEIGNER / QUESTIONS OUVERTES : aucune pour T00 lui-même (zéro dépendance aux 17 paramètres de `PLAN.md` §27). Reste ouvert pour les tâches suivantes : identifiants Chronopost (T01, bloquant J1), taux de TVA et paramètres d'expédition (T02/T04).
+POINTS À RELIRE PAR UN HUMAIN : choix de faire tourner les tests sur MariaDB plutôt que SQLite (léger surcoût de configuration, mais cohérence avec la prod) ; abandon des fichiers `AGENTS.md`/`CLAUDE.md`/`README.md` générés par défaut par Laravel 13 au profit des fichiers du projet.
+AJOUTÉ AU BACKLOG : aucun ajout pour cette tâche.
+PROCHAINE TÂCHE SUGGÉRÉE : T01 — Spike Chronopost (CRITIQUE, priorité absolue J1 selon le README de cadrage) : nécessite les identifiants Chronopost (compte + mot de passe WS), actuellement en placeholder dans `.env`.
