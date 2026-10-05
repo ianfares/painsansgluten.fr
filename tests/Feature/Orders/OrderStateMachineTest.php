@@ -10,6 +10,14 @@ use App\Exceptions\Orders\InvalidOrderTransition;
 use App\Models\Order;
 use App\Services\Orders\OrderStateMachine;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
+
+beforeEach(function () {
+    // Les listeners de facturation (T16) sont en queue : on isole ici le
+    // comportement de la machine à états, testé séparément dans
+    // tests/Feature/Invoicing.
+    Queue::fake();
+});
 
 test('toutes les transitions autorisées par PLAN §9.2 réussissent', function (OrderStatus $from, OrderStatus $to) {
     $order = Order::factory()->create(['status' => $from]);
