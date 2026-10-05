@@ -32,6 +32,11 @@
 
 Toute nouvelle dépendance Composer/NPM doit être **justifiée dans `docs/DECISIONS.md`** (pourquoi, alternative écartée). Pas de package abandonné ou à faible maintenance.
 
+**Sécurité des dépendances — NON NÉGOCIABLE** : avant d'installer ou de monter en version une dépendance (Composer ou NPM), vérifier :
+1. Qu'elle n'est pas **obsolète / non maintenue** (dernière release récente, pas de dépréciation annoncée).
+2. Qu'**aucune CVE active sans correctif** n'est connue sur la version installée (`composer audit`, `npm audit`, et vérification manuelle si doute — changelog, advisories GitHub).
+En cas de CVE active sans fix disponible, ou de doute sérieux sur la maintenance d'un package : **s'arrêter et demander validation à l'humain avant d'installer**, ne jamais installer "en espérant que ça passe". `composer audit` / `npm audit` doivent tourner propres (0 faille critique/haute) avant de clore toute tâche qui touche aux dépendances — résultat à consigner dans `docs/DECISIONS.md`.
+
 ## 3. Règles de travail NON NÉGOCIABLES
 1. **Ne jamais inventer.** Si une information manque (valeur métier, texte juridique, taux de TVA, identifiant API, comportement Chronopost), tu **t'arrêtes et tu poses la question**, ou tu crées un paramètre/placeholder explicitement marqué `À RENSEIGNER`. Aucune clause juridique, aucun taux, aucun tarif inventé.
 2. **Une tâche = une branche** `feature/TXX-nom` depuis `develop`. Tu ne touches qu'aux fichiers du périmètre de la tâche. Pas de refactor opportuniste hors périmètre.
