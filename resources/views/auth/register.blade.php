@@ -15,7 +15,7 @@
         @error('phone') <p class="error">{{ $message }}</p> @enderror
 
         <label for="email">Email</label>
-        <input id="email" type="email" name="email" value="{{ old('email') }}" required>
+        <input id="email" type="email" name="email" value="{{ old('email', request()->query('email', '')) }}" required>
         @error('email') <p class="error">{{ $message }}</p> @enderror
 
         <label for="password">Mot de passe</label>
