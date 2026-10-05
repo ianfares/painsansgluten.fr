@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
 // Stub de l'espace client (PLAN.md §13) : le tableau de bord complet est
 // construit en T18. Ce stub sert uniquement de cible de redirection pour

@@ -2,8 +2,36 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../views';
 
+/*
+ * Design system (T06, PLAN.md §5.1) — valeurs relevées sur le site existant
+ * https://painsansgluten.fr (couleurs, rayons, ombres des custom properties
+ * du thème Shopify), reproduites ici sans réutiliser son code. Voir
+ * docs/DECISIONS.md pour le détail des mesures.
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-cream: #fefcf2;
+    --color-cream-alt: #f3ecdc;
+    --color-ink: rgb(0 0 0 / 0.81);
+    --color-ink-muted: rgb(0 0 0 / 0.6);
+    --color-sage: #5d6e41;
+    --color-sage-dark: #4a5733;
+    --color-ochre: #b47c38;
+    --color-line: #dfdfdf;
+
+    --radius-field: 4px;
+    --radius-button: 10px;
+    --radius-card: 0.8rem;
+    --radius-popover: 14px;
+
+    --shadow-button: 0 2px 3px rgb(0 0 0 / 0.2);
+    --shadow-drawer: 0px 4px 20px rgb(0 0 0 / 0.15);
+}
+
+[x-cloak] {
+    display: none !important;
 }
