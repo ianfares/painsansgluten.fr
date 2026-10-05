@@ -41,6 +41,16 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — T04 — Paramètres boutique et apparence
+
+- **`spatie/laravel-settings` ^3.9** + **`filament/spatie-laravel-settings-plugin` ^3.3** : 6 classes de paramètres (`ShopSettings`, `BillingSettings`, `BankTransferSettings`, `ShippingSettings`, `HomepageSettings`, `SeoSettings`), chacune avec sa page Filament dédiée (auto-découverte via `discoverPages`). C'est le "helper/service unique" demandé par la fiche T04 : tout le code lit/écrit via `app(XxxSettings::class)`, jamais de configuration dupliquée ailleurs.
+- **Toutes les valeurs restent `null`/vides** sauf les deux explicitement validées par la cliente (`bank_transfer.cancel_after_days = 5`, `shipping.max_quantity_per_line = 20`) et deux textes déjà rédigés dans PLAN.md lui-même (§5.3, §8.4 : message produit non expédiable, message retrait relais) — jamais de valeur inventée (CLAUDE.md §3.1).
+- **`App\Services\Settings\ConfigurationStatus`** : point d'entrée unique pour savoir si la configuration bloquante est complète (coordonnées boutique, SIRET/TVA, IBAN/BIC, paramètres d'expédition, grille de frais de port non vide). Utilisé par le widget d'alerte du tableau de bord (T04) ; sera réutilisé tel quel pour bloquer le tunnel de commande (T09/T13) plutôt que de dupliquer cette logique.
+- **IBAN validé par une règle maison** (`App\Rules\Iban`, somme de contrôle mod-97) plutôt qu'un package dédié : validation triviale (QUALITE.md §2.14).
+- **Upload logo/favicon/bannière** : `Filament\Forms\Components\FileUpload` simple (disque `public`), **sans** `spatie/laravel-medialibrary` — ce package est réservé aux images produits (galerie, conversions WebP), prévu en T05. Pas de conversions d'images pour les visuels de paramètres en V1.
+- Widget `ConfigurationAlertsWidget` **non lazy** (`$isLazy = false`) : calcul trivial, doit être visible immédiatement au chargement du tableau de bord (pas de round-trip Livewire différé).
+- Migration `database/settings/..._create_settings_groups.php` renommée/réordonnée pour s'exécuter **après** `create_settings_table` (les migrations de `database/settings/` et `database/migrations/` sont fusionnées et triées par nom de fichier par le migrateur Laravel).
+
 ## 2026-10-06 — T03 — Authentification
 
 - **Laravel Fortify ^1.40** pour l'authentification client (guard `web`) : inscription, connexion, mot de passe oublié/réinitialisation, vérification d'email, mise à jour du profil/mot de passe — toutes "officielles", aucun mécanisme maison (CLAUDE.md §3.1).
