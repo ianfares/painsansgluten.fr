@@ -62,7 +62,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="{{ \Illuminate\Support\Facades\Route::has('contact') ? route('contact') : '#' }}" class="text-sm font-medium text-ink hover:text-sage">Contact</a>
+                <a href="{{ route('content.show', 'contact') }}" class="text-sm font-medium text-ink hover:text-sage">Contact</a>
             </nav>
 
             {{-- Logo mobile (le lien "desktop" ci-dessus reste masqué en dessous de lg) --}}
@@ -78,26 +78,32 @@
                 @endif
             </a>
 
-            <div class="flex items-center justify-end gap-2 lg:order-3 lg:justify-self-end">
+            <div class="flex items-center justify-end gap-3 lg:order-3 lg:justify-self-end">
                 <a
                     href="{{ auth()->check() ? route('compte.dashboard') : route('login') }}"
                     aria-label="Mon compte"
-                    class="flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-sage/10 hover:text-sage"
+                    class="group flex flex-col items-center gap-1"
                 >
-                    <span aria-hidden="true" class="text-lg">👤</span>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-sage-dark text-white transition group-hover:bg-sage">
+                        <span aria-hidden="true" class="text-base">👤</span>
+                    </span>
+                    <span class="hidden text-[10px] font-semibold uppercase tracking-wide text-ink-muted sm:block">Mon compte</span>
                 </a>
                 <button
                     type="button"
                     x-on:click="window.dispatchEvent(new CustomEvent('open-drawer-cart'))"
-                    class="relative flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-sage/10 hover:text-sage"
+                    class="group flex flex-col items-center gap-1"
                     aria-label="Panier"
                 >
-                    <span aria-hidden="true" class="text-lg">🛍️</span>
-                    @if (($cartCount ?? 0) > 0)
-                        <span class="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-ochre text-[10px] text-white">
-                            {{ $cartCount }}
-                        </span>
-                    @endif
+                    <span class="relative flex h-10 w-10 items-center justify-center rounded-full bg-sage-dark text-white transition group-hover:bg-sage">
+                        <span aria-hidden="true" class="text-base">🛍️</span>
+                        @if (($cartCount ?? 0) > 0)
+                            <span class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-ochre text-[10px] text-white">
+                                {{ $cartCount }}
+                            </span>
+                        @endif
+                    </span>
+                    <span class="hidden text-[10px] font-semibold uppercase tracking-wide text-ink-muted sm:block">Mon panier</span>
                 </button>
             </div>
         </div>
@@ -120,7 +126,7 @@
             @foreach ($headerCategories as $category)
                 <a href="{{ route('content.show', $category) }}" class="pl-4 text-sm text-ink-muted hover:text-sage">{{ $category->name }}</a>
             @endforeach
-            <a href="{{ \Illuminate\Support\Facades\Route::has('contact') ? route('contact') : '#' }}" class="text-ink hover:text-sage">Contact</a>
+            <a href="{{ route('content.show', 'contact') }}" class="text-ink hover:text-sage">Contact</a>
         </nav>
     </div>
 </header>

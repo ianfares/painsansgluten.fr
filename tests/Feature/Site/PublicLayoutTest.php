@@ -51,3 +51,30 @@ test('une page inconnue affiche la 404 personnalisée avec des liens de catégor
     $response->assertSee('Page introuvable');
     $response->assertSee('Viennoiseries sans gluten');
 });
+
+test('le lien Contact de l\'en-tête pointe vers la vraie page de contact', function () {
+    $response = $this->get('/');
+
+    $response->assertSee(route('content.show', 'contact'), false);
+});
+
+test('la bannière d\'accueil affiche les 3 canaux de vente', function () {
+    $response = $this->get('/');
+
+    $response->assertSee('Commande en ligne');
+    $response->assertSee('Sur les marchés');
+    $response->assertSee('Professionnels');
+});
+
+test('le badge "Professionnels" est un lien mailto uniquement si un email de contact est renseigné', function () {
+    $shop = app(ShopSettings::class);
+    $shop->contact_email = null;
+    $shop->save();
+
+    $this->get('/')->assertDontSee('mailto:', false);
+
+    $shop->contact_email = 'contact@painsansgluten.fr';
+    $shop->save();
+
+    $this->get('/')->assertSee('mailto:contact@painsansgluten.fr', false);
+});

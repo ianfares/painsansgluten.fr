@@ -369,3 +369,16 @@ RÉSUMÉ : la bannière "prenait tout l'écran" (retour cliente) — padding ver
 FICHIERS : `resources/views/catalog/home.blade.php`.
 TESTS : aucun nouveau (changement de dimensions CSS uniquement) ; suite complète réexécutée : **170 passés / 0 échec**. pint/phpstan niveau 5/`composer audit` : tout vert. Vérifié visuellement (desktop, mobile).
 PROCHAINE TÂCHE SUGGÉRÉE : reprendre la liste normale (T14 dès les clés Stripe, sinon T19/T21/T23).
+
+
+---
+
+## [2026-10-06 14:00] — Claude Sonnet 5 — (hors plan) — 3 canaux de vente dans la bannière + icônes compte/panier
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : suite directe des deux entrées précédentes. La cliente a demandé d'ajouter les 3 canaux de vente ("commande en ligne, marché, professionnels") dans la bannière, en référence à painsansgluten.fr, et a déposé 3 captures d'écran dans un dossier `foto-dev/` à la racine (déplacé dans `docs/reference/foto-dev/`, voir docs/DECISIONS.md) — ces captures proviennent en fait du site d'une autre boulangerie ("Le Petit Minotier"), traitées comme inspiration de style fournie par la cliente, pas comme contenu à copier.
+RÉSUMÉ : Bannière d'accueil : 3 badges "Commande en ligne" (lien boutique) / "Sur les marchés" (texte, pas de lien) / "Professionnels" (mailto si `contact_email` renseigné), contenu tiré de `docs/reference/audit-painsansgluten.html` (pas inventé). Icônes compte/panier de l'en-tête restylées (cercle plein + libellé, inspiré des captures fournies). Bug préexistant corrigé : le lien "Contact" ne menait nulle part depuis le début (route `contact` inexistante) — pointe maintenant vers la vraie page de contact (encore un brouillon non publié côté cliente).
+FICHIERS : `app/Http/Controllers/Catalog/HomeController.php` (injection `ShopSettings`), `resources/views/catalog/home.blade.php`, `resources/views/components/site/header.blade.php`, `tests/Feature/Site/PublicLayoutTest.php`, `docs/reference/foto-dev/` (nouveau, captures de référence de la cliente).
+TESTS : 3 nouveaux (lien Contact correct, 3 badges affichés, badge "Professionnels" cliquable seulement si email configuré). Suite complète : **173 passés / 0 échec**. pint/phpstan niveau 5/`composer audit` : tout vert. Vérifié visuellement (desktop, mobile).
+À RENSEIGNER : aucun nouveau — toujours en attente que la cliente rédige et publie sa page Contact (texte réel, adresse, marchés).
+POINTS À RELIRE PAR UN HUMAIN : aucun glissement de process. Pas d'icône "Rechercher" ajoutée (pas de fonctionnalité de recherche produit dans ce projet — déjà au backlog V1.1/V2).
+PROCHAINE TÂCHE SUGGÉRÉE : reprendre la liste normale (T14 dès les clés Stripe, sinon T19/T21/T23).
