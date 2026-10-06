@@ -382,3 +382,16 @@ TESTS : 3 nouveaux (lien Contact correct, 3 badges affichés, badge "Professionn
 À RENSEIGNER : aucun nouveau — toujours en attente que la cliente rédige et publie sa page Contact (texte réel, adresse, marchés).
 POINTS À RELIRE PAR UN HUMAIN : aucun glissement de process. Pas d'icône "Rechercher" ajoutée (pas de fonctionnalité de recherche produit dans ce projet — déjà au backlog V1.1/V2).
 PROCHAINE TÂCHE SUGGÉRÉE : reprendre la liste normale (T14 dès les clés Stripe, sinon T19/T21/T23).
+
+
+---
+
+## [2026-10-06 14:30] — Claude Sonnet 5 — (hors plan) — En-tête refondu en 3 bandeaux
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : la cliente a fourni une nouvelle capture (`docs/reference/capture/menu-haut.png`, toujours du site "Le Petit Minotier") et a demandé de **remplacer tout l'en-tête** dans cet esprit — un logo plus grand et centré, une barre utilitaire fine au-dessus, une barre de catégories permanente en dessous. **Ceci remplace la disposition "logo à gauche / menu centré" mise en place plus tôt dans la journée** (voir l'entrée "Retouches de design..." du même jour) : changement de direction explicite de la cliente après avoir vu un exemple concret, pas une erreur de ma part. Lire docs/DECISIONS.md pour le détail, en particulier **pourquoi les badges de certification (AB, AFDIAG, Trophées) visibles sur la référence n'ont volontairement PAS été reproduits** (allégation de certification non vérifiée pour notre cliente).
+RÉSUMÉ : En-tête à 3 bandeaux — (1) barre utilitaire fine (F.A.Q., Contact), masquée sur mobile ; (2) barre principale avec logo agrandi (reste dans sa résolution native, donc net) + nom de la boutique + "100% sans gluten" en dessous, icônes compte/panier inchangées ; (3) barre de catégories permanente (remplace le menu déroulant au survol `megaOpen`, supprimé). Menu coulissant mobile mis à jour en conséquence (ajout F.A.Q., pictogrammes sur les catégories).
+FICHIERS : `resources/views/components/site/header.blade.php` (réécriture complète), `docs/reference/capture/` (nouveau, captures de référence).
+TESTS : aucun nouveau test (structure HTML changée, mais le contenu testé — catégories actives visibles/inactives masquées, lien Contact, badges de la bannière — reste inchangé) ; suite complète réexécutée pour non-régression : **173 passés / 0 échec**. pint/phpstan niveau 5/`composer audit` : tout vert. Vérifié visuellement (desktop, mobile).
+À RENSEIGNER : si la cliente détient réellement des certifications/labels (bio, AFDIAG ou autre) qu'elle souhaite afficher, il faudra qu'elle le confirme explicitement et fournisse les vrais visuels — jamais une supposition de notre part.
+POINTS À RELIRE PAR UN HUMAIN : troisième changement de direction sur l'en-tête dans la même journée (logo centré → logo gauche → logo centré en grand) — comportement normal d'un cycle d'itération avec retours visuels rapides, mais à signaler si la cliente hésite encore après cette version.
+PROCHAINE TÂCHE SUGGÉRÉE : reprendre la liste normale (T14 dès les clés Stripe, sinon T19/T21/T23).
