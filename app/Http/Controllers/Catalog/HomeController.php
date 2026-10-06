@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Settings\HomepageSettings;
+use App\Settings\ShopSettings;
 use Illuminate\View\View;
 
 /**
@@ -16,7 +17,7 @@ use Illuminate\View\View;
  */
 class HomeController extends Controller
 {
-    public function __invoke(HomepageSettings $homepage): View
+    public function __invoke(HomepageSettings $homepage, ShopSettings $shop): View
     {
         $featured = Product::query()
             ->published()
@@ -33,6 +34,7 @@ class HomeController extends Controller
             'categories' => Category::query()->where('is_active', true)->orderBy('position')->get(),
             'featured' => $featured,
             'homepageSettings' => $homepage,
+            'shopSettings' => $shop,
         ]);
     }
 }

@@ -28,6 +28,25 @@
                     </x-ui.button>
                     <a href="{{ route('faq') }}" class="text-sm font-medium text-ink hover:text-sage">Comment ça marche&nbsp;? →</a>
                 </div>
+
+                {{-- Les 3 canaux de vente de la boulangerie (marchés, vente en ligne, professionnels — cf. docs/reference/audit-painsansgluten.html). --}}
+                <div class="mt-6 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+                    <a href="{{ route('boutique.index') }}" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition hover:shadow-button">
+                        🛒 Commande en ligne
+                    </a>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm">
+                        🧺 Sur les marchés
+                    </span>
+                    @if ($shopSettings->contact_email)
+                        <a href="mailto:{{ $shopSettings->contact_email }}?subject=Demande%20professionnels" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition hover:shadow-button">
+                            🤝 Professionnels
+                        </a>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm">
+                            🤝 Professionnels
+                        </span>
+                    @endif
+                </div>
             </div>
 
             <div class="relative mx-auto aspect-[4/3] w-full max-w-xs lg:max-w-sm">
