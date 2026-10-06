@@ -5,8 +5,11 @@ declare(strict_types=1);
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Filament\Resources\OrderResource\Pages\ListOrders;
+use App\Filament\Resources\OrderResource\Pages\ViewOrder;
 use App\Models\Admin;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\OrderStatusHistory;
 use App\Settings\ShippingSettings;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -60,4 +63,14 @@ test('valider un virement depuis le BO passe la commande à payée', function ()
         ->callTableAction('validateBankTransfer', $order);
 
     expect($order->fresh()->status)->toBe(OrderStatus::Paid);
+});
+
+test('la fiche détail d\'une commande affiche ses lignes et son historique', function () {
+    $order = Order::factory()->create();
+    OrderItem::factory()->for($order)->create(['product_name' => 'Pain nordique sans gluten']);
+    OrderStatusHistory::factory()->for($order)->create(['comment' => 'Commande créée']);
+
+    Livewire::test(ViewOrder::class, ['record' => $order->getRouteKey()])
+        ->assertSee('Pain nordique sans gluten')
+        ->assertSee('Commande créée');
 });
