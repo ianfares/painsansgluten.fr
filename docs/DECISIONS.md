@@ -41,6 +41,10 @@
 - **`order_status_histories`** : table d'audit append-only, `UPDATED_AT` désactivé (`const UPDATED_AT = null`) — une ligne d'historique ne se modifie jamais.
 - Les transitions de statut autorisées (PLAN §9.2) sont encodées directement sur l'enum `OrderStatus::allowedNextStatuses()` (donnée statique), pas dans un service séparé : `App\Services\Orders\OrderStateMachine` (T12) s'appuiera dessus plutôt que de redéfinir la table de transitions.
 
+## 2026-10-06 — Bannière d'accueil réduite en hauteur
+
+- Retour rapide de la cliente après la passe précédente : la bannière "prenait tout l'écran". Padding vertical réduit (`py-16 sm:py-24 lg:py-28` → `py-8 sm:py-10 lg:py-14`), tailles de titre/visuel/icônes réduites en proportion (grille de pictogrammes `h-20/h-24` → `h-12/h-14`, panneau `aspect-square` → `aspect-[4/3]`). Aucun changement de contenu/texte, uniquement des dimensions.
+
 ## 2026-10-06 — Retouches de design suite à relecture visuelle de la cliente
 
 - **Suite directe de la décision précédente** ("Logo client + refonte de la bannière") : la cliente a demandé une passe de relecture visuelle après coup (en-tête, bannière, pied de page, icônes de catégories). Tentative d'utiliser l'outil `claude-in-chrome` pour regarder le site **en direct dans un vrai navigateur** : échec, même limitation réseau que documentée plus tôt dans la session (l'extension Chrome ne peut pas atteindre `127.0.0.1:8000`/`localhost:8000` depuis ce bac à sable). Repli sur Chrome headless en ligne de commande (déjà la méthode qui fonctionne) pour capturer des captures d'écran, corriger, recapturer.

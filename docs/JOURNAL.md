@@ -360,3 +360,12 @@ TESTS : 1 nouveau test unitaire (`fallbackIcon()` sur les 4 catégories + repli)
 À RENSEIGNER : rien de nouveau — la limitation de résolution du logo (100×100px) reste un point à signaler à la cliente si elle veut un rendu net en grand format un jour (bannière, réseaux sociaux, etc.).
 POINTS À RELIRE PAR UN HUMAIN : aucun nouveau glissement de process cette fois (branche créée avant le premier commit). `claude-in-chrome` reste non fonctionnel sur cet environnement pour atteindre le serveur de dev local — à garder en tête pour toute future tâche visuelle plutôt que de retenter à chaque fois sans prévenir l'humain.
 PROCHAINE TÂCHE SUGGÉRÉE : reprendre la liste normale (T14 dès les clés Stripe, sinon T19/T21/T23).
+
+---
+
+## [2026-10-06 13:30] — Claude Sonnet 5 — (hors plan) — Bannière d'accueil réduite en hauteur
+STATUT : terminée
+RÉSUMÉ : la bannière "prenait tout l'écran" (retour cliente) — padding vertical et tailles réduits (voir docs/DECISIONS.md), aucun changement de contenu.
+FICHIERS : `resources/views/catalog/home.blade.php`.
+TESTS : aucun nouveau (changement de dimensions CSS uniquement) ; suite complète réexécutée : **170 passés / 0 échec**. pint/phpstan niveau 5/`composer audit` : tout vert. Vérifié visuellement (desktop, mobile).
+PROCHAINE TÂCHE SUGGÉRÉE : reprendre la liste normale (T14 dès les clés Stripe, sinon T19/T21/T23).

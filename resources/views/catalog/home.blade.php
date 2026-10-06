@@ -8,21 +8,21 @@
             <div class="absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-ochre/10 blur-3xl"></div>
         </div>
 
-        <div class="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:py-24 lg:grid-cols-2 lg:py-28">
+        <div class="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-8 sm:py-10 lg:grid-cols-2 lg:py-14">
             <div class="text-center lg:text-left">
                 <span class="inline-flex items-center gap-2 rounded-full bg-sage/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-sage-dark">
                     🌾 100&nbsp;% sans gluten · fait main à Avranches
                 </span>
 
-                <h1 class="mt-6 text-4xl font-semibold leading-tight text-ink sm:text-5xl">
+                <h1 class="mt-4 text-3xl font-semibold leading-tight text-ink sm:text-4xl">
                     {{ $homepage->banner_title ?: 'Boulangerie & créations artisanales 100 % sans gluten' }}
                 </h1>
 
-                <p class="mx-auto mt-5 max-w-xl text-lg text-ink-muted lg:mx-0">
+                <p class="mx-auto mt-3 max-w-xl text-base text-ink-muted lg:mx-0">
                     {{ $homepage->banner_subtitle ?: 'Pains, viennoiseries, pâtisseries et biscuits confectionnés à la commande, livrés près de chez vous en point relais.' }}
                 </p>
 
-                <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+                <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
                     <x-ui.button variant="primary" :href="route('boutique.index')" class="w-full sm:w-auto">
                         {{ $homepage->banner_button_text ?: 'Découvrir la boutique' }}
                     </x-ui.button>
@@ -30,7 +30,7 @@
                 </div>
             </div>
 
-            <div class="relative mx-auto aspect-square w-full max-w-sm lg:max-w-none">
+            <div class="relative mx-auto aspect-[4/3] w-full max-w-xs lg:max-w-sm">
                 @if ($homepage->banner_image_path)
                     <img
                         src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepage->banner_image_path) }}"
@@ -38,18 +38,18 @@
                         class="h-full w-full rounded-card object-cover shadow-drawer"
                     >
                 @else
-                    <div class="flex h-full w-full flex-col items-center justify-center gap-6 rounded-card bg-gradient-to-br from-white via-cream to-cream-alt p-8 shadow-drawer">
-                        <div class="grid grid-cols-2 gap-5">
-                            <span class="flex h-20 w-20 items-center justify-center rounded-full bg-sage/10 text-4xl sm:h-24 sm:w-24">🥖</span>
-                            <span class="flex h-20 w-20 items-center justify-center rounded-full bg-ochre/10 text-4xl sm:h-24 sm:w-24">🥐</span>
-                            <span class="flex h-20 w-20 items-center justify-center rounded-full bg-ochre/10 text-4xl sm:h-24 sm:w-24">🍪</span>
-                            <span class="flex h-20 w-20 items-center justify-center rounded-full bg-sage/10 text-4xl sm:h-24 sm:w-24">🍰</span>
+                    <div class="flex h-full w-full flex-col items-center justify-center gap-3 rounded-card bg-gradient-to-br from-white via-cream to-cream-alt p-5 shadow-drawer">
+                        <div class="grid grid-cols-2 gap-3">
+                            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-sage/10 text-2xl sm:h-14 sm:w-14">🥖</span>
+                            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-ochre/10 text-2xl sm:h-14 sm:w-14">🥐</span>
+                            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-ochre/10 text-2xl sm:h-14 sm:w-14">🍪</span>
+                            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-sage/10 text-2xl sm:h-14 sm:w-14">🍰</span>
                         </div>
-                        <p class="text-sm font-medium text-ink-muted">Photos de nos créations à venir</p>
+                        <p class="text-xs font-medium text-ink-muted">Photos de nos créations à venir</p>
                     </div>
                 @endif
 
-                <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-card bg-sage px-4 py-3 text-sm font-medium text-white shadow-button lg:left-auto lg:right-6 lg:translate-x-0">
+                <span class="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-card bg-sage px-3 py-2 text-xs font-medium text-white shadow-button lg:left-auto lg:right-4 lg:translate-x-0">
                     📦 Expédié frais, à retirer en relais
                 </span>
             </div>
