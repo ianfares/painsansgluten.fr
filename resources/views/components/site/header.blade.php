@@ -3,15 +3,24 @@
     // $homepageSettings, $shopSettings, $headerCategories.
 @endphp
 
-<header x-data="{ mobileOpen: false, megaOpen: false }">
+<header x-data="{ mobileOpen: false }">
     @if ($homepageSettings->announcement_active && $homepageSettings->announcement_text)
         <div class="bg-sage px-4 py-2 text-center text-sm text-white">
             {{ $homepageSettings->announcement_text }}
         </div>
     @endif
 
+    {{-- Barre utilitaire (liens secondaires, masquée sur mobile — repris dans le menu coulissant) --}}
+    <div class="hidden border-b border-line bg-white lg:block">
+        <div class="mx-auto flex max-w-6xl items-center justify-end gap-6 px-4 py-2 text-xs font-medium text-ink-muted">
+            <a href="{{ route('faq') }}" class="hover:text-sage">F.A.Q.</a>
+            <a href="{{ route('content.show', 'contact') }}" class="hover:text-sage">Contact</a>
+        </div>
+    </div>
+
+    {{-- Barre principale : logo en grand, centré --}}
     <div class="border-b border-line bg-cream">
-        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5 lg:grid lg:grid-cols-[1fr_auto_1fr]">
             <button
                 type="button"
                 class="lg:hidden"
@@ -21,64 +30,27 @@
                 <span aria-hidden="true" class="text-2xl">☰</span>
             </button>
 
-            <a href="{{ route('home') }}" class="hidden items-center gap-2 text-lg font-semibold text-ink lg:order-1 lg:flex lg:justify-self-start">
+            <div class="hidden lg:block" aria-hidden="true"></div>
+
+            <a href="{{ route('home') }}" class="flex flex-col items-center gap-1.5 lg:justify-self-center">
                 @if ($homepageSettings->logo_path)
                     <img
                         src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepageSettings->logo_path) }}"
                         alt="{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}"
-                        class="h-11 w-11 rounded-full object-cover"
+                        class="h-14 w-14 rounded-full object-cover sm:h-20 sm:w-20"
                     >
+                    <span class="hidden text-base font-semibold text-ink sm:block sm:text-lg">
+                        {{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}
+                    </span>
+                    <span class="hidden text-xs uppercase tracking-wide text-sage-dark sm:block">100&nbsp;% sans gluten</span>
                 @else
-                    {{ $shopSettings->shop_name ?? "Mon Sans Gluten" }}
+                    <span class="text-lg font-semibold text-ink">
+                        {{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}
+                    </span>
                 @endif
             </a>
 
-            <nav class="hidden items-center gap-8 lg:order-2 lg:flex lg:justify-self-center" aria-label="Navigation principale">
-                <a href="{{ route('home') }}" class="text-sm font-medium text-ink hover:text-sage">Accueil</a>
-                <div class="relative" x-on:mouseenter="megaOpen = true" x-on:mouseleave="megaOpen = false">
-                    <a href="{{ route('boutique.index') }}" class="text-sm font-medium text-ink hover:text-sage">
-                        Boutique
-                    </a>
-
-                    <div
-                        x-show="megaOpen"
-                        x-cloak
-                        x-transition
-                        class="absolute left-1/2 top-full z-40 w-[40rem] -translate-x-1/2 rounded-card border border-line bg-white p-6 shadow-drawer"
-                    >
-                        <div class="grid grid-cols-4 gap-4">
-                            @foreach ($headerCategories as $category)
-                                <a href="{{ route('content.show', $category) }}" class="group flex flex-col items-center gap-2 text-center">
-                                    <span class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-cream-alt to-sage/15 text-2xl shadow-sm transition group-hover:scale-105">
-                                        @if ($url = $category->getFirstMediaUrl('cover', 'menu'))
-                                            <img src="{{ $url }}" alt="" class="h-full w-full object-cover">
-                                        @else
-                                            <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
-                                        @endif
-                                    </span>
-                                    <span class="text-xs font-medium text-ink group-hover:text-sage">{{ $category->name }}</span>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ route('content.show', 'contact') }}" class="text-sm font-medium text-ink hover:text-sage">Contact</a>
-            </nav>
-
-            {{-- Logo mobile (le lien "desktop" ci-dessus reste masqué en dessous de lg) --}}
-            <a href="{{ route('home') }}" class="flex items-center gap-2 text-lg font-semibold text-ink lg:hidden">
-                @if ($homepageSettings->logo_path)
-                    <img
-                        src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepageSettings->logo_path) }}"
-                        alt="{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}"
-                        class="h-11 w-11 rounded-full object-cover"
-                    >
-                @else
-                    {{ $shopSettings->shop_name ?? "Mon Sans Gluten" }}
-                @endif
-            </a>
-
-            <div class="flex items-center justify-end gap-3 lg:order-3 lg:justify-self-end">
+            <div class="flex items-center justify-end gap-3 lg:justify-self-end">
                 <a
                     href="{{ auth()->check() ? route('compte.dashboard') : route('login') }}"
                     aria-label="Mon compte"
@@ -109,6 +81,20 @@
         </div>
     </div>
 
+    {{-- Barre de catégories (persistante, masquée sur mobile — repris dans le menu coulissant) --}}
+    <div class="hidden border-b border-line bg-white lg:block">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-8 gap-y-2 px-4 py-3">
+            <a href="{{ route('home') }}" class="text-sm font-medium text-ink hover:text-sage">Accueil</a>
+            <a href="{{ route('boutique.index') }}" class="text-sm font-medium text-ink hover:text-sage">Toute la boutique</a>
+            @foreach ($headerCategories as $category)
+                <a href="{{ route('content.show', $category) }}" class="flex items-center gap-1.5 text-sm font-medium text-ink hover:text-sage">
+                    <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
+                    {{ $category->name }}
+                </a>
+            @endforeach
+        </div>
+    </div>
+
     {{-- Menu mobile --}}
     <div
         x-show="mobileOpen"
@@ -124,8 +110,12 @@
             <a href="{{ route('home') }}" class="text-ink hover:text-sage">Accueil</a>
             <a href="{{ route('boutique.index') }}" class="text-ink hover:text-sage">Boutique</a>
             @foreach ($headerCategories as $category)
-                <a href="{{ route('content.show', $category) }}" class="pl-4 text-sm text-ink-muted hover:text-sage">{{ $category->name }}</a>
+                <a href="{{ route('content.show', $category) }}" class="flex items-center gap-2 pl-4 text-sm text-ink-muted hover:text-sage">
+                    <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
+                    {{ $category->name }}
+                </a>
             @endforeach
+            <a href="{{ route('faq') }}" class="text-ink hover:text-sage">F.A.Q.</a>
             <a href="{{ route('content.show', 'contact') }}" class="text-ink hover:text-sage">Contact</a>
         </nav>
     </div>
