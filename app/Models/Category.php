@@ -59,4 +59,23 @@ class Category extends Model implements HasMedia
     {
         return 'slug';
     }
+
+    /**
+     * Pictogramme de repli (méga-menu, grille catégories) tant qu'aucune
+     * image de couverture n'est importée (T06/T07). Choisi d'après le nom
+     * de la catégorie (déjà saisi par la cliente), jamais une donnée
+     * inventée — juste un repli visuel plus parlant qu'une icône unique.
+     */
+    public function fallbackIcon(): string
+    {
+        $name = mb_strtolower($this->name);
+
+        return match (true) {
+            str_contains($name, 'viennoiserie') => '🥐',
+            str_contains($name, 'pâtisserie'), str_contains($name, 'patisserie') => '🍰',
+            str_contains($name, 'biscuit') => '🍪',
+            str_contains($name, 'pain') => '🥖',
+            default => '🌾',
+        };
+    }
 }

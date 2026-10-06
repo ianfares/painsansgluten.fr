@@ -3,14 +3,14 @@
     // $shopSettings, $footerPages.
 @endphp
 
-<footer class="border-t border-line bg-cream-alt">
-    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
+<footer class="border-t-4 border-sage bg-cream-alt">
+    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div>
             @if ($homepageSettings->logo_path)
                 <img
                     src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepageSettings->logo_path) }}"
                     alt="{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}"
-                    class="mb-3 h-16 w-16 rounded-full object-cover"
+                    class="mb-3 h-16 w-16 rounded-full object-cover shadow-button"
                 >
             @endif
             <p class="font-semibold text-ink">{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}</p>
@@ -21,13 +21,19 @@
                 @endif
             </p>
             @if ($shopSettings->facebook_url)
-                <a href="{{ $shopSettings->facebook_url }}" class="mt-2 inline-block text-sm text-ink hover:text-sage" rel="noopener" target="_blank">Facebook</a>
+                <a
+                    href="{{ $shopSettings->facebook_url }}"
+                    class="mt-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-sage/10 text-sage-dark transition hover:bg-sage hover:text-white"
+                    rel="noopener" target="_blank" aria-label="Facebook"
+                >
+                    <span aria-hidden="true">f</span>
+                </a>
             @endif
         </div>
 
         <div>
-            <p class="font-semibold text-ink">Informations</p>
-            <ul class="mt-2 space-y-1 text-sm text-ink-muted">
+            <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Informations</p>
+            <ul class="mt-3 space-y-2 text-sm text-ink-muted">
                 <li><a href="{{ route('faq') }}" class="hover:text-sage">FAQ</a></li>
                 @foreach ($footerPages as $page)
                     <li>
@@ -40,26 +46,32 @@
         </div>
 
         <div>
-            <p class="font-semibold text-ink">Contact</p>
-            <ul class="mt-2 space-y-1 text-sm text-ink-muted">
+            <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Contact</p>
+            <ul class="mt-3 space-y-2 text-sm text-ink-muted">
                 @if ($shopSettings->contact_email)
-                    <li><a href="mailto:{{ $shopSettings->contact_email }}" class="hover:text-sage">{{ $shopSettings->contact_email }}</a></li>
+                    <li class="flex items-center gap-2">
+                        <span aria-hidden="true">✉️</span>
+                        <a href="mailto:{{ $shopSettings->contact_email }}" class="hover:text-sage">{{ $shopSettings->contact_email }}</a>
+                    </li>
                 @endif
                 @if ($shopSettings->contact_phone)
-                    <li>{{ $shopSettings->contact_phone }}</li>
+                    <li class="flex items-center gap-2">
+                        <span aria-hidden="true">📞</span>
+                        {{ $shopSettings->contact_phone }}
+                    </li>
                 @endif
             </ul>
         </div>
 
         <div>
-            <p class="font-semibold text-ink">Cookies</p>
-            <button type="button" class="mt-2 text-sm text-ink-muted hover:text-sage" data-tarteaucitron-manager>
-                Gérer mes préférences de cookies
+            <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Cookies</p>
+            <button type="button" class="mt-3 rounded-button border border-line bg-white px-3 py-2 text-sm text-ink-muted transition hover:border-sage hover:text-sage" data-tarteaucitron-manager>
+                Gérer mes préférences
             </button>
         </div>
     </div>
 
-    <div class="border-t border-line px-4 py-4 text-center text-xs text-ink-muted">
+    <div class="bg-sage-dark px-4 py-4 text-center text-xs text-white/80">
         &copy; {{ now()->year }} {{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}. Tous droits réservés.
     </div>
 </footer>
