@@ -21,6 +21,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $shipped_at
  * @property Carbon|null $delivered_at
  * @property Carbon|null $cancelled_at
+ * @property Carbon|null $bank_transfer_reminder_sent_at
+ * @property Carbon|null $planned_ship_date
  */
 #[Fillable([
     'number', 'token', 'user_id', 'status', 'payment_method',
@@ -59,6 +61,7 @@ class Order extends Model
             'ga_purchase_sent' => 'boolean',
             'paid_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'bank_transfer_reminder_sent_at' => 'datetime',
         ];
     }
 

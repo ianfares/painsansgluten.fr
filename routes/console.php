@@ -12,3 +12,6 @@ Artisan::command('inspire', function () {
 
 // Purge des paniers invités > 30 jours (PLAN.md §7, T08).
 Schedule::command('cart:purge-old-guests')->daily();
+
+// Relance/annulation des virements en attente (PLAN.md §11, T15).
+Schedule::command('orders:process-bank-transfer-deadlines')->hourly();
