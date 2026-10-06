@@ -53,8 +53,16 @@
                 <a href="{{ \Illuminate\Support\Facades\Route::has('contact') ? route('contact') : '#' }}" class="text-sm font-medium text-ink hover:text-sage">Contact</a>
             </nav>
 
-            <a href="{{ route('home') }}" class="justify-self-center text-lg font-semibold text-ink">
-                {{ $shopSettings->shop_name ?? "Mon Sans Gluten" }}
+            <a href="{{ route('home') }}" class="justify-self-center flex items-center gap-2 text-lg font-semibold text-ink">
+                @if ($homepageSettings->logo_path)
+                    <img
+                        src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepageSettings->logo_path) }}"
+                        alt="{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}"
+                        class="h-12 w-12 rounded-full object-cover"
+                    >
+                @else
+                    {{ $shopSettings->shop_name ?? "Mon Sans Gluten" }}
+                @endif
             </a>
 
             <div class="flex items-center justify-end gap-4">

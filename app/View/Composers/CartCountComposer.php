@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\View\Composers;
 
 use App\Services\Cart\CartService;
+use App\Settings\HomepageSettings;
 use Illuminate\View\View;
 
 /**
- * Nombre d'articles dans le panier, affiché sur le badge du panier de
- * l'en-tête (T08) — présent sur chaque page publique via le layout.
+ * Données partagées par le layout public de base (T08, T17) : nombre
+ * d'articles dans le panier (badge d'en-tête) et favicon (`HomepageSettings`).
  */
 class CartCountComposer
 {
@@ -18,6 +19,9 @@ class CartCountComposer
     public function compose(View $view): void
     {
         $cart = $this->cartService->currentCart();
-        $view->with('cartCount', $this->cartService->totals($cart)['count']);
+        $view->with([
+            'cartCount' => $this->cartService->totals($cart)['count'],
+            'homepageSettings' => app(HomepageSettings::class),
+        ]);
     }
 }

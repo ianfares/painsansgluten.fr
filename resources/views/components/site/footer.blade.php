@@ -6,6 +6,13 @@
 <footer class="border-t border-line bg-cream-alt">
     <div class="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
+            @if ($homepageSettings->logo_path)
+                <img
+                    src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepageSettings->logo_path) }}"
+                    alt="{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}"
+                    class="mb-3 h-16 w-16 rounded-full object-cover"
+                >
+            @endif
             <p class="font-semibold text-ink">{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}</p>
             <p class="mt-2 text-sm text-ink-muted">
                 {{ $shopSettings->address_line1 }}
