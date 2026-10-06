@@ -15,7 +15,7 @@ test('la page d\'accueil affiche l\'en-tête, le pied de page et le nom de la bo
 
     $response->assertOk();
     $response->assertSee('Mon Sans Gluten by Angélique');
-    $response->assertSee('Gérer mes préférences de cookies');
+    $response->assertSee('Gérer mes préférences');
 });
 
 test('le bandeau d\'annonce ne s\'affiche que si activé', function () {

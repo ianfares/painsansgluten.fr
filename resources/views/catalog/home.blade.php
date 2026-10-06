@@ -38,16 +38,13 @@
                         class="h-full w-full rounded-card object-cover shadow-drawer"
                     >
                 @else
-                    <div class="flex h-full w-full flex-col items-center justify-center gap-4 rounded-card bg-gradient-to-br from-white via-cream to-cream-alt shadow-drawer">
-                        @if ($homepage->logo_path)
-                            <img
-                                src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepage->logo_path) }}"
-                                alt=""
-                                class="h-36 w-36 rounded-full object-cover shadow-button sm:h-44 sm:w-44"
-                            >
-                        @else
-                            <span class="text-8xl" aria-hidden="true">🥖</span>
-                        @endif
+                    <div class="flex h-full w-full flex-col items-center justify-center gap-6 rounded-card bg-gradient-to-br from-white via-cream to-cream-alt p-8 shadow-drawer">
+                        <div class="grid grid-cols-2 gap-5">
+                            <span class="flex h-20 w-20 items-center justify-center rounded-full bg-sage/10 text-4xl sm:h-24 sm:w-24">🥖</span>
+                            <span class="flex h-20 w-20 items-center justify-center rounded-full bg-ochre/10 text-4xl sm:h-24 sm:w-24">🥐</span>
+                            <span class="flex h-20 w-20 items-center justify-center rounded-full bg-ochre/10 text-4xl sm:h-24 sm:w-24">🍪</span>
+                            <span class="flex h-20 w-20 items-center justify-center rounded-full bg-sage/10 text-4xl sm:h-24 sm:w-24">🍰</span>
+                        </div>
                         <p class="text-sm font-medium text-ink-muted">Photos de nos créations à venir</p>
                     </div>
                 @endif
@@ -72,12 +69,12 @@
             <h2 class="mb-6 text-xl font-semibold text-ink">Nos catégories</h2>
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 @foreach ($categories as $category)
-                    <a href="{{ route('content.show', $category) }}" class="flex flex-col items-center gap-3 rounded-card border border-line bg-white p-6 text-center hover:border-sage">
-                        <span class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-cream-alt">
+                    <a href="{{ route('content.show', $category) }}" class="group flex flex-col items-center gap-3 rounded-card border border-line bg-white p-6 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-sage hover:shadow-drawer">
+                        <span class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-cream-alt to-sage/15 text-3xl transition group-hover:scale-105">
                             @if ($url = $category->getFirstMediaUrl('cover', 'menu'))
                                 <img src="{{ $url }}" alt="" class="h-full w-full object-cover">
                             @else
-                                <span aria-hidden="true" class="text-2xl">🥖</span>
+                                <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
                             @endif
                         </span>
                         <span class="font-medium text-ink">{{ $category->name }}</span>
