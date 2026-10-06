@@ -6,6 +6,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ? $title.' — ' : '' }}Mon Sans Gluten by Angélique</title>
+    @if (($homepageSettings ?? null)?->favicon_path)
+        <link rel="icon" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepageSettings->favicon_path) }}">
+    @endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
