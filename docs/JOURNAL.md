@@ -480,3 +480,21 @@ DOCUMENTATION : ce journal.
 POINTS À RELIRE PAR UN HUMAIN : piège général à retenir : dans un formulaire Filament à onglets, une erreur de validation *native du navigateur* (step, min, max, pattern) dans un onglet masqué bloque l'envoi en silence.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T23 (dont proxies Cloudflare), T19, T21/T22 ; T14 dès les clés Stripe.
+
+---
+
+## [2026-10-08 23:00] — Claude Opus 5.5 — (correctif) — Panier : tiroir vide après ajout, compteur de l'en-tête figé
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : test manuel du parcours « ajouter au panier » demandé par Ian, fait en local dans un navigateur piloté (visiteur neuf).
+RÉSUMÉ : (1) Alpine.js chargé deux fois (import dans `app.js` + celui de Livewire) : le tiroir s'ouvrait avec « Votre panier est vide » ou ne s'ouvrait plus, et deux paniers pouvaient être créés pour le même visiteur. Import supprimé, dépendance `alpinejs` retirée. (2) Le compteur d'articles de l'en-tête n'était calculé qu'au chargement de la page : `CartWidget` envoie désormais l'événement `cart-count`, le badge (Alpine) se met à jour et se masque à 0. Vérifié dans le navigateur : ajout, +/−, retrait, compteur 2→3→masqué.
+FICHIERS : `resources/js/app.js`, `package.json`, `package-lock.json`, `app/Livewire/CartWidget.php`, `resources/views/components/site/header.blade.php`, `tests/Feature/Cart/CartLivewireTest.php`, `docs/DECISIONS.md`, `docs/JOURNAL.md`.
+ANALYSE D'IMPACT : tout le front utilisant Alpine (tiroirs, menu mobile) : il tourne désormais sur l'instance de Livewire, aucune différence fonctionnelle attendue.
+SÉCURITÉ : sans objet (le compteur n'est qu'un affichage, le serveur reste seul juge du panier).
+PERFORMANCE : un JS de moins à télécharger.
+TESTS : 2 nouveaux tests. Suite complète : 177 passés / 0 échec.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur, `npm audit` : 0 vulnérabilité, build OK.
+DOCUMENTATION : `docs/DECISIONS.md`.
+À RENSEIGNER / QUESTIONS OUVERTES : la grille de frais de port n'est pas renseignée (message affiché dans le panier, normal tant que les tarifs ne sont pas saisis en BO).
+POINTS À RELIRE PAR UN HUMAIN : vérifier le menu mobile et les tiroirs sur la préprod (Alpine désormais fourni par Livewire seul).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : poursuivre le test du parcours (page panier → tunnel de commande), puis T23, T19, T21/T22 ; T14 dès les clés Stripe.

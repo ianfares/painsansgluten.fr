@@ -69,11 +69,14 @@
                 >
                     <span class="relative flex h-10 w-10 items-center justify-center rounded-full bg-sage-dark text-white transition group-hover:bg-sage">
                         <span aria-hidden="true" class="text-base">🛍️</span>
-                        @if (($cartCount ?? 0) > 0)
-                            <span class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-ochre text-[10px] text-white">
-                                {{ $cartCount }}
-                            </span>
-                        @endif
+                        <span
+                            x-data="{ count: {{ (int) ($cartCount ?? 0) }} }"
+                            x-on:cart-count.window="count = $event.detail.count"
+                            x-show="count > 0"
+                            x-text="count"
+                            @if (($cartCount ?? 0) === 0) style="display: none" @endif
+                            class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-ochre text-[10px] text-white"
+                        >{{ $cartCount ?? 0 }}</span>
                     </span>
                     <span class="hidden text-[10px] font-semibold uppercase tracking-wide text-ink-muted sm:block">Mon panier</span>
                 </button>

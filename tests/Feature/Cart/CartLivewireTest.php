@@ -45,3 +45,15 @@ test('le tiroir panier affiche les articles et leur total', function () {
         ->assertSee($product->name)
         ->assertSee('10,00'); // 2 x 5,00 €
 });
+
+test('le tiroir panier envoie le nombre d\'articles au compteur de l\'en-tête', function () {
+    $product = Product::factory()->create(['price_ttc' => 500]);
+    app(CartService::class)->add($product, 3);
+
+    Livewire::test(CartWidget::class)
+        ->assertDispatched('cart-count', count: 3);
+});
+
+test('Alpine n\'est pas importé une seconde fois (Livewire le fournit déjà)', function () {
+    expect(file_get_contents(resource_path('js/app.js')))->not->toContain('import Alpine');
+});
