@@ -516,3 +516,21 @@ DOCUMENTATION : `docs/DECISIONS.md` (T14).
 POINTS À RELIRE PAR UN HUMAIN : parcours complet à faire sur la préprod une fois le secret posé (carte test 4242 4242 4242 4242) : commande payée, facture générée une seule fois, remboursement depuis le BO.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : recette T14 sur la préprod dès le `whsec_…`, puis T19 (emails Brevo : accès disponibles chez Ian, configuration DNS en cours).
+
+---
+
+## [2026-10-09 00:30] — Claude Opus 5.5 — (hors plan) — Brevo branché en SMTP (local + préprod)
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : Ian a configuré les DNS Brevo (vérifiés depuis 1.1.1.1 et 8.8.8.8 : `brevo-code`, DKIM `brevo1`/`brevo2`, DMARC `p=none` ; SPF limité à OVH, non bloquant). **Reprise prévue le 2026-10-09** : Ian fournit le `whsec_…` du webhook Stripe (mode test) → le poser dans `STRIPE_WEBHOOK_SECRET` du `.env` préprod (puis `php artisan config:cache`), et faire avec lui la commande de test complète (carte 4242 4242 4242 4242). Ensuite : T19 (emails clients), non commencée.
+RÉSUMÉ : envoi des emails par le relais SMTP Brevo (mailer `smtp` natif de Laravel, aucune dépendance ajoutée) : `MAIL_MAILER=smtp`, `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, identifiant et clé SMTP fournis par Ian, expéditeur `contact@painsansgluten.fr` (proposé, non contredit par Ian). Authentification Brevo vérifiée en local et en préprod ; email de test envoyé depuis la préprod et **reçu par Ian**. Les tests restent sur le mailer `array` (phpunit.xml) : aucun envoi réel.
+FICHIERS : dépôt : `docs/JOURNAL.md`. Hors dépôt : `.env` local et `.env` préprod.
+ANALYSE D'IMPACT : tous les emails existants (virement, alerte d'anomalie Stripe) partent désormais réellement, via la file traitée par cron chaque minute. ⚠️ En local aussi : une commande de test avec une adresse inventée part chez Brevo.
+SÉCURITÉ : clés hors Git. La clé SMTP et la clé secrète Stripe de test ont transité dans la conversation : à régénérer pour la production (Ian les collera lui-même dans le `.env` de prod).
+PERFORMANCE : sans objet (envois en queue).
+TESTS : pas de code modifié ; vérification réelle (authentification SMTP + email reçu).
+QUALITÉ : sans objet.
+DOCUMENTATION : ce journal. `docs/DECISIONS.md` : choix SMTP plutôt qu'API Brevo (pas de dépendance) à consigner avec T19.
+À RENSEIGNER / QUESTIONS OUVERTES : `whsec_…` Stripe (demain) ; confirmation de l'adresse d'expédition ; `admin_notification_email` et grille de frais de port à saisir en BO avant la commande de test.
+POINTS À RELIRE PAR UN HUMAIN : aucun.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook + commande test sur la préprod), puis T19.
