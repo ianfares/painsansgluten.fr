@@ -273,3 +273,7 @@
 - **`npm audit` : 2 failles critiques** (GHSA-pqg4-j6r4-53mv, `shell-quote` 1.8.4–1.10.0, injection de commande via `quote()`), tirées par `concurrently` 10.0.5 (dev uniquement, dernière version, qui impose exactement `shell-quote@1.9.0`). `npm audit fix --force` aurait **rétrogradé** `concurrently` sous 9.2.3 (changement cassant) : écarté. Retenu : `overrides` npm `"shell-quote": "^1.11.0"` (1.11.0 = première version corrigée ; installée : 1.12.0). Résultat : `npm audit` → 0 vulnérabilité, `npm run build` OK, `composer audit` → aucune faille. À retirer quand `concurrently` publiera une version qui dépend d'un `shell-quote` corrigé.
 - **`config/app.php`** : valeur par défaut de `timezone` passée de `UTC` à `Europe/Paris` (CLAUDE.md §3.7), pour ne plus dépendre de la seule présence de `APP_TIMEZONE` dans `.env` sur un serveur.
 - **Résolveur `/{slug}`** (`routes/web.php`) : la lookahead d'exclusion `(?!faq|commande|…)` excluait tout slug *commençant* par un mot réservé (`faq-livraison`, `commandes-speciales` → 404). Ancrée sur le segment entier : `(?!(?:…)(?:/|$))`. Test ajouté dans `ContentPagesTest`.
+
+## 2026-10-08 — Suppression de `concurrently` (remplace l'`overrides` npm ci-dessus)
+
+- Vérification de simplicité demandée par Ian : `concurrently` n'est utilisé que comme solution de secours par `php artisan dev`, qui utilise en priorité `@laravel/multiplex` (déjà installé). Dépendance retirée de `package.json`, avec l'`overrides` `shell-quote` devenu inutile. `npm audit` : 0 vulnérabilité, `npm run build` OK, `php artisan dev` démarre.
