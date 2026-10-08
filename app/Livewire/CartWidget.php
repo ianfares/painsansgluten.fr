@@ -51,9 +51,14 @@ class CartWidget extends Component
             $this->removedNotice = true;
         }
 
+        $totals = $cartService->totals($cart);
+
+        // Met à jour le compteur de l'en-tête (rendu serveur au chargement).
+        $this->dispatch('cart-count', count: $totals['count']);
+
         return view('livewire.cart-widget', [
             'items' => $items,
-            'totals' => $cartService->totals($cart),
+            'totals' => $totals,
         ]);
     }
 

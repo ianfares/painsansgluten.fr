@@ -290,3 +290,7 @@
   Liste d'exclusion : `/.git/ /node_modules/ /.env /.remember/ /public/.htaccess /public/hot /public/storage /storage/logs/* /storage/framework/cache/* /storage/framework/sessions/* /storage/framework/views/* /storage/framework/testing/ /storage/framework/phpstan/ /storage/app/purifier/ /bootstrap/cache/*.php /tests/ /docs/` (une par ligne).
 - **Base** : importée une fois depuis la base locale (données de démonstration, sans sessions ni cache). Ne **pas** réimporter ensuite : la préprod a désormais ses propres données, seules les migrations s'appliquent.
 - **Pas encore en place** (nécessite root, non bloquant pour travailler) : `cron` (tâches planifiées : relances virement, purge des paniers, file d'emails) et HTTPS (certbot).
+
+## 2026-10-08 — Alpine.js : celui de Livewire uniquement
+
+- `resources/js/app.js` importait et démarrait `alpinejs` alors que `@livewireScripts` embarque déjà Alpine : deux instances tournaient (avertissement console), ce qui cassait le tiroir panier (ouverture et rafraîchissement perdus, panier vide affiché après un ajout). Import supprimé et dépendance npm `alpinejs` retirée : une seule source, celle de Livewire.
