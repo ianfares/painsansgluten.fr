@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Compte;
 
 use App\Http\Controllers\Controller;
+use App\Mail\Admin\AccountDeletionRequestedMail;
 use App\Models\Invoice;
+use App\Services\Mail\AdminMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,6 +85,8 @@ class AccountController extends Controller
         $user = Auth::user();
         $user->deletion_requested_at = now();
         $user->save();
+
+        AdminMailer::queue(new AccountDeletionRequestedMail($user));
 
         return back()->with('status', 'Votre demande de suppression de compte a été enregistrée. Elle sera traitée par notre équipe.');
     }

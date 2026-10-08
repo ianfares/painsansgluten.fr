@@ -11,15 +11,14 @@ use App\Mail\StripePaymentAnomalyMail;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\StripeEvent;
+use App\Services\Mail\AdminMailer;
 use App\Services\Orders\OrderStateMachine;
 use App\Services\Shipping\ShippingDateCalculator;
-use App\Settings\ShopSettings;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Stripe\Charge;
 use Stripe\Checkout\Session;
 use Stripe\Event;
@@ -65,10 +64,7 @@ class HandleStripeWebhookAction
         }
 
         if ($anomaly instanceof Order) {
-            $to = app(ShopSettings::class)->admin_notification_email;
-            if ($to) {
-                Mail::to($to)->queue(new StripePaymentAnomalyMail($anomaly));
-            }
+            AdminMailer::queue(new StripePaymentAnomalyMail($anomaly));
         }
     }
 

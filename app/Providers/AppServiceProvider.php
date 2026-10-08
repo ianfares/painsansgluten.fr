@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Events\Orders\OrderPaid;
-use App\Events\Orders\OrderRefunded;
-use App\Listeners\Orders\GenerateCreditNoteOnOrderRefunded;
-use App\Listeners\Orders\GenerateInvoiceOnOrderPaid;
 use App\Models\User;
 use App\Services\Cart\CartService;
+use App\Settings\ShopSettings;
 use App\View\Composers\CartCountComposer;
 use App\View\Composers\FooterComposer;
 use App\View\Composers\HeaderComposer;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Stripe\StripeClient;
+use Symfony\Component\Mime\Address;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -45,8 +47,30 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        // Facturation (PLAN.md §12, T16).
-        Event::listen(OrderPaid::class, GenerateInvoiceOnOrderPaid::class);
-        Event::listen(OrderRefunded::class, GenerateCreditNoteOnOrderRefunded::class);
+        // Les écouteurs de app/Listeners (factures, avoirs, emails) sont
+        // détectés automatiquement par Laravel : ne pas les redéclarer ici,
+        // sinon ils s'exécutent deux fois (`php artisan event:list`).
+
+        VerifyEmail::toMailUsing(fn (object $notifiable, string $url) => (new MailMessage)
+            ->subject('Bienvenue ! Confirmez votre adresse email')
+            ->markdown('emails.auth.verify-email', ['url' => $url, 'name' => $notifiable->first_name ?? null]));
+
+        ResetPassword::toMailUsing(fn (object $notifiable, string $token) => (new MailMessage)
+            ->subject('Réinitialisation de votre mot de passe')
+            ->markdown('emails.auth.reset-password', [
+                'url' => url(route('password.reset', ['token' => $token, 'email' => $notifiable->getEmailForPasswordReset()], false)),
+                'minutes' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire'),
+            ]));
+
+        // Expéditeur et adresse de réponse paramétrables en BO (PLAN.md §15).
+        Event::listen(function (MessageSending $event): void {
+            $shop = app(ShopSettings::class);
+            if ($shop->sender_email) {
+                $event->message->from(new Address($shop->sender_email, (string) config('mail.from.name')));
+            }
+            if ($shop->reply_to_email && $event->message->getReplyTo() === []) {
+                $event->message->replyTo($shop->reply_to_email);
+            }
+        });
     }
 }

@@ -305,3 +305,16 @@
 - **Emails client au paiement** : non inclus, prévus en T19 (Brevo).
 - **File d'attente sans superviseur** : `queue:work --stop-when-empty` lancé chaque minute par le planificateur (une seule ligne cron `schedule:run` sur le serveur), plus simple que supervisor sur un seul serveur.
 - **Préprod** : la protection par mot de passe exempte uniquement `POST /webhooks/stripe` (dans le `public/.htaccess` du serveur), la signature Stripe faisant office d'authentification. Ligne utilisée, dans un `<RequireAny>` avec `Require valid-user` : `Require expr %{THE_REQUEST} =~ m#^POST /webhooks/stripe[ ?]#` (`SetEnvIf` et `%{REQUEST_URI}` ne marchent pas en `.htaccess` : trop tardif / réécrit en `index.php` par Laravel). Cron du serveur (utilisateur `painsansgluten`) : `* * * * * cd /var/www/painsansgluten && php artisan schedule:run >> /dev/null 2>&1`.
+
+## 2026-10-09 — T19 — Emails transactionnels (Brevo)
+
+- **Transport** : relais SMTP Brevo via le mailer `smtp` natif de Laravel, plutôt que le transport API (`symfony/brevo-mailer`) : zéro dépendance ajoutée, même résultat pour des emails transactionnels.
+- **Emails client avec document** (confirmation carte / virement reçu avec la facture, remboursement avec l'avoir) envoyés **depuis la tâche qui émet le document** (`GenerateInvoiceOnOrderPaid`, `GenerateCreditNoteOnOrderRefunded`) : le lien de téléchargement (URL signée 30 jours, valable aussi pour un invité) existe forcément. `ValidateBankTransferPaymentAction` n'envoie donc plus l'email lui-même.
+- **Emails sans document** (expédition, alerte admin « commande payée ») : `SendOrderStatusEmails`, exécuté **après validation de la transaction** (`ShouldHandleEventsAfterCommit`) : jamais d'email pour un changement de statut annulé.
+- **Bug corrigé** : les écouteurs de `app/Listeners` étaient à la fois détectés automatiquement par Laravel et déclarés à la main dans `AppServiceProvider` → exécutés deux fois (factures protégées par leur garde anti-doublon, mais emails admin en double). Déclarations manuelles supprimées ; test de non-régression sur le nombre d'écouteurs.
+- **Notifications admin** : `AdminMailer` envoie à `admin_notification_email` (BO) ; rien n'est envoyé tant qu'elle est vide.
+- **Expéditeur / réponse** : `sender_email` et `reply_to_email` (BO) appliqués à chaque envoi (écouteur `MessageSending`), sinon `MAIL_FROM_ADDRESS`. ⚠️ L'expéditeur doit être sur un domaine validé dans Brevo (painsansgluten.fr), sinon Brevo refuse l'envoi.
+- **Emails de compte** (vérification à l'inscription, mot de passe oublié) : textes français personnalisés (`VerifyEmail::toMailUsing`, `ResetPassword::toMailUsing`) au lieu des textes anglais par défaut.
+- **Charte** : seules les vues mail modifiées sont publiées (`resources/views/vendor/mail/html/header`, `message`, `themes/default.css`, `text/message`) : logo (paramètre Apparence), couleurs sauge/crème, pied de page en français.
+- **Relecture des textes** : `php artisan emails:samples <adresse>` envoie un exemplaire des 13 emails avec une fausse commande, dans une transaction annulée (rien ne reste en base). Les textes sont dans `resources/views/emails/` (un fichier par email).
+- **Préprod** : `GET /storage/branding/…` exempté de la protection par mot de passe pour que le logo s'affiche dans les emails (fichier public, sans risque).

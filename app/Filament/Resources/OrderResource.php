@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Actions\Orders\RefundOrderAction;
+use App\Actions\Orders\ResendOrderConfirmationAction;
 use App\Actions\Orders\ShipOrderAction;
 use App\Actions\Orders\ValidateBankTransferPaymentAction;
 use App\Enums\OrderStatus;
@@ -120,6 +121,16 @@ class OrderResource extends Resource
                                 ->danger()
                                 ->send();
                         }
+                    }),
+                Tables\Actions\Action::make('resendConfirmation')
+                    ->label('Renvoyer l\'email de confirmation')
+                    ->icon('heroicon-o-envelope')
+                    ->visible(fn (Order $record): bool => ResendOrderConfirmationAction::isAvailableFor($record))
+                    ->requiresConfirmation()
+                    ->modalDescription(fn (Order $record): string => "L'email sera renvoyé à {$record->email}.")
+                    ->action(function (Order $record, ResendOrderConfirmationAction $resend): void {
+                        $resend->execute($record);
+                        Notification::make()->title('Email de confirmation renvoyé.')->success()->send();
                     }),
                 Tables\Actions\Action::make('prepare')
                     ->label('Marquer en préparation')

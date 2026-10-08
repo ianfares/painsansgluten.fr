@@ -13,11 +13,8 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-/**
- * Envoyée à la cliente quand son virement a été vérifié et validé en BO
- * (PLAN.md §11, T15) : confirmation + nouvelle date d'expédition.
- */
-class BankTransferPaidMail extends Mailable
+/** Paiement carte confirmé par Stripe (PLAN.md §15). */
+class OrderConfirmedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -25,11 +22,11 @@ class BankTransferPaidMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: "Virement reçu — votre commande {$this->order->number} va être préparée");
+        return new Envelope(subject: "Commande {$this->order->number} confirmée — merci !");
     }
 
     public function content(): Content
     {
-        return new Content(markdown: 'emails.bank-transfer-paid', with: ['invoiceUrl' => $this->invoice ? InvoiceLink::for($this->invoice) : null]);
+        return new Content(markdown: 'emails.order-confirmed', with: ['invoiceUrl' => $this->invoice ? InvoiceLink::for($this->invoice) : null]);
     }
 }
