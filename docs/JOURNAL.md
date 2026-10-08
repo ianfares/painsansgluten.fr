@@ -426,3 +426,21 @@ DOCUMENTATION : `docs/DECISIONS.md` (entrée 2026-10-08).
 POINTS À RELIRE PAR UN HUMAIN : l'`overrides` npm est à retirer quand `concurrently` publiera une version qui dépend d'un `shell-quote` corrigé.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : mise en place de la préprod sur le VPS (demandée par Ian), puis T23 (dont proxies Cloudflare), T19, T21/T22 ; T14 dès les clés Stripe.
+
+---
+
+## [2026-10-08 12:00] — Claude Opus 5.5 — (hors plan) — Revue de simplicité du projet + suppression de `concurrently`
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : Ian demande que le projet reste **le plus simple possible** (boutique en lancement). Avant de proposer une solution (code, infra, déploiement), choisir le minimum qui marche. Revue complète faite le 2026-10-08 : pas de sur-architecture trouvée dans le code (voir RÉSUMÉ). Déploiement préprod retenu : envoi des fichiers (dont `vendor/` et `public/build/`) par rsync via l'alias SSH `painsansgluten`, dans `/var/www/painsansgluten` (son `public/` est déjà le dossier servi par Apache), import de la BDD, `.env` serveur. Pas de clé GitHub sur le serveur, pas de changement de config Apache. En attente : mot de passe MariaDB préprod (Ian).
+RÉSUMÉ : 136 fichiers / ~6 600 lignes dans `app/`, toutes les dépendances Composer sont celles de la stack imposée (+ Fortify pour l'auth, `mews/purifier` pour nettoyer le HTML des pages). Aucune interface/abstraction inutile. Seul superflu trouvé et supprimé : `concurrently` (npm, dev), qui remplace aussi le correctif `overrides` de l'entrée précédente. Les événements `OrderShipped`/`OrderCancelled` n'ont pas encore d'écouteur : ils sont conservés car ils servent de point d'accroche aux emails de T19.
+FICHIERS : `package.json`, `package-lock.json`, `docs/DECISIONS.md`, `docs/JOURNAL.md`.
+ANALYSE D'IMPACT : dépendance de dev uniquement, aucun impact sur le site.
+SÉCURITÉ : la faille `shell-quote` disparaît avec la dépendance.
+PERFORMANCE : sans objet.
+TESTS : suite complète 174 passés / 0 échec ; `php artisan dev` démarre.
+QUALITÉ : `npm audit` 0 vulnérabilité, `npm run build` OK, `composer audit` inchangé (aucune faille).
+DOCUMENTATION : `docs/DECISIONS.md`.
+À RENSEIGNER / QUESTIONS OUVERTES : mot de passe MariaDB de la préprod.
+POINTS À RELIRE PAR UN HUMAIN : aucun.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : mise en ligne préprod (version simple ci-dessus) dès réception du mot de passe MariaDB.
