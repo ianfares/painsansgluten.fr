@@ -552,3 +552,21 @@ DOCUMENTATION : `docs/DECISIONS.md` (T19).
 POINTS À RELIRE PAR UN HUMAIN : rendu des emails dans les principales messageries (Gmail, Outlook, mobile) à partir des exemplaires reçus.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook + commande test), corrections de textes d'emails au retour de la cliente, puis T21 (SEO) / T22 (analytics) / T23 (sécurité, dont proxies Cloudflare).
+
+---
+
+## [2026-10-09 02:00] — Claude Opus 5.5 — (hors plan) — Reprise des 8 fiches produits Shopify + document client
+STATUT : terminée, **avec un incident** (voir SÉCURITÉ / POINTS À RELIRE).
+CONTEXTE POUR LA PROCHAINE IA : à la demande d'Ian, les 8 produits publiés sur l'ancien site Shopify (painsansgluten.fr, données publiques `/products/<handle>.json` + page produit) ont été importés **sur la préprod uniquement**, en brouillon (non publiés, non disponibles, prix 0, TVA vide). Script d'import ponctuel, non versionné (exécuté puis supprimé du serveur). La cliente complète prix, TVA, poids, puis publie. ⚠️ La préprod contient désormais de vraies saisies : **toujours sauvegarder la base avant d'y écrire** (`storage/app/backups/` sur le serveur).
+RÉSUMÉ : récupérés : nom, description, photos (16, converties par la médiathèque), ingrédients, allergènes, valeurs nutritionnelles, conditionnement, conseils, conservation, référence, titre et description SEO. Catégories : 4 pains, 4 pâtisseries (collections Shopify). Allergènes relus un par un à la main : le Miel'lleux est « sans lactose et sans œuf » (détection automatique corrigée) ; pour l'Insolent (amande) et le Zest'moelleux (beurre, amande), des allergènes présents dans les ingrédients mais absents de la mention d'origine ont été **ajoutés par prudence** et signalés. Anomalies de la source signalées, jamais corrigées : poids « XXX g », prix 0 €, « 22, g », « 4, g », texte « brownie » sur le cookie, nutrition identique Insolent/Brownheur, sel 9,72 g du Bunheur. Document client PDF : `docs/client/Mon-Sans-Gluten-parcours-commande-et-fiches-produits.pdf` (parcours de commande + 13 emails + à-faire par fiche) ; version en ligne du parcours : https://claude.ai/artifact/V6L5Jos4VppbpNvc3sgoBW.
+FICHIERS : dépôt : `docs/client/…pdf`, `docs/JOURNAL.md`. Préprod : tables `products`, `media`, `storage/app/public/<id>/`.
+ANALYSE D'IMPACT : catalogue de la préprod uniquement ; aucun code modifié.
+SÉCURITÉ : descriptions passées par le nettoyeur HTML du modèle (Purifier). **Incident** : `updateOrCreate` sur le slug a écrasé 2 produits **saisis à la main par Ian** sur la préprod (ids 1 et 2, slugs « Le-pain-nordique-sans-gluten » / « La-cabosse-sans-gluten », identiques à la casse près, MariaDB comparant sans casse) : prix, TVA, poids, statut publié/disponible, textes, et **5 photos supprimées** (médias 1 à 5). Pas de sauvegarde antérieure : non récupérable. Sauvegarde complète faite juste après : `storage/app/backups/preprod-20261008-2234.sql.gz`.
+PERFORMANCE : sans objet.
+TESTS : pas de code ; vérification des 8 fiches importées (catégorie, allergènes, nutrition, photos).
+QUALITÉ : sans objet.
+DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : prix, TVA, poids et publication des 8 fiches (cliente) ; corrections des textes sources ; Ian doit ressaisir ce qu'il avait mis sur le Pain Nordique et la Cabosse (prix, TVA, poids, photos s'il en avait d'autres).
+POINTS À RELIRE PAR UN HUMAIN : l'incident ci-dessus. Proposition : sauvegarde automatique quotidienne de la base préprod par cron (non faite, à valider par Ian).
+AJOUTÉ AU BACKLOG : rattachement des commandes invité au compte après vérification de l'email (prévu par CLAUDE.md §4, constaté non implémenté le 2026-10-08, à planifier — pas du hors-V1, c'est un manque).
+PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des textes d'emails, rattachement des commandes invité.
