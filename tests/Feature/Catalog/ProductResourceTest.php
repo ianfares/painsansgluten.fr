@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Filament\Resources\ProductResource\Pages\CreateProduct;
 use App\Filament\Resources\ProductResource\Pages\EditProduct;
+use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Order;
@@ -148,4 +149,11 @@ test('les valeurs nutritionnelles acceptent deux décimales (ex. sel 0,34 g)', f
         ->assertHasNoFormErrors();
 
     expect((string) $product->fresh()->nutrition['salt'])->toBe('0.34');
+});
+
+test('la liste des produits affiche d\'abord les fiches modifiées en dernier', function () {
+    $old = Product::factory()->create(['category_id' => $this->category->id, 'updated_at' => now()->subDays(3)]);
+    $recent = Product::factory()->create(['category_id' => $this->category->id, 'updated_at' => now()]);
+
+    Livewire::test(ListProducts::class)->assertCanSeeTableRecords([$recent, $old], inOrder: true);
 });

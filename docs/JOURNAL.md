@@ -570,3 +570,20 @@ DOCUMENTATION : ce journal.
 POINTS À RELIRE PAR UN HUMAIN : l'incident ci-dessus. Proposition : sauvegarde automatique quotidienne de la base préprod par cron (non faite, à valider par Ian).
 AJOUTÉ AU BACKLOG : rattachement des commandes invité au compte après vérification de l'email (prévu par CLAUDE.md §4, constaté non implémenté le 2026-10-08, à planifier — pas du hors-V1, c'est un manque).
 PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des textes d'emails, rattachement des commandes invité.
+
+---
+
+## [2026-10-09 02:30] — Claude Opus 5.5 — (correctif) — Liste des produits du BO triée par dernière modification
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : Ian ne voyait pas les 8 fiches importées dans l'admin : la liste n'avait pas de tri par défaut (ordre des ids) et 10 lignes par page, les fiches importées étaient en page 3. Cloudflare a été vérifié : la préprod passe désormais par Cloudflare (DNS proxifié), mais les pages admin ne sont pas mises en cache (`cf-cache-status: DYNAMIC`).
+RÉSUMÉ : tri par défaut `updated_at` décroissant + colonne « Modifié le » (triable).
+FICHIERS : `app/Filament/Resources/ProductResource.php`, `tests/Feature/Catalog/ProductResourceTest.php`, `docs/JOURNAL.md`.
+ANALYSE D'IMPACT : affichage de la liste BO uniquement.
+SÉCURITÉ : sans objet. PERFORMANCE : tri sur une table de quelques dizaines de lignes, sans objet.
+TESTS : 1 nouveau test (ordre d'affichage). Suite complète au vert.
+QUALITÉ : pint OK, phpstan 0 erreur.
+DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : Cloudflare devant la préprod → T23 (proxies de confiance) devient utile ; vérifier que le WAF/anti-bot Cloudflare laisse passer `POST /webhooks/stripe` (CLAUDE.md §4).
+POINTS À RELIRE PAR UN HUMAIN : aucun.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : fin de T14, puis T23 (proxies Cloudflare).
