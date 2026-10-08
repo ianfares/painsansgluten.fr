@@ -15,3 +15,7 @@ Schedule::command('cart:purge-old-guests')->daily();
 
 // Relance/annulation des virements en attente (PLAN.md §11, T15).
 Schedule::command('orders:process-bank-transfer-deadlines')->hourly();
+
+// File d'attente (factures, emails) traitée par le cron, sans superviseur :
+// le plus simple sur un seul serveur (voir docs/DECISIONS.md, T14).
+Schedule::command('queue:work --stop-when-empty --max-time=55')->everyMinute()->withoutOverlapping();

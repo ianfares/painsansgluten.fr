@@ -37,4 +37,12 @@ return [
         ],
     ],
 
+    // Stripe Checkout hébergé (T14, PLAN.md §10). Clés de test en local/préprod.
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'session_expires_minutes' => 30,
+    ],
+
 ];
