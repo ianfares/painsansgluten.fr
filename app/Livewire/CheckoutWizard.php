@@ -6,8 +6,10 @@ namespace App\Livewire;
 
 use App\Actions\Orders\CreateOrderAction;
 use App\Enums\PaymentMethod;
+use App\Mail\Admin\NewBankTransferOrderMail;
 use App\Mail\BankTransferInstructionsMail;
 use App\Services\Cart\CartService;
+use App\Services\Mail\AdminMailer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -188,6 +190,7 @@ class CheckoutWizard extends Component
         }
 
         Mail::to($order->email)->queue(new BankTransferInstructionsMail($order));
+        AdminMailer::queue(new NewBankTransferOrderMail($order));
 
         $this->redirect(route('checkout.confirmation', $order->token), navigate: false);
     }

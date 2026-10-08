@@ -9,7 +9,11 @@ Nous avons bien reçu votre virement pour la commande **{{ $order->number }}**. 
 📦 Expédition prévue le **{{ $order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM') }}**.
 @endif
 
-Votre facture est disponible dans votre espace client.
+@if ($invoiceUrl)
+@component('mail::button', ['url' => $invoiceUrl])
+Télécharger ma facture
+@endcomponent
+@endif
 
 Merci de votre confiance,<br>
 {{ config('app.name') }}

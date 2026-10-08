@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Listeners\Orders;
 
 use App\Actions\Invoicing\IssueInvoiceAction;
+use App\Enums\PaymentMethod;
 use App\Events\Orders\OrderPaid;
+use App\Mail\BankTransferPaidMail;
+use App\Mail\OrderConfirmedMail;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Génère la facture à chaque commande payée (PLAN.md §12), en queue (le
@@ -22,6 +26,13 @@ class GenerateInvoiceOnOrderPaid implements ShouldQueue
             return;
         }
 
-        app(IssueInvoiceAction::class)->execute($event->order);
+        $invoice = app(IssueInvoiceAction::class)->execute($event->order);
+
+        // Email de confirmation client envoyé ici, une fois la facture émise,
+        // pour qu'il contienne son lien (PLAN.md §15, T19).
+        $mail = $event->order->payment_method === PaymentMethod::Stripe
+            ? new OrderConfirmedMail($event->order, $invoice)
+            : new BankTransferPaidMail($event->order, $invoice);
+        Mail::to($event->order->email)->queue($mail);
     }
 }

@@ -7,14 +7,12 @@ namespace App\Actions\Orders;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Exceptions\Orders\BankTransferValidationNotAllowed;
-use App\Mail\BankTransferPaidMail;
 use App\Models\Order;
 use App\Services\Orders\OrderStateMachine;
 use App\Services\Shipping\ShippingDateCalculator;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * Action BO « Valider le virement reçu » (PLAN.md §11, T15) : l'admin a
@@ -58,8 +56,6 @@ class ValidateBankTransferPaymentAction
                 comment: 'Virement reçu et vérifié manuellement.',
             );
         });
-
-        Mail::to($order->email)->queue(new BankTransferPaidMail($order));
 
         return $order;
     }

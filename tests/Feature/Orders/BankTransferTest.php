@@ -6,10 +6,10 @@ use App\Actions\Orders\ValidateBankTransferPaymentAction;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Exceptions\Orders\BankTransferValidationNotAllowed;
+use App\Listeners\Orders\GenerateInvoiceOnOrderPaid;
 use App\Livewire\CheckoutWizard;
 use App\Mail\BankTransferCancelledMail;
 use App\Mail\BankTransferInstructionsMail;
-use App\Mail\BankTransferPaidMail;
 use App\Mail\BankTransferReminderMail;
 use App\Models\Order;
 use App\Models\Product;
@@ -17,6 +17,7 @@ use App\Models\ShippingRate;
 use App\Services\Cart\CartService;
 use App\Settings\BankTransferSettings;
 use App\Settings\ShippingSettings;
+use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -87,7 +88,9 @@ test('valider un virement passe la commande à payée, recalcule la date d\'exp�
         ->and($updated->paid_at)->not->toBeNull()
         ->and($updated->planned_ship_date->toDateString())->not->toBe(now()->subMonth()->toDateString());
 
-    Mail::assertQueued(BankTransferPaidMail::class, fn (BankTransferPaidMail $mail): bool => $mail->order->is($updated));
+    // L'email « virement reçu » part de la tâche de facturation, une fois la
+    // facture émise (lien inclus) : testé dans tests/Feature/Emails (T19).
+    Queue::assertPushed(CallQueuedListener::class, fn (CallQueuedListener $job): bool => $job->class === GenerateInvoiceOnOrderPaid::class);
 });
 
 test('impossible de valider un virement sur une commande déjà payée', function () {
