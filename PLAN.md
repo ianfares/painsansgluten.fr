@@ -59,7 +59,7 @@ Catalogue → Fiche produit → Panier → Coordonnées → Choix relais Chronop
 
 | Sujet | Décision |
 |---|---|
-| Stack | Laravel + Filament + MariaDB (Ian = exploitation PHP-FPM/Nginx) |
+| Stack | Laravel + Filament + MariaDB (Ian = exploitation PHP-FPM/Apache) |
 | Hébergement | VPS Linux Infomaniak Cloud, sans Plesk. Infra, DNS, domaine, bascule : **gérés par Ian**, hors périmètre Claude Code |
 | CDN / WAF | Cloudflare devant le site |
 | Code | Dépôt Git privé (compte perso de Ian) — URL `À RENSEIGNER` |
@@ -131,7 +131,7 @@ Catalogue → Fiche produit → Panier → Coordonnées → Choix relais Chronop
 ## 4. Architecture et stack
 
 ```
-Client ─► Cloudflare ─► Nginx ─► PHP-FPM (Laravel)
+Client ─► Cloudflare ─► Apache ─► PHP-FPM (Laravel)
                                    ├── Front-office (Blade + Livewire)
                                    ├── Espace client (/mon-compte)
                                    ├── Back-office (Filament, /admin)
@@ -148,7 +148,7 @@ Client ─► Cloudflare ─► Nginx ─► PHP-FPM (Laravel)
 - Stockage fichiers : disque local `storage/app` (images publiques via `public`, factures PDF en **privé**, servies via route authentifiée ou URL signée).
 - Tâches planifiées (scheduler Laravel) : expiration/relance des virements, nettoyage paniers, génération sitemap.
 
-**Prérequis serveur** (mis en place par Ian) : Nginx, PHP-FPM 8.3+ (extensions : bcmath, intl, gd ou imagick, mbstring, pdo_mysql, zip, exif), MariaDB, Composer, Node (build des assets uniquement), Supervisor (`queue:work`), cron `* * * * * php artisan schedule:run`.
+**Prérequis serveur** (mis en place par Ian) : Apache 2.4 (modules `rewrite`, `proxy_fcgi`, `setenvif`, `ssl`, `headers`) + PHP-FPM 8.3+ (extensions : bcmath, intl, gd ou imagick, mbstring, pdo_mysql, zip, exif), MariaDB, Composer, Node (build des assets uniquement), Supervisor (`queue:work`), cron `* * * * * php artisan schedule:run`. Un pool PHP-FPM dédié par site (utilisateur système propre, socket Unix propre) sur les serveurs mutualisant plusieurs sites — voir `docs/DECISIONS.md`.
 
 ---
 

@@ -236,4 +236,34 @@
 
 ## 2026-10-05 — Rangement des fichiers non applicatifs
 
-- `audit-painsansgluten.html` (audit du site Shopify existant) et `documents/` (archive brute reçue de la cliente) déplacés dans `docs/reference/` pour ne pas mélanger matériel de référence et structure applicative Laravel (qui doit rester à la racine du dépôt — conventions `artisan`/`public/index.php`/déploiement Nginx déjà décrites dans `CHECKLIST-PROD.md` et la tâche T25).
+- `audit-painsansgluten.html` (audit du site Shopify existant) et `documents/` (archive brute reçue de la cliente) déplacés dans `docs/reference/` pour ne pas mélanger matériel de référence et structure applicative Laravel (qui doit rester à la racine du dépôt — conventions `artisan`/`public/index.php`/déploiement Apache déjà décrites dans `CHECKLIST-PROD.md` et la tâche T25).
+
+## 2026-10-07 — Infra VPS preprod — Apache au lieu de Nginx, PHP 8.4, pool FPM dédié par site
+
+- **Apache 2.4 retenu à la place de Nginx** pour le serveur web du VPS (Ian, hors périmètre Claude Code — `PLAN.md` §Hébergement) : besoin explicite de `.htaccess` pour la protection d'accès de la préprod (auth basique par répertoire, modifiable sans toucher la config serveur). Nginx ne supporte pas `.htaccess`. PHP reste en **PHP-FPM** (pas `mod_php`) via le module Apache `proxy_fcgi`, conformément à l'exigence `PLAN.md` "Prérequis serveur". `PLAN.md`, `CHECKLIST-PROD.md` et `tasks/T25-deploiement.md` amendés en conséquence (toute mention de Nginx remplacée par Apache).
+- **PHP 8.4** (au lieu du minimum `^8.3` imposé) : dépôt Sury, version la plus récente **éprouvée** à la date du setup (8.4 sorti fin 2024, ~2 ans de recul en prod sur l'écosystème Laravel/Filament/Spatie) — 8.5 existe déjà sur le dépôt mais jugée trop récente pour servir un site marchand avec paiement. Aucune dérogation à documenter : `composer.json` exige `^8.3`, toutes les dépendances installées acceptent `^8.3` ou moins, donc 8.4 est strictement conforme.
+- **Node.js 24.x** (Active LTS à la date du setup), version **épinglée explicitement** (dépôt NodeSource `setup_24.x`) plutôt que l'alias `lts.x` qui changerait de sens tout seul lors du prochain basculement de LTS (dans quelques semaines) — nécessaire à la reproductibilité du script de reprise après sinistre (PRA) à venir.
+- **Isolation multi-sites** : ce VPS hébergera plusieurs sites à terme. Chaque site a son **utilisateur système dédié sans connexion** (`adduser --system --group --home /var/www/<site> --shell /usr/sbin/nologin <site>`), propriétaire de ses fichiers, et son **propre pool PHP-FPM** écoutant sur un socket Unix dédié (`/run/php/php8.4-fpm-<site>.sock`, pool tournant sous l'utilisateur du site, socket accessible en lecture/écriture par `www-data` pour qu'Apache puisse s'y connecter). Isole chaque site des autres en cas de compromission. L'utilisateur admin `deploy` (sudo, connexion SSH) est ajouté au groupe du site pour pouvoir déployer sans changer les permissions à chaque fois (dossier du site en `2775`, bit setgid).
+- **Pas de pare-feu host (ni UFW ni iptables manuel)** : décision du client (Ian) — la sécurité réseau est gérée en amont par les security groups d'Infomaniak Public Cloud. Compensé par : SSH sur port non standard (54000), authentification par clé uniquement (`PasswordAuthentication no`, `PermitRootLogin no`), et `fail2ban` actif sur le service SSH (backend `systemd`, ban 1h après 4 échecs en 10 min).
+- **`rsyslog` + journald persistant installés** : Debian 12 n'a par défaut que `journald` (logs volatils, pas de `/var/log/auth.log`/`/var/log/syslog`). Ajoutés pour disposer des fichiers de logs classiques (utile pour `fail2ban`, l'audit, et le PRA) et ne plus perdre les logs au redémarrage.
+- **Protection d'accès préprod** (exigée par `CLAUDE.md` §4 "Préprod : accès protégé") : authentification HTTP basique via `.htaccess` + `htpasswd`, fichier de mots de passe hors du webroot (`/etc/apache2/.htpasswd-painsansgluten-preprod`). En-tête `X-Robots-Tag: noindex, nofollow` posé au niveau du VirtualHost Apache (fiable, indépendant du code applicatif) ; une balise `<meta name="robots" content="noindex">` sera ajoutée dans le layout Blade au déploiement, en complément.
+- **SSL (Let's Encrypt/Certbot) reporté** : le DNS de `preprod.painsansgluten.fr` n'est pas encore sous la main d'Ian au moment du setup serveur. À faire dès que le DNS pointe vers le VPS.
+- **ModSecurity** : prévu par Ian, mais explicitement **hors du périmètre de ce setup guidé** — sera ajouté séparément.
+- Setup réalisé en pas-à-pas guidé (VPS Debian 12 Infomaniak Public Cloud) ; un script de réinstallation reproductible (PRA) sera produit à partir de l'historique des commandes, dans une tâche ultérieure.
+
+## 2026-10-07 — Accès SSH `painsansgluten` : `AuthorizedKeysFile` sorti du home dir
+
+- **Problème** : la clé `agent-ia-painsansgluten` (utilisée par l'agent IA dédié à ce projet pour se connecter au VPS) était rejetée silencieusement par sshd. Deux causes cumulées : (1) `authorized_keys` placé sous `/home/painsansgluten/.ssh/` alors que le vrai `$HOME` de cet utilisateur est `/var/www/painsansgluten` (cf. entrée du 2026-10-07 ci-dessus, `adduser --home /var/www/<site>`) ; (2) même corrigé, `StrictModes` de sshd aurait refusé la clé car `/var/www/painsansgluten` est volontairement en `2775` (bit d'écriture groupe, nécessaire pour que `deploy` puisse y déployer) — OpenSSH refuse l'auth par clé dès qu'un répertoire du chemin `$HOME` a le bit d'écriture groupe/autre posé, quel que soit le groupe propriétaire.
+- **Décision** : ne pas retirer le `2775` (casserait le workflow de déploiement). À la place, bloc dédié dans `/etc/ssh/sshd_config` :
+  ```
+  Match User painsansgluten
+      AuthorizedKeysFile /etc/ssh/authorized_keys/%u
+  ```
+  avec la clé déplacée vers `/etc/ssh/authorized_keys/painsansgluten` (root:root, 644), hors du home dir donc hors d'atteinte de `StrictModes`. Reproductible pour les futurs sites du même VPS (un bloc `Match User <site>` par utilisateur système si même besoin).
+- `/home/painsansgluten/.ssh/` laissé en place mais obsolète (non nettoyé, à faire — noté dans `docs/JOURNAL.md`).
+
+## 2026-10-07 — Initialisation du repo GitHub (`ianfares/painsansgluten.fr`)
+
+- Dépôt distant créé et initialisé avec l'historique local complet (24 branches : `main`, `develop`, tous les `feature/*`/`fix/*`), remote `origin` en SSH.
+- **Clés SSH ajoutées comme clés de compte GitHub** (`ianfares` → Settings → SSH and GPG keys), pas comme *deploy keys* scopées en lecture seule à ce seul repo comme initialement envisagé : la clé perso d'Ian (`id_ed25519`) et `agent-ia-painsansgluten`. Conséquence : ces deux clés ont accès à **tous** les repos du compte `ianfares`, pas seulement celui-ci.
+- **Accepté tel quel par Ian** car un seul projet existe sous ce compte pour l'instant. **À revoir** si un deuxième repo est créé sous ce compte : scoper `agent-ia-painsansgluten` en deploy key dédiée (lecture seule, propre à `painsansgluten.fr`) pour limiter le rayon d'action de cette clé.

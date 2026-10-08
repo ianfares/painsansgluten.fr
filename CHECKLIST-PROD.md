@@ -69,7 +69,7 @@
 - [ ] Coordonnées boulangerie (pied de page + schema.org)
 
 ## 4. Infrastructure (Ian)
-- [ ] Nginx + PHP-FPM + MariaDB + Supervisor (queue) + cron scheduler actifs
+- [ ] Apache + PHP-FPM (pool dédié par site) + MariaDB + Supervisor (queue) + cron scheduler actifs
 - [ ] Cloudflare : proxy, SSL Full (strict), cache assets, **`/webhooks/stripe` exclu du WAF/challenge**
 - [ ] Webhook Stripe **live** créé, secret en `.env`, événements cochés (PLAN §10)
 - [ ] Clés Stripe **live** en prod uniquement

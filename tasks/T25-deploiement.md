@@ -13,7 +13,7 @@
   php artisan queue:restart
   ```
 - Exemple de config Supervisor (`queue:work --tries=3 --timeout=90`) et ligne cron du scheduler.
-- Exemple de bloc Nginx (root `public/`, PHP-FPM, taille d'upload, assets en cache long).
+- Exemple de VirtualHost Apache (root `public/`, PHP-FPM via `proxy_fcgi` sur socket dédié, taille d'upload, assets en cache long, `.htaccess` Laravel fusionné avec la protection d'accès preprod).
 - Script de retour arrière (checkout du tag précédent + `migrate:rollback` si migration réversible — ⚠️ jamais automatique sur des données de prod sans sauvegarde).
 
 ## Côté Ian
