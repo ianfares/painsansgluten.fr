@@ -226,7 +226,10 @@ class ProductResource extends Resource
                 TextColumn::make('price_ttc')->label('Prix TTC')->money('EUR', divideBy: 100)->sortable(),
                 IconColumn::make('is_published')->label('Publié')->boolean(),
                 IconColumn::make('is_available')->label('Disponible')->boolean(),
+                TextColumn::make('updated_at')->label('Modifié le')->dateTime('d/m/Y H:i')->sortable(),
             ])
+            // Les fiches modifiées ou ajoutées en dernier apparaissent en premier.
+            ->defaultSort('updated_at', 'desc')
             ->filters([
                 SelectFilter::make('category_id')->label('Catégorie')->relationship('category', 'name'),
                 TernaryFilter::make('is_available')->label('Disponible'),
