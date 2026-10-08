@@ -462,3 +462,21 @@ DOCUMENTATION : `docs/DECISIONS.md`.
 POINTS À RELIRE PAR UN HUMAIN : vérifier visuellement le site et la connexion au back-office avec le compte admin existant (même identifiants qu'en local).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T23 (dont proxies Cloudflare), T19, T21/T22 ; T14 dès les clés Stripe.
+
+---
+
+## [2026-10-08 22:30] — Claude Opus 5.5 — (correctif) — Fiche produit BO : enregistrement bloqué par les valeurs nutritionnelles à 2 décimales
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : bug signalé par Ian sur la préprod (bouton « Sauvegarder » sans effet sur une fiche produit). Reproduit en local dans un navigateur.
+RÉSUMÉ : les champs de l'onglet Nutrition avaient `step(0.1)` : une valeur à 2 décimales (sel 0,34 g) est refusée par la validation native du navigateur, qui bloque l'envoi sans rien afficher car le champ est dans un onglet masqué. Passé à `step('any')`.
+FICHIERS : `app/Filament/Resources/ProductResource.php`, `tests/Feature/Catalog/ProductResourceTest.php`, `docs/JOURNAL.md`.
+ANALYSE D'IMPACT : formulaire produit du BO uniquement ; le stockage (JSON `nutrition`) acceptait déjà toute valeur.
+SÉCURITÉ : sans objet.
+PERFORMANCE : sans objet.
+TESTS : 1 nouveau test (attribut HTML + enregistrement de 0.34). Suite complète : 175 passés / 0 échec.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur. Pas de nouvelle dépendance.
+DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : aucune.
+POINTS À RELIRE PAR UN HUMAIN : piège général à retenir : dans un formulaire Filament à onglets, une erreur de validation *native du navigateur* (step, min, max, pattern) dans un onglet masqué bloque l'envoi en silence.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T23 (dont proxies Cloudflare), T19, T21/T22 ; T14 dès les clés Stripe.

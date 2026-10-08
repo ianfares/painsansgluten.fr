@@ -140,7 +140,7 @@ class ProductResource extends Resource
                     Tab::make('Nutrition')
                         ->schema(
                             collect(self::NUTRITION_FIELDS)
-                                ->map(fn (string $label, string $key) => TextInput::make("nutrition.{$key}")->label($label)->numeric()->step(0.1))
+                                ->map(fn (string $label, string $key) => TextInput::make("nutrition.{$key}")->label($label)->numeric()->step('any'))
                                 ->values()
                                 ->all()
                         )

@@ -131,3 +131,21 @@ test('les textes alternatifs de la galerie sont enregistrés sur chaque média',
 
     expect($media->fresh()->getCustomProperty('alt'))->toBe('Vue de face du Mie\'miam');
 });
+
+test('les valeurs nutritionnelles acceptent deux décimales (ex. sel 0,34 g)', function () {
+    $product = Product::factory()->create(['category_id' => $this->category->id, 'is_published' => false]);
+
+    // Sans step="any", le navigateur bloque l'envoi du formulaire en silence
+    // (champ dans un onglet masqué) dès qu'on saisit plus d'une décimale.
+    $this->get(EditProduct::getUrl(['record' => $product]))
+        ->assertOk()
+        ->assertSee('id="data.nutrition.salt"', false)
+        ->assertDontSee('step="0.1"', false);
+
+    Livewire::test(EditProduct::class, ['record' => $product->getRouteKey()])
+        ->fillForm(['nutrition' => ['salt' => '0.34']])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect((string) $product->fresh()->nutrition['salt'])->toBe('0.34');
+});
