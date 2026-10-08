@@ -444,3 +444,21 @@ DOCUMENTATION : `docs/DECISIONS.md`.
 POINTS À RELIRE PAR UN HUMAIN : aucun.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : mise en ligne préprod (version simple ci-dessus) dès réception du mot de passe MariaDB.
+
+---
+
+## [2026-10-08 21:30] — Claude Opus 5.5 — (hors plan) — Mise en ligne de la préprod
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : la préprod tourne sur http://preprod.painsansgluten.fr (protégée par mot de passe, détenu par Ian). Méthode d'envoi et de mise à jour : `docs/DECISIONS.md`, entrée 2026-10-08 « Mise en ligne préprod ». Ne jamais réimporter la base locale par-dessus celle de la préprod.
+RÉSUMÉ : fichiers envoyés par rsync dans `/var/www/painsansgluten` (vendor et assets compilés inclus), `.env` serveur créé (staging, debug désactivé, mails en log, clés Stripe/Chronopost/Brevo factices), clé d'application générée, base locale importée (22 produits de démo, 1 admin, sans sessions ni cache), migrations à jour, `storage:link`, caches Laravel/Filament. `public/.htaccess` serveur = protection par mot de passe + `X-Robots-Tag: noindex` + règles Laravel.
+FICHIERS : dépôt : `docs/DECISIONS.md`, `docs/JOURNAL.md`. Serveur : tout le site, `.env`, `public/.htaccess`.
+ANALYSE D'IMPACT : aucun code modifié.
+SÉCURITÉ : APP_DEBUG=false, `.env` en 640, préprod protégée par mot de passe et non indexable. **Pas de HTTPS** : le mot de passe de la préprod circule en clair (certbot à installer en root).
+PERFORMANCE : caches de config/routes/vues activés.
+TESTS : test des pages directement sur le serveur : `/`, `/boutique`, `/pains-sans-gluten`, `/panier`, `/faq`, `/commande`, `/connexion`, `/admin/login` → 200 ; page inexistante → 404 ; `/mentions-legales` → 404 car les 6 pages légales ne sont pas publiées (textes à rédiger, comportement normal). Accès HTTP public → 401 (protection active).
+QUALITÉ : sans objet (pas de code).
+DOCUMENTATION : `docs/DECISIONS.md`.
+À RENSEIGNER / QUESTIONS OUVERTES : installer `cron` et certbot (root, Ian) ; sans cron, les tâches planifiées et la file d'emails ne tournent pas sur la préprod.
+POINTS À RELIRE PAR UN HUMAIN : vérifier visuellement le site et la connexion au back-office avec le compte admin existant (même identifiants qu'en local).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T23 (dont proxies Cloudflare), T19, T21/T22 ; T14 dès les clés Stripe.
