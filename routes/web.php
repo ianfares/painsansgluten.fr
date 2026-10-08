@@ -6,6 +6,7 @@ use App\Http\Controllers\Catalog\BoutiqueController;
 use App\Http\Controllers\Catalog\HomeController;
 use App\Http\Controllers\Catalog\ProductController;
 use App\Http\Controllers\Checkout\CheckoutController;
+use App\Http\Controllers\Checkout\StripeWebhookController;
 use App\Http\Controllers\Compte\AccountController;
 use App\Http\Controllers\Compte\InvoiceDownloadController;
 use App\Http\Controllers\Content\FaqController;
@@ -35,6 +36,9 @@ Route::get('/commande', [CheckoutController::class, 'create'])->name('checkout')
 Route::get('/commande/stripe/{order:token}', [CheckoutController::class, 'stripeStart'])->name('checkout.stripe.start');
 Route::get('/commande/confirmation/{order:token}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
 
+// Webhook Stripe (T14) : hors CSRF (bootstrap/app.php), signature vérifiée dans le contrôleur.
+Route::post('/webhooks/stripe', StripeWebhookController::class)->name('webhooks.stripe');
+
 // Résolveur générique catégorie/page (PLAN.md §5, §16.1, §23 : T20) : les
 // deux partagent le même niveau d'URL racine pour matcher les
 // redirections 301 Shopify déjà seedées en T02.
@@ -44,7 +48,7 @@ Route::get('/{slug}', [SlugController::class, 'show'])
     // (voir docs/DECISIONS.md, T07/T20).
     // Exclusion ancrée sur le segment entier : `faq-livraison` ou
     // `commandes-speciales` restent des slugs valides.
-    ->where('slug', '(?!(?:boutique|produit|panier|faq|factures|mon-compte|connexion|inscription|admin|commande)(?:/|$)).*');
+    ->where('slug', '(?!(?:boutique|produit|panier|faq|factures|mon-compte|connexion|inscription|admin|commande|webhooks)(?:/|$)).*');
 
 // Espace client (PLAN.md §13, T18). Email/mot de passe : routes Fortify
 // déjà en place (T03, `user-profile-information.update`, `user-password.update`).

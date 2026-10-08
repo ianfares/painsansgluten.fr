@@ -13,12 +13,13 @@ use RuntimeException;
  */
 class RefundNotAvailable extends RuntimeException
 {
-    public static function stripeNotIntegratedYet(): self
+    public static function stripePaymentNotFound(): self
     {
-        return new self(
-            'Remboursement carte bancaire indisponible pour le moment : l\'intégration Stripe (T14) '.
-            'n\'est pas encore livrée. Remboursez directement depuis le tableau de bord Stripe en attendant, '.
-            'puis contactez le développeur pour que cette commande soit marquée remboursée manuellement.'
-        );
+        return new self('Paiement Stripe introuvable pour cette commande : remboursez depuis le tableau de bord Stripe, la commande sera mise à jour automatiquement.');
+    }
+
+    public static function stripeError(string $message): self
+    {
+        return new self("Stripe a refusé le remboursement : {$message}");
     }
 }

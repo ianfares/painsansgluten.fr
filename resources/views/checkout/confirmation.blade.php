@@ -5,11 +5,13 @@
         <p class="mb-6 text-sm text-ink-muted">Commande n°{{ $order->number }} du {{ $order->created_at->format('d/m/Y') }}</p>
 
         {{--
-            Statuts possibles ici (PLAN.md §9.2) :
-            - virement : toujours "pending_payment" tant que la cliente n'a pas validé le virement reçu (T15 — BO).
-            - carte (Stripe) : "pending_payment"/"payment_failed" tant que T14 (webhook) n'est pas livré, "paid" une fois le webhook câblé.
-            Ne JAMAIS afficher un paiement comme accepté avant que le statut en BDD ne le confirme.
+            Virement : "pending_payment" tant que l'admin n'a pas validé le virement reçu (T15).
+            Carte : le statut vient uniquement du webhook Stripe (T14), jamais du retour navigateur.
         --}}
+        @if (session('payment_error'))
+            <x-ui.alert variant="warning" class="mb-6">{{ session('payment_error') }}</x-ui.alert>
+        @endif
+
         @if ($order->payment_method === \App\Enums\PaymentMethod::BankTransfer)
             <x-ui.alert variant="info" class="mb-6">
                 <p class="mb-2 font-medium">Réglez par virement bancaire sous {{ $bankTransfer->cancel_after_days }} jours pour confirmer votre commande.</p>
@@ -22,10 +24,8 @@
                     <p>Nos coordonnées bancaires vous seront communiquées par email très prochainement.</p>
                 @endif
             </x-ui.alert>
-        @elseif ($order->status === \App\Enums\OrderStatus::Paid)
-            <x-ui.alert variant="success" class="mb-6">Votre paiement a bien été accepté.</x-ui.alert>
         @else
-            <x-ui.alert variant="info" class="mb-6">Votre paiement est en cours de traitement. Vous recevrez un email de confirmation dès sa validation.</x-ui.alert>
+            <livewire:stripe-payment-status :token="$order->token" />
         @endif
 
         <div class="mb-6 divide-y divide-line rounded-card border border-line bg-white">

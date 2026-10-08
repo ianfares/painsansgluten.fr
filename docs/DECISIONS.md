@@ -294,3 +294,14 @@
 ## 2026-10-08 — Alpine.js : celui de Livewire uniquement
 
 - `resources/js/app.js` importait et démarrait `alpinejs` alors que `@livewireScripts` embarque déjà Alpine : deux instances tournaient (avertissement console), ce qui cassait le tiroir panier (ouverture et rafraîchissement perdus, panier vide affiché après un ajout). Import supprimé et dépendance npm `alpinejs` retirée : une seule source, celle de Livewire.
+
+## 2026-10-08 — T14 — Paiement Stripe Checkout
+
+- **Dépendance** : `stripe/stripe-php` ^22.0 (SDK officiel Stripe, imposé par CLAUDE.md §2, v22.0.0 du 2026-10-01, maintenu). Pas d'alternative envisagée (Cashier exclu par la stack). `composer audit` : aucune faille ; `npm audit` : 0 vulnérabilité.
+- **Création de session** (`StripeCheckoutService`) : lignes produits + port depuis la commande en BDD, garde-fou qui refuse d'envoyer à Stripe un total différent de celui de la commande. Une ligne `payments` par session (`provider_ref` = id de session, puis id du PaymentIntent une fois payée, utilisé pour le remboursement et `charge.refunded`). `success_url` et `cancel_url` pointent vers la page de confirmation, qui affiche le statut réel (poll Livewire 2 s, 30 s max) et propose de reprendre le paiement.
+- **Webhook** (`POST /webhooks/stripe`, hors CSRF) : l'`event.id` est inséré dans `stripe_events` dans la même transaction que son effet (doublon → ignoré, erreur → rollback et Stripe réessaie). Montant/devise différents → statut inchangé, `payment_anomaly`, log, email admin (`admin_notification_email`). Expiration : n'annule que si aucune autre session n'est en attente (paiement relancé). Remboursement partiel ignoré (V1 : total). Si les paramètres d'expédition sont incomplets, le paiement est quand même enregistré (sans date d'expédition, log error) plutôt que d'échouer en boucle.
+- **Sécurité** : webhook refusé (503) tant que `STRIPE_WEBHOOK_SECRET` est vide ou vaut la valeur factice de `.env.example` (publique : sinon n'importe qui pourrait signer un faux paiement).
+- **Remboursement BO** : `refunds.create` avec clé d'idempotence `refund-order-{id}` ; le `charge.refunded` qui suit est sans effet (commande déjà remboursée).
+- **Emails client au paiement** : non inclus, prévus en T19 (Brevo).
+- **File d'attente sans superviseur** : `queue:work --stop-when-empty` lancé chaque minute par le planificateur (une seule ligne cron `schedule:run` sur le serveur), plus simple que supervisor sur un seul serveur.
+- **Préprod** : la protection par mot de passe exempte uniquement `/webhooks/stripe` (dans le `public/.htaccess` du serveur), la signature Stripe faisant office d'authentification.

@@ -160,7 +160,7 @@ class OrderResource extends Resource
                     ->visible(fn (Order $record): bool => in_array($record->status, [OrderStatus::Paid, OrderStatus::Preparing, OrderStatus::Shipped, OrderStatus::Delivered], true))
                     ->requiresConfirmation()
                     ->modalDescription(fn (Order $record): string => $record->payment_method === PaymentMethod::Stripe
-                        ? 'Remboursement carte bancaire : indisponible tant que T14 (Stripe) n\'est pas livrée.'
+                        ? 'Le montant total sera remboursé sur la carte du client via Stripe, et l\'avoir sera généré.'
                         : 'Le virement doit être remboursé manuellement par vous (banque). Cette action enregistre seulement le remboursement et génère l\'avoir.')
                     ->action(function (Order $record, RefundOrderAction $refundOrderAction): void {
                         try {

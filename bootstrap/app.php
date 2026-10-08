@@ -19,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // la résolution de route pour couvrir les anciennes URLs qui ne
         // correspondent à aucune route actuelle.
         $middleware->web(prepend: [HandleLegacyRedirects::class]);
+
+        // Stripe signe ses webhooks : pas de jeton CSRF possible (T14).
+        $middleware->validateCsrfTokens(except: ['webhooks/stripe']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
