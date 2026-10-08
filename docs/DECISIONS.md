@@ -277,3 +277,16 @@
 ## 2026-10-08 — Suppression de `concurrently` (remplace l'`overrides` npm ci-dessus)
 
 - Vérification de simplicité demandée par Ian : `concurrently` n'est utilisé que comme solution de secours par `php artisan dev`, qui utilise en priorité `@laravel/multiplex` (déjà installé). Dépendance retirée de `package.json`, avec l'`overrides` `shell-quote` devenu inutile. `npm audit` : 0 vulnérabilité, `npm run build` OK, `php artisan dev` démarre.
+
+## 2026-10-08 — Mise en ligne préprod : version la plus simple
+
+- **Principe** (demande d'Ian : rester simple) : envoi des fichiers par `rsync` via l'alias SSH `painsansgluten`, directement dans `/var/www/painsansgluten` (son `public/` est déjà le dossier servi par Apache). `vendor/` et `public/build/` sont envoyés tout prêts depuis le poste local : pas de Git, de Composer ni de Node à lancer sur le serveur, pas de clé GitHub, pas de changement de config Apache.
+- **Spécifique au serveur, jamais écrasé par l'envoi** : `.env` (APP_ENV=staging, APP_DEBUG=false, mails en `log`) et `public/.htaccess` (protection par mot de passe + `X-Robots-Tag: noindex` ajoutés en tête des règles Laravel).
+- **Mettre à jour la préprod** (depuis le poste local, sur `develop` à jour, après `npm run build`) :
+  ```bash
+  rsync -az --exclude-from=<liste> ./ painsansgluten:/var/www/painsansgluten/
+  ssh painsansgluten 'php artisan migrate --force && php artisan optimize && php artisan filament:optimize'
+  ```
+  Liste d'exclusion : `/.git/ /node_modules/ /.env /.remember/ /public/.htaccess /public/hot /public/storage /storage/logs/* /storage/framework/cache/* /storage/framework/sessions/* /storage/framework/views/* /storage/framework/testing/ /storage/framework/phpstan/ /storage/app/purifier/ /bootstrap/cache/*.php /tests/ /docs/` (une par ligne).
+- **Base** : importée une fois depuis la base locale (données de démonstration, sans sessions ni cache). Ne **pas** réimporter ensuite : la préprod a désormais ses propres données, seules les migrations s'appliquent.
+- **Pas encore en place** (nécessite root, non bloquant pour travailler) : `cron` (tâches planifiées : relances virement, purge des paniers, file d'emails) et HTTPS (certbot).
