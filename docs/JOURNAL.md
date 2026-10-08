@@ -408,3 +408,21 @@ TESTS : pas de suite Pest concernée (infra pure). Vérifications manuelles : `s
 À RENSEIGNER : nettoyer `/home/painsansgluten/.ssh/` sur le VPS (dossier mort, risque de confusion pour la prochaine personne qui debug un accès SSH). Si un deuxième repo GitHub arrive sous le compte `ianfares`, revoir la clé `agent-ia-painsansgluten` pour la scoper en *deploy key* dédiée (lecture seule) plutôt que clé de compte à portée large.
 POINTS À RELIRE PAR UN HUMAIN : la modification de `/etc/ssh/sshd_config` (bloc `Match User painsansgluten` + `AuthorizedKeysFile` custom) — vérifier qu'elle n'interfère pas avec un futur deuxième site/utilisateur sur le même VPS (le bloc est scopé au seul user `painsansgluten`, a priori sans impact sur les autres, mais à confirmer si un nouvel utilisateur système est créé). Portée large de la clé `agent-ia-painsansgluten` sur le compte GitHub (cf. "À RENSEIGNER").
 PROCHAINE TÂCHE SUGGÉRÉE : reprendre la liste normale (T14 dès les clés Stripe, sinon T19/T21/T23) ; penser à nettoyer `/home/painsansgluten/.ssh/` et à reconsidérer le scope de la clé GitHub si un 2e repo arrive.
+
+---
+
+## [2026-10-08 10:30] — Claude Opus 5.5 — (hors plan) — Correctifs : faille npm, fuseau horaire par défaut, exclusion du résolveur de slug
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : correctifs issus d'une analyse globale du projet demandée par Ian (2026-10-08). Les proxies de confiance Cloudflare (aussi relevés) sont **volontairement non traités ici** à la demande d'Ian : ils restent dans T23.
+RÉSUMÉ : (1) `npm audit` remontait 2 failles critiques (`shell-quote` via `concurrently`, dev uniquement) → `overrides` npm vers `shell-quote ^1.11.0` plutôt que `npm audit fix --force` qui rétrogradait `concurrently`. (2) `config/app.php` : fuseau par défaut `Europe/Paris` au lieu de `UTC`. (3) Résolveur générique `/{slug}` : exclusion des routes réservées ancrée sur le segment entier (un slug `faq-livraison` ou `commandes-speciales` ne renvoie plus 404).
+FICHIERS : `package.json`, `package-lock.json`, `config/app.php`, `routes/web.php`, `tests/Feature/Content/ContentPagesTest.php`, `docs/DECISIONS.md`, `docs/JOURNAL.md`.
+ANALYSE D'IMPACT : `overrides` limité à une dépendance de dev (aucun impact sur le bundle front). Fuseau : aucun changement effectif là où `.env` contient déjà `APP_TIMEZONE=Europe/Paris`. Regex : les routes réservées restent exclues (`/faq`, `/panier`, `/commande/...` testés), seuls les slugs qui *commencent* par un mot réservé sont désormais résolus.
+SÉCURITÉ : faille critique npm supprimée. Pas d'autre surface modifiée.
+PERFORMANCE : sans objet.
+TESTS : 1 nouveau test (slugs préfixés par un mot réservé + non-régression `/faq`, `/panier`). Suite complète : **174 passés / 0 échec**.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur, `composer audit` : aucune faille, `npm audit` : 0 vulnérabilité, `npm run build` OK.
+DOCUMENTATION : `docs/DECISIONS.md` (entrée 2026-10-08).
+À RENSEIGNER / QUESTIONS OUVERTES : aucune.
+POINTS À RELIRE PAR UN HUMAIN : l'`overrides` npm est à retirer quand `concurrently` publiera une version qui dépend d'un `shell-quote` corrigé.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : mise en place de la préprod sur le VPS (demandée par Ian), puis T23 (dont proxies Cloudflare), T19, T21/T22 ; T14 dès les clés Stripe.

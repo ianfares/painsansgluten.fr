@@ -33,6 +33,16 @@ test('un slug de catégorie et un slug de page ne se marchent pas dessus', funct
     $this->get(route('content.show', $page))->assertOk()->assertSee('Contact');
 });
 
+test('un slug qui commence par un mot réservé reste résolu par le résolveur générique', function () {
+    Page::factory()->create(['is_published' => true, 'slug' => 'faq-livraison', 'title' => 'Livraison FAQ']);
+    Page::factory()->create(['is_published' => true, 'slug' => 'commandes-speciales', 'title' => 'Commandes spéciales']);
+
+    $this->get('/faq-livraison')->assertOk()->assertSee('Livraison FAQ');
+    $this->get('/commandes-speciales')->assertOk()->assertSee('Commandes spéciales');
+    $this->get('/faq')->assertOk();
+    $this->get('/panier')->assertOk();
+});
+
 test('la page FAQ répond 200, groupe les questions et masque les non publiées', function () {
     FaqItem::factory()->create(['question' => 'Livrez-vous en Corse ?', 'group' => 'Livraison', 'is_published' => true]);
     FaqItem::factory()->create(['question' => 'Question cachée', 'is_published' => false]);
