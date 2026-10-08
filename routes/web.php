@@ -42,7 +42,9 @@ Route::get('/{slug}', [SlugController::class, 'show'])
     ->name('content.show')
     // Liste d'exclusion à maintenir : toute nouvelle route racine doit y être ajoutée
     // (voir docs/DECISIONS.md, T07/T20).
-    ->where('slug', '(?!boutique|produit|panier|faq|factures|mon-compte|connexion|inscription|admin|commande).*');
+    // Exclusion ancrée sur le segment entier : `faq-livraison` ou
+    // `commandes-speciales` restent des slugs valides.
+    ->where('slug', '(?!(?:boutique|produit|panier|faq|factures|mon-compte|connexion|inscription|admin|commande)(?:/|$)).*');
 
 // Espace client (PLAN.md §13, T18). Email/mot de passe : routes Fortify
 // déjà en place (T03, `user-profile-information.update`, `user-password.update`).
