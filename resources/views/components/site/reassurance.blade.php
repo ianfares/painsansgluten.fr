@@ -32,9 +32,9 @@
     <ul class="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
         @foreach ($items as $item)
             <li class="flex flex-col items-center gap-4 text-center">
-                <span class="relative flex h-20 w-20 items-center justify-center rounded-full" style="background-color: {{ $item['color'] }}">
+                <span class="relative flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full" style="background-color: {{ $item['color'] }}">
                     <span class="absolute inset-1.5 rounded-full border-2 border-white/90" aria-hidden="true"></span>
-                    <svg class="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{!! $item['icon'] !!}</svg>
+                    <svg class="h-9 w-9 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{!! $item['icon'] !!}</svg>
                 </span>
                 <p class="max-w-[16rem] text-sm leading-relaxed text-ink-muted [&_strong]:font-semibold">
                     {!! str_replace('<strong>', '<strong style="color: '.$item['color'].'">', $item['text']) !!}
