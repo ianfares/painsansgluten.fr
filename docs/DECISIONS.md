@@ -365,3 +365,13 @@
 - **Catégories** : le texte de présentation (déjà saisi en BO mais jamais affiché) est affiché sous le titre.
 - **Logo** : version HD fournie par Ian (`docs/reference/branding/logo-hd.png`, 1254 px) ; `branding/logo.jpg` 512 px (33 Ko, fond crème plein → JPEG, lisible par toutes les messageries) et `branding/logo-og.jpg` 1200×630 (48 Ko) comme image de partage par défaut.
 - **Cloudflare** : les règles de défi par pays et la fonction « bloquer les robots d'IA » de Cloudflare peuvent bloquer GPTBot, PerplexityBot… : à vérifier avant la mise en production.
+
+## 2026-10-09 — T26 B1 — Formulaire « Demande de compte professionnel »
+
+- **Périmètre** : uniquement le formulaire public `/professionnels`, le stockage (`pro_account_requests`), les emails et la ressource BO « Demandes pro ». Comptes pro, remises, prix différenciés, facturation pro (B2 à B4) : V2, voir `docs/BACKLOG.md`. « Approuver » = changement de statut + email « nous revenons vers vous » (aucun compte créé).
+- **Anti-spam** (décision Ian) : Cloudflare Turnstile (même composant et même règle que le contact) + 3 demandes **acceptées** par heure et par IP (`RateLimiter` manuel : les erreurs de saisie ne consomment pas le quota) + garde-fou large `throttle:pro-request` (30 soumissions/heure/IP, échecs compris). Pas de honeypot. Aucune dépendance ajoutée.
+- **Texte de présentation et types d'activité** : deux nouveaux réglages dans le groupe `shop` (`pro_intro_html`, `pro_activity_types`), éditables dans « Paramètres > Boutique > Espace professionnels ». Valeur initiale du texte = celui de la page B2B du Shopify actuel, tel quel. HTML purifié (Purifier) à l'affichage. Alternative écartée : une Page du module Pages (slug réservé, risque de collision avec le résolveur de slugs).
+- **Validation** : SIRET = 14 chiffres + Luhn (`App\Rules\Siret`, exception La Poste ignorée) ; TVA = `FR` + 2 caractères + 9 chiffres (format seulement, pas de contrôle VIES). Les listes de choix (types d'activité, produits) sont relues côté serveur.
+- **Produits d'intérêt** : stockés par libellé (JSON) : catégories actives au moment de la demande + « Pâte à pizza crue » + « Autre ».
+- **Statut** : enum `ProRequestStatus`, jamais assignable en masse ; seul `ProcessProAccountRequestAction` le modifie (transaction + verrou, un seul traitement et un seul email même en cas de double clic).
+- **Conservation** : durée des demandes refusées `À CONFIRMER` (proposition 12 mois, à reporter dans la politique de confidentialité). Pas de purge automatique en V1 (noté au BACKLOG). Rien de personnel dans les logs.

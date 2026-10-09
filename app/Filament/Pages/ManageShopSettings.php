@@ -6,8 +6,10 @@ namespace App\Filament\Pages;
 
 use App\Settings\ShopSettings;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
@@ -60,6 +62,16 @@ class ManageShopSettings extends SettingsPage
                         ->columns(3)
                         ->addActionLabel('Ajouter un créneau')
                         ->defaultItems(0),
+                ]),
+
+            Section::make('Espace professionnels')
+                ->description('Page publique « Professionnels » (/professionnels) : texte de présentation et choix du type d\'activité du formulaire de demande de compte pro.')
+                ->schema([
+                    RichEditor::make('pro_intro_html')->label('Texte de présentation')->columnSpanFull(),
+                    TagsInput::make('pro_activity_types')
+                        ->label('Types d\'activité proposés')
+                        ->helperText('Un type par entrée. « Autre » fait apparaître la précision demandée au visiteur : gardez-le dans la liste.')
+                        ->columnSpanFull(),
                 ]),
 
             Section::make('Emails')

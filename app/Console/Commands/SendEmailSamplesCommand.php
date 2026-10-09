@@ -10,6 +10,7 @@ use App\Enums\PaymentMethod;
 use App\Mail\Admin\AccountDeletionRequestedMail;
 use App\Mail\Admin\NewBankTransferOrderMail;
 use App\Mail\Admin\NewPaidOrderMail;
+use App\Mail\Admin\NewProAccountRequestMail;
 use App\Mail\BankTransferCancelledMail;
 use App\Mail\BankTransferInstructionsMail;
 use App\Mail\BankTransferPaidMail;
@@ -18,10 +19,14 @@ use App\Mail\ContactMessageMail;
 use App\Mail\OrderConfirmedMail;
 use App\Mail\OrderRefundedMail;
 use App\Mail\OrderShippedMail;
+use App\Mail\ProAccountRequestApprovedMail;
+use App\Mail\ProAccountRequestReceivedMail;
+use App\Mail\ProAccountRequestRejectedMail;
 use App\Mail\StripePaymentAnomalyMail;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\ProAccountRequest;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -109,6 +114,15 @@ class SendEmailSamplesCommand extends Command
 
         $user = User::factory()->make(['id' => 1, 'first_name' => 'Marie', 'last_name' => 'Exemple', 'email' => 'marie.exemple@example.com']);
 
+        $proRequest = ProAccountRequest::factory()->make([
+            'id' => 1,
+            'company_name' => 'Pizzeria Exemple',
+            'contact_first_name' => 'Marie',
+            'contact_last_name' => 'Exemple',
+            'activity_type' => 'Pizzeria',
+            'admin_comment' => 'Nous vous recontactons par téléphone cette semaine.',
+        ]);
+
         return [
             ['Client — carte : commande confirmée', new OrderConfirmedMail($card, $invoice)],
             ['Client — virement : instructions de paiement', new BankTransferInstructionsMail($transfer)],
@@ -123,6 +137,10 @@ class SendEmailSamplesCommand extends Command
             ['Admin — nouveau virement en attente', new NewBankTransferOrderMail($transfer)],
             ['Admin — anomalie de paiement Stripe', new StripePaymentAnomalyMail($card, 'Un paiement de 25,80 € a été encaissé alors que la commande était déjà « Payée » (paiement en double ou commande annulée). Remboursez-le depuis le tableau de bord Stripe.')],
             ['Admin — demande de suppression de compte', new AccountDeletionRequestedMail($user)],
+            ['Client pro — demande reçue', new ProAccountRequestReceivedMail($proRequest)],
+            ['Client pro — demande approuvée', new ProAccountRequestApprovedMail($proRequest)],
+            ['Client pro — demande refusée', new ProAccountRequestRejectedMail($proRequest)],
+            ['Admin — nouvelle demande de compte pro', new NewProAccountRequestMail($proRequest)],
             ['Admin — message du formulaire de contact', new ContactMessageMail(['name' => 'Marie Exemple', 'email' => 'marie.exemple@example.com', 'phone' => '06 12 34 56 78', 'message' => "Bonjour,\nlivrez-vous à Granville ? Je voudrais commander pour samedi.\nMerci !"])],
         ];
     }

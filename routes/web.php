@@ -11,6 +11,7 @@ use App\Http\Controllers\Compte\AccountController;
 use App\Http\Controllers\Compte\InvoiceDownloadController;
 use App\Http\Controllers\Content\ContactController;
 use App\Http\Controllers\Content\FaqController;
+use App\Http\Controllers\Content\ProAccountRequestController;
 use App\Http\Controllers\Content\SeoFilesController;
 use App\Http\Controllers\Content\SlugController;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,8 @@ Route::get('/sitemap.xml', [SeoFilesController::class, 'sitemap'])->name('seo.si
 Route::get('/llms.txt', [SeoFilesController::class, 'llms'])->name('seo.llms');
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.send');
+Route::get('/professionnels', [ProAccountRequestController::class, 'create'])->name('pro.request.create');
+Route::post('/professionnels', [ProAccountRequestController::class, 'store'])->middleware('throttle:pro-request')->name('pro.request.store');
 
 // Tunnel de commande (PLAN.md §9.1, T13). Pas de middleware `auth` : le
 // tunnel doit rester accessible en invité. `{order:token}` lie le
@@ -57,7 +60,7 @@ Route::get('/{slug}', [SlugController::class, 'show'])
     // (voir docs/DECISIONS.md, T07/T20).
     // Exclusion ancrée sur le segment entier : `faq-livraison` ou
     // `commandes-speciales` restent des slugs valides.
-    ->where('slug', '(?!(?:boutique|produit|panier|faq|factures|mon-compte|connexion|inscription|admin|commande|webhooks|contact)(?:/|$)).*');
+    ->where('slug', '(?!(?:boutique|produit|panier|faq|factures|mon-compte|connexion|inscription|admin|commande|webhooks|contact|professionnels)(?:/|$)).*');
 
 // Espace client (PLAN.md §13, T18). Email/mot de passe : routes Fortify
 // déjà en place (T03, `user-profile-information.update`, `user-password.update`).

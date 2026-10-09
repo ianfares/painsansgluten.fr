@@ -796,3 +796,20 @@ DOCUMENTATION : `docs/DECISIONS.md`.
 POINTS À RELIRE PAR UN HUMAIN : rendu du nouveau logo (en-tête, pied de page, emails).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T22 (GTM `GTM-KFK55VB8` fourni, GA4 `G-XF6EHRRV48`, tarteaucitron, Consent Mode v2, CSP à durcir ensuite).
+
+---
+
+## [2026-10-09 18:30] — Claude Sonnet — T26 B1
+TÂCHE : T26 B1 — Formulaire « Demande de compte professionnel » (branche `feature/T26B1-demande-pro`, non mergée)
+RÉSUMÉ : page publique `/professionnels` (texte de présentation éditable en BO + formulaire protégé par Turnstile et limité à 3 demandes acceptées/heure/IP), table `pro_account_requests`, 4 emails en file d'attente (accusé de réception, notification admin, approbation, refus), ressource BO « Demandes pro » (liste, filtre statut, détail, actions Approuver/Refuser avec commentaire, badge des demandes en attente). B2 à B4 non touchés : reportés en V2 dans `docs/BACKLOG.md` avec les 8 questions À TRANCHER.
+FICHIERS CRÉÉS / MODIFIÉS : créés : migration `create_pro_account_requests_table`, migration de réglages `add_pro_space_to_shop_settings`, `app/Enums/ProRequestStatus.php`, `app/Models/ProAccountRequest.php` (+ factory), `app/Rules/{Siret,FrenchVatNumber}.php`, `app/Http/Requests/Content/StoreProAccountRequest.php`, `app/Http/Controllers/Content/ProAccountRequestController.php`, `app/Actions/Pro/ProcessProAccountRequestAction.php`, 4 mailables + 4 vues email, `resources/views/content/pro-request.blade.php`, `app/Filament/Resources/ProAccountRequestResource*`, tests `ProAccountRequestFormTest` et `ProAccountRequestResourceTest`. Modifiés : `ShopSettings`, `ManageShopSettings`, `routes/web.php`, `AppServiceProvider` (limiteur), pied de page (1 ligne), `SeoFilesController` (sitemap), `SendEmailSamplesCommand`, `OrderEmailsTest` (compteur 14 → 18 emails d'exemple), PLAN.md (§3.3, §16.3 bis), DECISIONS, BACKLOG, JOURNAL.
+ANALYSE D'IMPACT : route `/professionnels` ajoutée à la liste d'exclusion du résolveur de slugs ; `ShopSettings` gagne 2 propriétés (migration de réglages à jouer au déploiement : `php artisan migrate`) ; le sitemap est en cache : le vider au déploiement ; compteur du test des emails d'exemple mis à jour (4 emails ajoutés, règle métier changée).
+SÉCURITÉ : validation serveur complète (Form Request), listes de choix relues en base, Turnstile vérifié côté serveur, statut/commentaire non assignables en masse, Approuver/Refuser sous transaction + verrou (pas de double email), HTML du texte de présentation purifié, BO derrière le guard admin, aucune donnée personnelle dans les logs. Risque résiduel : limite par IP contournable avec plusieurs IP (Turnstile en seconde barrière) ; l'IP réelle dépend des trusted proxies Cloudflare.
+PERFORMANCE : 1 requête catégories + lecture des réglages par affichage ; emails en file d'attente ; index sur `status`.
+TESTS : 21 nouveaux (formulaire, SIRET, TVA, consentement, Turnstile, limite horaire, quota non consommé par les erreurs, texte purifié, sitemap, actions BO, accès refusé). Suite complète au vert (voir compte rendu final).
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur. Aucune dépendance ajoutée.
+DOCUMENTATION : PLAN.md, docs/DECISIONS.md, docs/BACKLOG.md, ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : durée de conservation des demandes refusées À CONFIRMER (12 mois proposés, à mettre dans la politique de confidentialité) ; réponses de Ian aux 8 points À TRANCHER. Le texte de présentation (repris tel quel du Shopify) promet des « prix dégressifs selon les volumes » et une « livraison rapide partout en France » : non tenus par le site V1 (pas de prix pro ; Chronopost Relais, France métropolitaine hors Corse). Éditable en BO.
+POINTS À RELIRE PAR UN HUMAIN : rendu de la page sur la préprod, textes des emails d'approbation et de refus (`php artisan emails:samples`).
+AJOUTÉ AU BACKLOG : B2, B3, B4 ; purge des demandes refusées.
+PROCHAINE TÂCHE SUGGÉRÉE : réponses de Ian aux points À TRANCHER avant B2 ; sinon suite du Lot A de T26.
