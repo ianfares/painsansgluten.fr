@@ -663,3 +663,21 @@ ANALYSE D'IMPACT / SÉCURITÉ / PERFORMANCE : affichage uniquement.
 TESTS : tests Site et Catalogue au vert ; rendu vérifié dans le navigateur. QUALITÉ / DOCUMENTATION : sans objet / ce journal.
 À RENSEIGNER / QUESTIONS OUVERTES : aucune. POINTS À RELIRE PAR UN HUMAIN : aucun. AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des emails, T18 (rattachement des commandes invité), T23.
+
+---
+
+## [2026-10-09 11:50] — Claude Opus 5.5 — T14 (recette) — Paiement carte validé de bout en bout sur la préprod
+STATUT : **T14 terminée** (recette réelle en mode test Stripe).
+CONTEXTE POUR LA PROCHAINE IA : `STRIPE_WEBHOOK_SECRET` (whsec fourni par Ian) posé dans le `.env` préprod. Commande de recette C2026-01949 (prénom « TEST », email webmaster@yafar.org) laissée en base, remboursée : facture F2026-00001 et avoir A2026-00001 sont des **documents de test de la préprod** (la numérotation de production repartira de zéro sur sa propre base).
+RÉSUMÉ : (1) webhook joignable à travers Cloudflare et la protection par mot de passe : message signé → 200, mauvaise signature → 400. (2) Paiement réel sur Stripe Checkout (carte 4242) → `checkout.session.completed` reçu → commande `paid`, montant contrôlé, paiement rattaché au PaymentIntent, facture émise, emails envoyés par la file (cron). (3) Remboursement depuis l'action BO (`RefundOrderAction`) → vrai remboursement Stripe → `refunded` + avoir + email ; `charge.refunded` reçu ensuite et ignoré (déjà remboursée). 0 tâche en échec. (4) Correctif : Stripe proposait Klarna/Bancontact/MB WAY (réglages du tableau de bord) → `payment_method_types: ['card']` (PLAN §10 : carte, Apple Pay / Google Pay inclus).
+FICHIERS : `app/Services/Payments/StripeCheckoutService.php`, `tests/Feature/Payments/StripeCheckoutTest.php`, `docs/JOURNAL.md`. Préprod : `.env`.
+ANALYSE D'IMPACT : moyens de paiement proposés sur Stripe limités à la carte.
+SÉCURITÉ : signature vérifiée en conditions réelles ; un événement de test « ping.test » signé à la main reste dans `stripe_events` (sans effet).
+PERFORMANCE : sans objet.
+TESTS : suite Payments 22/22 ; recette réelle décrite ci-dessus.
+QUALITÉ : pint OK, phpstan 0 erreur.
+DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : la commande de recette n'a pas de date d'expédition car les paramètres d'expédition (jours, heure limite, délai) ne sont pas saisis sur la préprod (comportement prévu : paiement enregistré + log error). À saisir en BO avant l'ouverture. Clés Stripe **live** à poser par Ian lui-même en production.
+POINTS À RELIRE PAR UN HUMAIN : aucun.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T01 Chronopost (Ian a fourni numéro client + identifiant ; mot de passe WS attendu), puis T11.
