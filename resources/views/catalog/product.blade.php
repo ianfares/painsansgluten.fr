@@ -41,6 +41,11 @@
                     @endif
                 </div>
 
+                @if ($mainImage)
+                    {{-- Demande d'Ian (09/10/2026) : garantir l'authenticité des photos. --}}
+                    <p class="mt-2 text-center text-xs text-ink-muted">📷 Photos originales de nos produits, non traitées par l'IA.</p>
+                @endif
+
                 @if ($product->getMedia('gallery')->isNotEmpty())
                     <div class="mt-4 grid grid-cols-4 gap-3">
                         @foreach ($product->getMedia('gallery') as $media)

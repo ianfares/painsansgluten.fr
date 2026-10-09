@@ -37,15 +37,9 @@
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm">
                         🧺 Sur les marchés
                     </span>
-                    @if ($shopSettings->contact_email)
-                        <a href="mailto:{{ $shopSettings->contact_email }}?subject=Demande%20professionnels" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition hover:shadow-button">
-                            🤝 Professionnels
-                        </a>
-                    @else
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm">
-                            🤝 Professionnels
-                        </span>
-                    @endif
+                    <a href="{{ route('pro.request.create') }}" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition hover:shadow-button">
+                        🤝 Professionnels
+                    </a>
                 </div>
             </div>
 

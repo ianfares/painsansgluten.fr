@@ -59,13 +59,7 @@
         <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Contact</p>
             <ul class="mt-3 space-y-2 text-sm text-ink-muted">
-                <li><a href="{{ route('contact') }}" class="hover:text-sage">Nous écrire</a></li>
-                @if ($shopSettings->contact_email)
-                    <li class="flex items-center gap-2">
-                        <span aria-hidden="true">✉️</span>
-                        <a href="mailto:{{ $shopSettings->contact_email }}" class="hover:text-sage">{{ $shopSettings->contact_email }}</a>
-                    </li>
-                @endif
+                <li><a href="{{ route('contact') }}" class="hover:text-sage">Formulaire de contact</a></li>
                 @if ($shopSettings->contact_phone)
                     <li class="flex items-center gap-2">
                         <span aria-hidden="true">📞</span>
