@@ -15,12 +15,19 @@ use Illuminate\View\View;
  */
 class FooterComposer
 {
+    public const LEGAL_SLUGS = ['mentions-legales', 'cgv', 'livraison', 'politique-de-remboursement', 'politique-de-confidentialite'];
+
     public function compose(View $view): void
     {
+        $pages = Page::query()->where('is_published', true)->orderBy('title')->get();
+
         $view->with([
             'shopSettings' => app(ShopSettings::class),
             'homepageSettings' => app(HomepageSettings::class),
-            'footerPages' => Page::query()->where('is_published', true)->orderBy('title')->get(),
+            // Pages publiées réparties en deux colonnes : légales / autres (Contact a son lien dédié).
+            'legalPages' => $pages->filter(fn (Page $page) => in_array($page->slug, self::LEGAL_SLUGS, true))
+                ->sortBy(fn (Page $page) => array_search($page->slug, self::LEGAL_SLUGS, true))->values(),
+            'footerPages' => $pages->reject(fn (Page $page) => in_array($page->slug, [...self::LEGAL_SLUGS, 'contact'], true))->values(),
         ]);
     }
 }

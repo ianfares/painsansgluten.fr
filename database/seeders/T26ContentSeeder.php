@@ -102,7 +102,6 @@ class T26ContentSeeder extends Seeder
             ],
             'Livraison' => [
                 ['Où livrez-vous ?', 'En point relais Chronopost, en France métropolitaine (hors Corse). Nous ne livrons pas à domicile, ni dans les DOM-TOM, ni à l\'étranger.'],
-                ['Tous les produits peuvent-ils être livrés ?', 'Seuls les produits portant la mention « Livraison possible » peuvent être expédiés.'],
                 ['Combien coûte la livraison ?', 'Les frais de livraison dépendent du poids de votre commande. Ils sont calculés et affichés avant la validation de la commande.'],
                 ['Puis-je retirer ma commande sur place ?', 'Non. Notre laboratoire n\'accueille pas de public et aucun retrait sur place n\'est proposé.'],
                 ['Quand dois-je retirer mon colis ?', 'Nous vous recommandons de le retirer le jour même de sa mise à disposition au point relais, pour préserver la fraîcheur de vos produits.'],

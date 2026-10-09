@@ -1,6 +1,6 @@
 @php
     // Variables injectées par App\View\Composers\FooterComposer :
-    // $shopSettings, $footerPages.
+    // $shopSettings, $homepageSettings, $footerPages, $legalPages.
 @endphp
 
 <footer class="border-t-4 border-sage bg-cream-alt">
@@ -35,23 +35,31 @@
         </div>
 
         <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Informations</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">La boutique</p>
             <ul class="mt-3 space-y-2 text-sm text-ink-muted">
+                @foreach ($footerPages as $page)
+                    <li><a href="{{ route('content.show', $page) }}" class="hover:text-sage">{{ $page->title }}</a></li>
+                @endforeach
                 <li><a href="{{ route('faq') }}" class="hover:text-sage">FAQ</a></li>
                 <li><a href="{{ route('pro.request.create') }}" class="hover:text-sage">Professionnels</a></li>
-                @foreach ($footerPages as $page)
-                    <li>
-                        <a href="{{ route('content.show', $page) }}" class="hover:text-sage">
-                            {{ $page->title }}
-                        </a>
-                    </li>
-                @endforeach
             </ul>
         </div>
+
+        @if ($legalPages->isNotEmpty())
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Informations légales</p>
+                <ul class="mt-3 space-y-2 text-sm text-ink-muted">
+                    @foreach ($legalPages as $page)
+                        <li><a href="{{ route('content.show', $page) }}" class="hover:text-sage">{{ $page->title }}</a></li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Contact</p>
             <ul class="mt-3 space-y-2 text-sm text-ink-muted">
+                <li><a href="{{ route('contact') }}" class="hover:text-sage">Nous écrire</a></li>
                 @if ($shopSettings->contact_email)
                     <li class="flex items-center gap-2">
                         <span aria-hidden="true">✉️</span>
@@ -65,17 +73,13 @@
                     </li>
                 @endif
             </ul>
-        </div>
-
-        {{-- Bouton affiché seulement si le bandeau est actif (production + GTM) ; gestionnaire : resources/js/consent.js --}}
-        @if (app(\App\Services\Consent\CookieConsent::class)->isActive())
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Cookies</p>
-                <button type="button" class="btn btn-outline btn-sm mt-3" data-tarteaucitron-manager>
+            {{-- Bouton affiché seulement si le bandeau est actif (production + GTM) ; gestionnaire : resources/js/consent.js --}}
+            @if (app(\App\Services\Consent\CookieConsent::class)->isActive())
+                <button type="button" class="btn btn-outline btn-sm mt-4" data-tarteaucitron-manager>
                     Gérer mes préférences
                 </button>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 
     <div class="bg-sage-dark px-4 py-3 text-center text-xs text-white/80">
