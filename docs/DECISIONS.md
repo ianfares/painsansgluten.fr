@@ -347,3 +347,9 @@
 - **Anti-abus du tunnel** : 3 commandes / 10 min par email (`RateLimiter`, clé = hash de l'email, indépendante de l'IP tant que les proxies Cloudflare ne sont pas configurés).
 - **Uploads** : PNG/JPEG/WebP (+ ICO favicon), 1 Mo (favicon), 5 Mo (paramètres), 10 Mo (photos produits/catégories).
 - **Base** : index unique `invoices(order_id, type)`.
+
+## 2026-10-09 — T23 — Vraie IP par Apache, en-têtes de sécurité
+
+- **Vraie IP** : `mod_remoteip` côté Apache (configuré par Ian : `/etc/apache2/conf-available/cloudflare-remoteip.conf`, plages téléchargées depuis cloudflare.com/ips-v4 et ips-v6 ; logs en `%a`). Préféré au `trustProxies` de Laravel : une seule source de vérité pour Apache (logs, règles) et PHP. ⚠️ Liste Cloudflare à rafraîchir périodiquement (T25).
+- **En-têtes** : middleware global `SecurityHeaders` ; CSP en report-only tant que GTM (T22) n'est pas en place.
+- **Cookie** : `SESSION_SECURE_COOKIE=true` en préprod/prod.

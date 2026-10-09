@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\HandleLegacyRedirects;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\VerifyTurnstile;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(prepend: [HandleLegacyRedirects::class]);
         // Anti-robot sur la création de compte et le mot de passe oublié.
         $middleware->web(append: [VerifyTurnstile::class]);
+
+        // En-têtes de sécurité sur toutes les réponses (T23). La vraie IP des
+        // visiteurs derrière Cloudflare est fournie par Apache (mod_remoteip) :
+        // pas de « trusted proxies » côté Laravel (voir docs/DECISIONS.md).
+        $middleware->append(SecurityHeaders::class);
 
         // Stripe signe ses webhooks : pas de jeton CSRF possible (T14).
         $middleware->validateCsrfTokens(except: ['webhooks/stripe']);
