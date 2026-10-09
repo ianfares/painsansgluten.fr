@@ -652,3 +652,14 @@ DOCUMENTATION : `docs/DECISIONS.md`.
 POINTS À RELIRE PAR UN HUMAIN : textes du bandeau.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des emails, T18 (rattachement des commandes invité), T23.
+
+---
+
+## [2026-10-09 13:00] — Claude Opus 5.5 — (retouches design, demande Ian) — Icônes du bandeau et pied de page plus compacts
+STATUT : terminée
+RÉSUMÉ : pastilles du bandeau d'engagements réduites (96 → 80 → 72 px ; Ian a validé « ne touche plus » pendant la 2e réduction, 72 px conservés faute de demande contraire). Pied de page plus compact (≈ 270 → 208 px : marges, logo 64 → 48 px, nom de la boutique, bouton cookies, barre de copyright), structure inchangée.
+FICHIERS : `resources/views/components/site/reassurance.blade.php`, `resources/views/components/site/footer.blade.php`, `docs/DECISIONS.md`, `docs/JOURNAL.md`.
+ANALYSE D'IMPACT / SÉCURITÉ / PERFORMANCE : affichage uniquement.
+TESTS : tests Site et Catalogue au vert ; rendu vérifié dans le navigateur. QUALITÉ / DOCUMENTATION : sans objet / ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : aucune. POINTS À RELIRE PAR UN HUMAIN : aucun. AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des emails, T18 (rattachement des commandes invité), T23.
