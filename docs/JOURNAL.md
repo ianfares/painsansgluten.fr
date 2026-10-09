@@ -587,3 +587,21 @@ DOCUMENTATION : ce journal.
 POINTS À RELIRE PAR UN HUMAIN : aucun.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : fin de T14, puis T23 (proxies Cloudflare).
+
+---
+
+## [2026-10-09 10:30] — Claude Opus 5.5 — (hors plan, décision Ian) — Page Contact avec formulaire et Cloudflare Turnstile
+STATUT : terminée en code ; **clés Turnstile réelles à fournir par Ian** (la préprod tourne avec les clés de test de Cloudflare, sans protection réelle, acceptable derrière le mot de passe de la préprod).
+CONTEXTE POUR LA PROCHAINE IA : changement de périmètre décidé par Ian (PLAN §5 mettait le formulaire au backlog) : voir docs/DECISIONS.md « Formulaire de contact ». Rien n'est stocké en base.
+RÉSUMÉ : `/contact` = texte de la page « contact » du BO (si publié) + formulaire (nom, email, téléphone facultatif, message) protégé par Turnstile (vérification serveur) et limité à 5 envois/minute. Le message part par email à `contact_email` (sinon `admin_notification_email`), avec Reply-To vers le visiteur. Messages d'erreur en français. Email ajouté aux exemplaires (`emails:samples`, 14 emails désormais).
+FICHIERS : créés : `app/Http/Controllers/Content/ContactController.php`, `app/Rules/Turnstile.php`, `app/Mail/ContactMessageMail.php`, `resources/views/content/contact.blade.php`, `resources/views/emails/admin/contact-message.blade.php`, `tests/Feature/Content/ContactFormTest.php`. Modifiés : `routes/web.php`, `config/services.php`, `.env.example`, `resources/views/components/site/header.blade.php`, `tests/Feature/Site/PublicLayoutTest.php`, `app/Console/Commands/SendEmailSamplesCommand.php`, `tests/Feature/Emails/OrderEmailsTest.php`, `docs/DECISIONS.md`.
+ANALYSE D'IMPACT : `/contact` n'est plus servi par le résolveur générique (lien de l'en-tête mis à jour) ; le contenu de la page « contact » du BO reste utilisé.
+SÉCURITÉ : jeton Turnstile vérifié côté serveur (secret jamais exposé), refus si Cloudflare est injoignable, limite de débit, CSRF, contenu du message échappé dans l'email, aucune donnée personnelle dans les logs ni en base. ⚠️ Derrière Cloudflare, la limite de débit voit l'IP de Cloudflare tant que T23 (proxies de confiance) n'est pas faite : elle peut bloquer plusieurs visiteurs à la fois en cas de pic (peu probable sur une page contact).
+PERFORMANCE : script Turnstile chargé uniquement sur `/contact` (async/defer) ; email en queue.
+TESTS : 9 nouveaux tests (affichage, texte BO, envoi + Reply-To, Turnstile refusé, jeton absent, Cloudflare injoignable, validations en français, aucune adresse de réception, limite de débit). Rendu vérifié dans le navigateur (widget chargé). Suite complète : 221 passés / 0 échec.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur, `composer audit` : aucune faille. Pas de nouvelle dépendance.
+DOCUMENTATION : `docs/DECISIONS.md`.
+À RENSEIGNER / QUESTIONS OUVERTES : vraies clés Turnstile (widget à créer dans Cloudflare pour preprod.painsansgluten.fr et painsansgluten.fr) ; `contact_email` à saisir en BO ; phrase RGPD sous le formulaire à valider par la cliente.
+POINTS À RELIRE PAR UN HUMAIN : mention de finalité sous le formulaire.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des emails, T23.

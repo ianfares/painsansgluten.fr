@@ -14,6 +14,7 @@ use App\Mail\BankTransferCancelledMail;
 use App\Mail\BankTransferInstructionsMail;
 use App\Mail\BankTransferPaidMail;
 use App\Mail\BankTransferReminderMail;
+use App\Mail\ContactMessageMail;
 use App\Mail\OrderConfirmedMail;
 use App\Mail\OrderRefundedMail;
 use App\Mail\OrderShippedMail;
@@ -122,6 +123,7 @@ class SendEmailSamplesCommand extends Command
             ['Admin — nouveau virement en attente', new NewBankTransferOrderMail($transfer)],
             ['Admin — anomalie de paiement Stripe', new StripePaymentAnomalyMail($card)],
             ['Admin — demande de suppression de compte', new AccountDeletionRequestedMail($user)],
+            ['Admin — message du formulaire de contact', new ContactMessageMail(['name' => 'Marie Exemple', 'email' => 'marie.exemple@example.com', 'phone' => '06 12 34 56 78', 'message' => "Bonjour,\nlivrez-vous à Granville ? Je voudrais commander pour samedi.\nMerci !"])],
         ];
     }
 }

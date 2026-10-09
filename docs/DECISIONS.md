@@ -318,3 +318,12 @@
 - **Charte** : seules les vues mail modifiées sont publiées (`resources/views/vendor/mail/html/header`, `message`, `themes/default.css`, `text/message`) : logo (paramètre Apparence), couleurs sauge/crème, pied de page en français.
 - **Relecture des textes** : `php artisan emails:samples <adresse>` envoie un exemplaire des 13 emails avec une fausse commande, dans une transaction annulée (rien ne reste en base). Les textes sont dans `resources/views/emails/` (un fichier par email).
 - **Préprod** : `GET /storage/branding/…` exempté de la protection par mot de passe pour que le logo s'affiche dans les emails (fichier public, sans risque).
+
+## 2026-10-09 — Formulaire de contact avec Cloudflare Turnstile (changement de périmètre)
+
+- **Décision d'Ian** (2026-10-09) : formulaire de contact en V1, alors que PLAN.md §5 le renvoyait au backlog (« anti-spam, RGPD »). Réponse aux deux objections : anti-spam = Cloudflare Turnstile + limite de 5 envois/minute ; RGPD = aucun stockage en base (le message part seulement par email à la boutique), mention de la finalité + lien vers la politique de confidentialité (phrase à valider par la cliente).
+- **Turnstile sans dépendance** : widget JS de Cloudflare + vérification serveur par un appel HTTP (`App\Rules\Turnstile`, client HTTP de Laravel). Cloudflare injoignable → envoi refusé (pas d'ouverture par défaut).
+- **Clés** : `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY`. `.env.example` contient les clés de **test publiques** de Cloudflare (la vérification réussit toujours) : à remplacer par les vraies clés en préprod/prod.
+- **Réception** : `contact_email` (Paramètres boutique), sinon `admin_notification_email` ; aucun des deux → message clair au visiteur + log. « Répondre » écrit directement au visiteur (Reply-To).
+- **Page** : `/contact` a sa route dédiée (avant le résolveur générique, ajoutée à sa liste d'exclusion) ; le texte de la page « contact » du BO s'affiche au-dessus du formulaire s'il est publié.
+- **À prévoir en T23** : autoriser `https://challenges.cloudflare.com` (script + iframe) dans la CSP.

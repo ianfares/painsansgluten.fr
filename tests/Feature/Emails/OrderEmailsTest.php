@@ -169,12 +169,12 @@ test('« Renvoyer l\'email de confirmation » renvoie le bon email selon l\'éta
         ->and($resend->execute($cancelled))->toBeFalse();
 });
 
-test('la commande d\'exemples envoie les 13 emails sans rien laisser en base', function () {
+test('la commande d\'exemples envoie les 14 emails sans rien laisser en base', function () {
     $ordersBefore = Order::query()->count();
 
     $this->artisan('emails:samples', ['to' => 'relecture@example.test'])->assertSuccessful();
 
-    Mail::assertSentCount(11); // + 2 emails de compte envoyés directement en HTML
+    Mail::assertSentCount(12); // + 2 emails de compte envoyés directement en HTML
     expect(Order::query()->count())->toBe($ordersBefore);
 });
 
