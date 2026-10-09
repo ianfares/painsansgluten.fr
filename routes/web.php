@@ -11,6 +11,7 @@ use App\Http\Controllers\Compte\AccountController;
 use App\Http\Controllers\Compte\InvoiceDownloadController;
 use App\Http\Controllers\Content\ContactController;
 use App\Http\Controllers\Content\FaqController;
+use App\Http\Controllers\Content\SeoFilesController;
 use App\Http\Controllers\Content\SlugController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,11 @@ Route::get('/panier', function () {
 Route::get('/boutique', [BoutiqueController::class, 'index'])->name('boutique.index');
 Route::get('/produit/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/faq', FaqController::class)->name('faq');
+
+// Fichiers pour moteurs et assistants IA (T21).
+Route::get('/robots.txt', [SeoFilesController::class, 'robots'])->name('seo.robots');
+Route::get('/sitemap.xml', [SeoFilesController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/llms.txt', [SeoFilesController::class, 'llms'])->name('seo.llms');
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.send');
 

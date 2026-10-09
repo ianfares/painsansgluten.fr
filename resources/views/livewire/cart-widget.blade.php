@@ -13,7 +13,7 @@
                 <div class="flex items-center gap-3 py-4" wire:key="cart-item-{{ $item->id }}">
                     <div class="h-14 w-14 flex-shrink-0 overflow-hidden rounded-card bg-cream-alt">
                         @if ($url = $item->product->getFirstMediaUrl('main', 'thumbnail'))
-                            <img src="{{ $url }}" alt="" class="h-full w-full object-cover">
+                            <img src="{{ $url }}" alt="" width="150" height="150" loading="lazy" class="h-full w-full object-cover">
                         @endif
                     </div>
                     <div class="flex-1">

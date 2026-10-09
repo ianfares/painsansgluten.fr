@@ -778,3 +778,21 @@ DOCUMENTATION : ce journal.
 POINTS À RELIRE PAR UN HUMAIN : rendu de la page de détail sur la préprod.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T21 (SEO, orienté moteurs IA à la demande d'Ian), T22 dès l'ID GTM ; T01/T11 dès les identifiants WS Chronopost.
+
+---
+
+## [2026-10-09 17:30] — Claude Opus 5.5 — T21 — SEO technique (Google + assistants IA)
+STATUT : **terminée**. Écart à la stack à valider (sitemap sans `spatie/laravel-sitemap`, voir DECISIONS).
+CONTEXTE POUR LA PROCHAINE IA : Ian veut un référencement « 100 % IA ». Tout est piloté par les données du BO : quand la cliente remplit horaires, réseaux, fiche Google, textes de catégories, prix, les données structurées / sitemap / llms.txt suivent sans code. Informations attendues de la cliente (via Ian) : horaires et marchés, lien Google Business (guide de création donné à Ian), Instagram, histoire (page « À propos »), FAQ, textes de catégories, certifications réelles. Nouveau logo HD intégré.
+RÉSUMÉ : balises SEO complètes sur toutes les pages, noindex des pages privées et de la préprod, JSON-LD (Bakery, Product/Offer, BreadcrumbList, FAQPage), robots.txt dynamique autorisant les robots d'IA en production, sitemap.xml et llms.txt générés depuis la base (cache invalidé à chaque modification), champs BO de référencement local, texte de catégorie affiché, dimensions et chargement différé des images, logo HD + image de partage. **Lighthouse (mobile, copie locale en mode production) : SEO 100 / Agentic Browsing 100** sur accueil, catégorie et fiche produit (accessibilité et bonnes pratiques 96 : contraste d'un petit texte de la fiche produit à reprendre en T24 ; alerte CSP propre à l'environnement local).
+FICHIERS : créés : `app/Services/Seo/StructuredData.php`, `app/Http/Controllers/Content/SeoFilesController.php`, `resources/views/seo/{sitemap,llms}.blade.php`, `database/settings/2026_10_09_160000_add_local_seo_to_shop_settings.php`, `tests/Feature/Seo/SeoTest.php`, `docs/reference/branding/logo-hd.png`. Modifiés : `resources/views/components/layouts/app.blade.php`, vues `catalog/{home,boutique,product}`, `content/{page,faq,contact}`, `components/ui/product-card`, `livewire/cart-widget`, `app/Settings/ShopSettings.php`, `app/Filament/Pages/ManageShopSettings.php`, `app/Filament/Resources/CategoryResource.php`, `app/Http/Middleware/SecurityHeaders.php`, `app/Providers/AppServiceProvider.php`, `routes/web.php`, `docs/DECISIONS.md`. Supprimé : `public/robots.txt`. Hors dépôt : `storage/app/public/branding/{logo.jpg,logo-og.jpg,logo-hd.png}` (local + préprod), paramètres `homepage.logo_path` et `seo.default_og_image_path` (local + préprod, sauvegarde de la base préprod faite avant).
+ANALYSE D'IMPACT : toutes les pages publiques (balises, JSON-LD), page catégorie (texte affiché), en-tête/pied/emails (nouveau logo).
+SÉCURITÉ : JSON-LD encodé contre l'injection de balises ; aucune donnée privée dans sitemap/llms.txt (produits publiés, pages publiées uniquement).
+PERFORMANCE : sitemap et llms.txt en cache ; images avec dimensions (pas de décalage de mise en page) et chargement différé ; logo 2,5 Mo → 33 Ko.
+TESTS : 11 nouveaux tests SEO. Suite complète : 261 passés / 0 échec.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur. Aucune dépendance ajoutée.
+DOCUMENTATION : `docs/DECISIONS.md`.
+À RENSEIGNER / QUESTIONS OUVERTES : validation de l'écart sitemap ; contenus de la cliente (voir CONTEXTE) ; règles Cloudflare vis-à-vis des robots d'IA avant la production.
+POINTS À RELIRE PAR UN HUMAIN : rendu du nouveau logo (en-tête, pied de page, emails).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T22 (GTM `GTM-KFK55VB8` fourni, GA4 `G-XF6EHRRV48`, tarteaucitron, Consent Mode v2, CSP à durcir ensuite).

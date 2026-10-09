@@ -1,6 +1,6 @@
 @php($homepage = $homepageSettings)
 
-<x-layouts.app>
+<x-layouts.app :schema="[app(\App\Services\Seo\StructuredData::class)->bakery()]">
     {{-- Bannière --}}
     <div class="relative bg-cream-alt">
         <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -91,7 +91,7 @@
                     <a href="{{ route('content.show', $category) }}" class="group flex flex-col items-center gap-3 rounded-card border border-line bg-white p-6 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-sage hover:shadow-drawer">
                         <span class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-cream-alt to-sage/15 text-3xl transition group-hover:scale-105">
                             @if ($url = $category->getFirstMediaUrl('cover', 'menu'))
-                                <img src="{{ $url }}" alt="" class="h-full w-full object-cover">
+                                <img src="{{ $url }}" alt="" width="200" height="200" loading="lazy" class="h-full w-full object-cover">
                             @else
                                 <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
                             @endif

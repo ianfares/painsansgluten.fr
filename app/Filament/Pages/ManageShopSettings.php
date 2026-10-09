@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Filament\Pages;
 
 use App\Settings\ShopSettings;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
 
@@ -33,8 +36,31 @@ class ManageShopSettings extends SettingsPage
                     TextInput::make('postal_code')->label('Code postal')->maxLength(10),
                     TextInput::make('city')->label('Ville')->maxLength(255),
                     TextInput::make('facebook_url')->label('Lien Facebook')->url()->maxLength(255),
+                    TextInput::make('instagram_url')->label('Lien Instagram')->url()->maxLength(255),
+                    TextInput::make('google_business_url')
+                        ->label('Lien de la fiche Google Business')
+                        ->helperText('Aide Google et les IA à relier le site à la boutique.')
+                        ->url()->maxLength(500),
                 ])
                 ->columns(2),
+
+            Section::make('Horaires d\'ouverture')
+                ->description('Affichés dans les résultats Google et repris par les assistants IA. Un créneau par ligne (ex. lundi 8:00 – 12:30, puis lundi 14:00 – 19:00).')
+                ->schema([
+                    Repeater::make('opening_hours')
+                        ->label('')
+                        ->schema([
+                            Select::make('day')->label('Jour')->required()->options([
+                                'Monday' => 'Lundi', 'Tuesday' => 'Mardi', 'Wednesday' => 'Mercredi', 'Thursday' => 'Jeudi',
+                                'Friday' => 'Vendredi', 'Saturday' => 'Samedi', 'Sunday' => 'Dimanche',
+                            ]),
+                            TimePicker::make('opens')->label('Ouverture')->seconds(false)->required(),
+                            TimePicker::make('closes')->label('Fermeture')->seconds(false)->required()->after('opens'),
+                        ])
+                        ->columns(3)
+                        ->addActionLabel('Ajouter un créneau')
+                        ->defaultItems(0),
+                ]),
 
             Section::make('Emails')
                 ->schema([

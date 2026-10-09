@@ -2,7 +2,11 @@
     $allItems = $groups->flatten(1);
 @endphp
 
-<x-layouts.app title="FAQ">
+<x-layouts.app
+    title="Questions fréquentes"
+    description="Toutes les réponses sur nos pains et pâtisseries 100 % sans gluten : ingrédients, allergènes, conservation, commande et livraison en point relais Chronopost."
+    :schema="$allItems->isNotEmpty() ? [app(\App\Services\Seo\StructuredData::class)->faq($allItems)] : []"
+>
     <div class="mx-auto max-w-3xl px-4 py-10">
         <x-ui.breadcrumb :items="[['label' => 'FAQ']]" class="mb-6" />
         <h1 class="mb-8 text-2xl font-semibold text-ink">Questions fréquentes</h1>
@@ -34,21 +38,4 @@
         @endforeach
     </div>
 
-    {{-- Données structurées FAQPage (PLAN.md §16.2, §17) --}}
-    @if ($allItems->isNotEmpty())
-        <script type="application/ld+json">
-            {!! json_encode([
-                '@context' => 'https://schema.org',
-                '@type' => 'FAQPage',
-                'mainEntity' => $allItems->map(fn ($item) => [
-                    '@type' => 'Question',
-                    'name' => $item->question,
-                    'acceptedAnswer' => [
-                        '@type' => 'Answer',
-                        'text' => strip_tags($item->answer),
-                    ],
-                ])->values()->all(),
-            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
-        </script>
-    @endif
 </x-layouts.app>

@@ -44,6 +44,11 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
         $response->headers->set('Content-Security-Policy-Report-Only', implode('; ', self::CSP));
 
+        // Hors production (préprod…) : jamais indexé, même si un lien fuit (PLAN.md §17).
+        if (! app()->environment('production')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
+
         if ($request->isSecure() && ! app()->environment('local')) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000');
         }
