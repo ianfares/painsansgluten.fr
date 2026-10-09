@@ -7,7 +7,9 @@ use App\Models\Page;
 use App\Models\Product;
 use App\Settings\ShopSettings;
 use Database\Seeders\T26ContentSeeder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 // --- A2 : bouton unique ------------------------------------------------------
 
@@ -165,4 +167,20 @@ test('« Sur les marchés » mène à « Où nous trouver » seulement une fois 
 
     $page->update(['is_published' => true]);
     expect($this->get('/')->getContent())->toContain('href="'.route('content.show', $page).'"');
+});
+
+test('fiche produit : toutes les photos s\'ouvrent en grand (visionneuse), sans jamais servir l\'original', function () {
+    Storage::fake('public');
+    $product = Product::factory()->create(['is_published' => true]);
+    $product->addMedia(UploadedFile::fake()->image('principale.jpg', 1200, 1200))->toMediaCollection('main');
+    $product->addMedia(UploadedFile::fake()->image('vue-1.jpg', 1200, 1200))->toMediaCollection('gallery');
+    $product->addMedia(UploadedFile::fake()->image('vue-2.jpg', 1200, 1200))->toMediaCollection('gallery');
+
+    $html = $this->get(route('products.show', $product))->assertOk()->getContent();
+
+    expect(substr_count($html, 'aria-label="Voir la photo'))->toBe(3)
+        ->and($html)->toContain('aria-label="Agrandir la photo"')
+        ->toContain('role="dialog" aria-modal="true" aria-label="Photos du produit"')
+        ->not->toContain('principale.jpg"')
+        ->toContain('non traitées par l');
 });
