@@ -45,4 +45,10 @@ return [
         'session_expires_minutes' => 30,
     ],
 
+    // Cloudflare Turnstile (anti-robot du formulaire de contact).
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
 ];

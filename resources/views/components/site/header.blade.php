@@ -14,7 +14,7 @@
     <div class="hidden border-b border-line bg-white lg:block">
         <div class="mx-auto flex max-w-6xl items-center justify-end gap-6 px-4 py-2 text-xs font-medium text-ink-muted">
             <a href="{{ route('faq') }}" class="hover:text-sage">F.A.Q.</a>
-            <a href="{{ route('content.show', 'contact') }}" class="hover:text-sage">Contact</a>
+            <a href="{{ route('contact') }}" class="hover:text-sage">Contact</a>
         </div>
     </div>
 
@@ -119,7 +119,7 @@
                 </a>
             @endforeach
             <a href="{{ route('faq') }}" class="text-ink hover:text-sage">F.A.Q.</a>
-            <a href="{{ route('content.show', 'contact') }}" class="text-ink hover:text-sage">Contact</a>
+            <a href="{{ route('contact') }}" class="text-ink hover:text-sage">Contact</a>
         </nav>
     </div>
 </header>

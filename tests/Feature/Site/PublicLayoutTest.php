@@ -55,7 +55,7 @@ test('une page inconnue affiche la 404 personnalisée avec des liens de catégor
 test('le lien Contact de l\'en-tête pointe vers la vraie page de contact', function () {
     $response = $this->get('/');
 
-    $response->assertSee(route('content.show', 'contact'), false);
+    $response->assertSee(route('contact'), false);
 });
 
 test('la bannière d\'accueil affiche les 3 canaux de vente', function () {

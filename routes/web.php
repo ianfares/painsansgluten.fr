@@ -9,6 +9,7 @@ use App\Http\Controllers\Checkout\CheckoutController;
 use App\Http\Controllers\Checkout\StripeWebhookController;
 use App\Http\Controllers\Compte\AccountController;
 use App\Http\Controllers\Compte\InvoiceDownloadController;
+use App\Http\Controllers\Content\ContactController;
 use App\Http\Controllers\Content\FaqController;
 use App\Http\Controllers\Content\SlugController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,8 @@ Route::get('/panier', function () {
 Route::get('/boutique', [BoutiqueController::class, 'index'])->name('boutique.index');
 Route::get('/produit/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/faq', FaqController::class)->name('faq');
+Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.send');
 
 // Tunnel de commande (PLAN.md §9.1, T13). Pas de middleware `auth` : le
 // tunnel doit rester accessible en invité. `{order:token}` lie le
@@ -48,7 +51,7 @@ Route::get('/{slug}', [SlugController::class, 'show'])
     // (voir docs/DECISIONS.md, T07/T20).
     // Exclusion ancrée sur le segment entier : `faq-livraison` ou
     // `commandes-speciales` restent des slugs valides.
-    ->where('slug', '(?!(?:boutique|produit|panier|faq|factures|mon-compte|connexion|inscription|admin|commande|webhooks)(?:/|$)).*');
+    ->where('slug', '(?!(?:boutique|produit|panier|faq|factures|mon-compte|connexion|inscription|admin|commande|webhooks|contact)(?:/|$)).*');
 
 // Espace client (PLAN.md §13, T18). Email/mot de passe : routes Fortify
 // déjà en place (T03, `user-profile-information.update`, `user-password.update`).
