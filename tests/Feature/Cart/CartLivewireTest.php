@@ -57,3 +57,16 @@ test('le tiroir panier envoie le nombre d\'articles au compteur de l\'en-tête',
 test('Alpine n\'est pas importé une seconde fois (Livewire le fournit déjà)', function () {
     expect(file_get_contents(resource_path('js/app.js')))->not->toContain('import Alpine');
 });
+
+test('paramètres d\'expédition incomplets : le client voit un message simple, jamais le détail technique', function () {
+    $settings = app(ShippingSettings::class);
+    $settings->production_lead_days = null;
+    $settings->save();
+
+    $product = Product::factory()->create(['is_published' => true, 'is_available' => true, 'is_shippable' => true]);
+    app(CartService::class)->add($product, 1);
+
+    Livewire::test(CartWidget::class)
+        ->assertSee('Livraison momentanément indisponible')
+        ->assertDontSee('paramètres de date d');
+});

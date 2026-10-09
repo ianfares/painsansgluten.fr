@@ -37,7 +37,8 @@
             <div class="flex justify-between"><span>Sous-total TTC</span><span>{{ number_format($totals['subtotal_ttc'] / 100, 2, ',', ' ') }} €</span></div>
 
             @if ($totals['shipping_error'])
-                <x-ui.alert variant="warning">Frais de port : {{ $totals['shipping_error'] }}</x-ui.alert>
+                {{-- Message client générique : le détail technique est signalé à l'admin (tableau de bord). --}}
+                <x-ui.alert variant="warning">Livraison momentanément indisponible pour votre panier. Contactez-nous pour finaliser votre commande.</x-ui.alert>
             @else
                 <div class="flex justify-between"><span>Frais de port</span><span>{{ $totals['shipping_ttc'] === 0 ? 'Offerts' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
                 <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
