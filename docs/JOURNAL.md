@@ -830,3 +830,36 @@ DOCUMENTATION : PLAN.md, docs/DECISIONS.md, docs/BACKLOG.md, ce journal.
 POINTS À RELIRE PAR UN HUMAIN : rendu de la page sur la préprod, textes des emails d'approbation et de refus (`php artisan emails:samples`).
 AJOUTÉ AU BACKLOG : B2, B3, B4 ; purge des demandes refusées.
 PROCHAINE TÂCHE SUGGÉRÉE : réponses de Ian aux points À TRANCHER avant B2 ; sinon suite du Lot A de T26.
+
+## [2026-10-09 18:35] — Claude Opus 5.5 — T26 (lot A + intégration T22 et B1, déploiement préprod)
+
+TÂCHE : T26 — retours du 09/10/2026 (`tasks/T26-modifications-09-10-2026.md`). Lot A fait par Claude Opus ; T22 (cookies, inclut A6) et B1 (demande de compte pro) faits en parallèle par deux agents Sonnet (entrées dédiées ci-dessus), puis fusionnés et déployés ici.
+
+DÉCISIONS D'IAN (09/10) : FAQ rédigée en brouillon non publié ; T22 fait maintenant ; lot B réduit à B1 (Turnstile, texte de la page B2B Shopify), B2-B4 en V2 ; textes légaux Shopify repris non publiés.
+
+FAIT :
+- A1/A2 : bouton unique `.btn` (vert, texte blanc gras 16 px, ocre au survol/focus, désactivé distinct) dans `@layer components` ; composant `<x-ui.button>`, boutons Fortify, « Ajouter au panier », bouton cookies. Couleurs déjà en variables uniques (écart de nommage assumé, DECISIONS).
+- A3 : icônes compte/panier SVG au trait, vertes, ocre au survol, pastille ocre, `aria-label` « Mon panier, N article(s) ».
+- A4/A5 : fiche produit en accordéons `<details>` (Ingrédients ouvert), bloc « Expédition et livraison » (texte fourni, éditable), badge « Livraison possible » (fiche + cartes).
+- A7 : frais de port saisis en HT (migration `price_ttc` → `price_ht`), TTC = HT × (1 + TVA port), grille Chrono Relais 13 (seeder), TVA port 20 % par défaut, libellé transporteur éditable (tunnel + Stripe).
+- A8 : adresse du laboratoire + mention « pas d'accueil du public » (pied de page, contact, llms.txt) ; téléphone absent s'il est vide ; horaires d'ouverture supprimés ; schema.org `Organization` seul.
+- A9 : slogan sur l'accueil (éditable) ; page « Notre histoire » publiée, au menu et au pied de page ; « Où nous trouver » créée non publiée (hors menu, 404, hors sitemap).
+- Contenus (`T26ContentSeeder`, idempotent, n'écrase rien) : FAQ 15 questions non publiées ; CGV, confidentialité, remboursement, livraison repris du Shopify, non publiés (mentions légales déjà remplies sur la préprod : non touchées).
+- Préprod : sauvegarde `storage/app/backups/preprod-avant-T26-20261009-1827.sql.gz`, fichiers envoyés, migrations, seeders, nom de boutique corrigé (« Mon Sans Gluten by Angélique », espace final retiré), adresse normalisée, caches sitemap/llms vidés.
+
+FICHIERS : voir commits `6ce084a` (lot A), `0d25bb2` (T22), `39ba27c` (B1) et merges `cc01860`, `9c75771`, `3c88ce6`.
+
+TESTS : `php artisan test` 302/302 (sous verrou flock : la base de test est partagée) ; `pint --test` OK ; `phpstan` 0 erreur ; `npm run build` OK. Smoke test préprod : 10 URL attendues (200, et 404 pour la page non publiée).
+
+ANALYSE D'IMPACT : le calcul des frais de port change de source (HT + TVA) : totaux et Stripe vérifiés par les tests du tunnel ; les commandes existantes gardent leur `shipping_ttc` figé. Le paramètre `shop.opening_hours` est supprimé (aucune donnée saisie).
+
+SÉCURITÉ : formulaires pro et contact protégés par Turnstile + limites ; contenus importés nettoyés par Purifier ; aucun secret ajouté (`GTM_ID` dans `.env`).
+
+À RENSEIGNER / QUESTIONS OUVERTES :
+- TVA du port 20 % et refacturation à prix coûtant sans arrondi (prix clients non ronds, ex. 10,01 €) : à confirmer (comptable).
+- Contraste blanc sur ocre (3,57:1) au survol des boutons : sous AA « grand texte » à 16 px gras.
+- Textes légaux repris du Shopify, à adapter avant publication : hébergeur (Shopify → Infomaniak), paiement (Shopify → Stripe + virement), livraison « à l'adresse indiquée » (→ point relais uniquement), SIREN/SIRET/TVA intracom, capital incohérent (1 000 € dans les mentions, 10 000 € dans les CGV), RCS « Coutance » (Coutances ?), médiateur de la consommation, section « Shopify » de la confidentialité (→ Stripe, Brevo, Cloudflare, Chronopost, Infomaniak, Google Analytics), mention de newsletter.
+- Texte de la page Professionnels (repris du Shopify) : promet des prix dégressifs et une livraison « partout en France » non fournis en V1.
+- Durée de conservation des demandes pro refusées (12 mois proposés).
+
+PROCHAINE TÂCHE SUGGÉRÉE : relecture par Ian/Angélique sur la préprod (FAQ, textes légaux, Notre histoire, page Professionnels) puis publication ; T22 suite (événements e-commerce GA4) ; T01/T11 Chronopost dès réception des identifiants Web Services ; T24 recette.
