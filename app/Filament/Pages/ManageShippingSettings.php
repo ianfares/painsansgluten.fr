@@ -27,8 +27,8 @@ class ManageShippingSettings extends SettingsPage
     public function form(Form $form): Form
     {
         return $form->schema([
-            Section::make('Date d\'expédition (PLAN.md §8.4)')
-                ->description('Tant que ces paramètres sont incomplets, le tunnel de commande reste bloqué (T09/T13).')
+            Section::make('Date d\'expédition')
+                ->description('Les 3 champs sont obligatoires : tant qu\'ils ne sont pas tous remplis, les clients ne peuvent pas commander.')
                 ->schema([
                     CheckboxList::make('shipping_weekdays')
                         ->label('Jours d\'expédition')
@@ -36,9 +36,13 @@ class ManageShippingSettings extends SettingsPage
                             'monday' => 'Lundi', 'tuesday' => 'Mardi', 'wednesday' => 'Mercredi',
                             'thursday' => 'Jeudi', 'friday' => 'Vendredi', 'saturday' => 'Samedi', 'sunday' => 'Dimanche',
                         ])
-                        ->columns(4),
-                    TimePicker::make('order_cutoff_time')->label('Heure limite de commande')->seconds(false),
-                    TextInput::make('production_lead_days')->label('Délai de fabrication (jours ouvrés)')->numeric()->minValue(0),
+                        ->columns(4)
+                        ->required(),
+                    TimePicker::make('order_cutoff_time')->label('Heure limite de commande')->seconds(false)->required(),
+                    TextInput::make('production_lead_days')
+                        ->label('Délai de fabrication (jours ouvrés)')
+                        ->helperText('Nombre de jours de fabrication avant expédition. 0 = expédié le jour même si la commande arrive avant l\'heure limite.')
+                        ->numeric()->minValue(0)->required(),
                 ]),
 
             Section::make('Chronopost')
