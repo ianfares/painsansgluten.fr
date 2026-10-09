@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\View\Composers;
 
 use App\Models\Page;
-use App\Settings\HomepageSettings;
 use App\Settings\ShopSettings;
 use Illuminate\View\View;
 
@@ -23,7 +22,6 @@ class FooterComposer
 
         $view->with([
             'shopSettings' => app(ShopSettings::class),
-            'homepageSettings' => app(HomepageSettings::class),
             // Pages publiées réparties en deux colonnes : légales / autres (Contact a son lien dédié).
             'legalPages' => $pages->filter(fn (Page $page) => in_array($page->slug, self::LEGAL_SLUGS, true))
                 ->sortBy(fn (Page $page) => array_search($page->slug, self::LEGAL_SLUGS, true))->values(),

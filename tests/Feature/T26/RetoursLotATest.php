@@ -184,3 +184,15 @@ test('fiche produit : toutes les photos s\'ouvrent en grand (visionneuse), sans 
         ->not->toContain('principale.jpg"')
         ->toContain('non traitées par l');
 });
+
+test('pied de page : pas de logo, icône Facebook sous le lien du formulaire de contact', function () {
+    $shop = app(ShopSettings::class);
+    $shop->facebook_url = 'https://www.facebook.com/profile.php?id=61594767200246';
+    $shop->save();
+
+    $html = $this->get('/')->getContent();
+    $footer = substr($html, strpos($html, '<footer'));
+
+    expect($footer)->not->toContain('<img')
+        ->and(strpos($footer, 'facebook.com'))->toBeGreaterThan(strpos($footer, 'Formulaire de contact'));
+});
