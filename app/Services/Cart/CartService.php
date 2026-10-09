@@ -130,6 +130,13 @@ class CartService
         $items = $cart->items()->with('product')->get()->filter(function (CartItem $item) use (&$removedNames) {
             $product = $item->product;
 
+            // Produit supprimé depuis l'ajout au panier : ligne retirée sans erreur.
+            if ($product === null) {
+                $item->delete();
+
+                return false;
+            }
+
             if (! $product->is_published || ! $product->is_available || ! $product->is_shippable) {
                 $removedNames[] = $product->name;
                 $item->delete();

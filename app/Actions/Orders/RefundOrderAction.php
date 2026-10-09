@@ -31,6 +31,12 @@ class RefundOrderAction
      */
     public function execute(Order $order, int $adminId): Order
     {
+        // État relu en base : une commande déjà remboursée (double clic, autre admin)
+        // ou jamais payée ne déclenche aucun appel à Stripe.
+        if (! $order->fresh()?->status->canTransitionTo(OrderStatus::Refunded)) {
+            throw RefundNotAvailable::notRefundable();
+        }
+
         if ($order->payment_method === PaymentMethod::BankTransfer) {
             return $this->orderStateMachine->transition(
                 $order,

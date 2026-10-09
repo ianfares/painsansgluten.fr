@@ -695,3 +695,20 @@ TESTS : appels réels décrits ci-dessus. QUALITÉ : sans objet. DOCUMENTATION :
 POINTS À RELIRE PAR UN HUMAIN : aucun.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : reprendre T01 dès réception des identifiants WS (relancer `scratchpad`-équivalent : un appel `recherchePointChronopostInter` sur 50300), puis T11. En attendant : T18 (rattachement des commandes invité), T23, T21/T22.
+
+---
+
+## [2026-10-09 13:30] — Claude Opus 5.5 — (hors plan, demande Ian) — Audit de sécurité complet + corrections
+STATUT : terminée. Restent les points de T23 (proxies Cloudflare, en-têtes, cookie Secure), **à valider par Ian** (il avait demandé d'attendre pour Cloudflare).
+CONTEXTE POUR LA PROCHAINE IA : rapport complet et statut de chaque constat dans `docs/AUDIT-SECURITE-2026-10-09.md` ; choix techniques dans docs/DECISIONS.md (2026-10-09, corrections de l'audit). 3 revues parallèles (sous-agents en lecture seule) + vérification manuelle de chaque constat important + tests externes de la préprod + scan de l'historique Git (aucun secret).
+RÉSUMÉ : aucune faille critique. 15 constats corrigés, dont 2 « hautes » : double paiement Stripe non détecté (relances de paiement) et tunnel de commande contournable par appel direct de `pay()`. Également : panier en erreur 500 si produit supprimé, HT/TVA du port, double commande concurrente, idempotence du webhook trop large, remboursement sans contrôle d'état, injection de formules CSV, anti-abus d'emails, email client dans un log, SVG en upload, doublon de facture en base, boucle d'annulation des virements, exception « logo » de la préprod détournable, droits des sauvegardes.
+FICHIERS : `app/Livewire/CheckoutWizard.php`, `app/Services/Cart/CartService.php`, `app/Actions/Orders/{CreateOrderAction,RefundOrderAction}.php`, `app/Actions/Invoicing/IssueInvoiceAction.php`, `app/Actions/Payments/HandleStripeWebhookAction.php`, `app/Services/Payments/StripeCheckoutService.php`, `app/Http/Controllers/Checkout/CheckoutController.php`, `app/Exceptions/Payments/PaymentAlreadyCompleted.php` (nouveau), `app/Exceptions/Orders/RefundNotAvailable.php`, `app/Mail/StripePaymentAnomalyMail.php`, `resources/views/emails/stripe-payment-anomaly.blade.php`, `app/Filament/Pages/{ExportInvoicesCsv,ManageHomepageSettings,ManageSeoSettings}.php`, `app/Filament/Resources/{OrderResource,ProductResource,CategoryResource}.php`, `app/Console/Commands/{ProcessBankTransferDeadlinesCommand,SendEmailSamplesCommand}.php`, migration `2026_10_09_111353_add_unique_order_type_to_invoices_table.php`, `tests/Support/FakeStripeHttpClient.php`, `tests/Feature/Security/AuditFixesTest.php` (nouveau), `docs/AUDIT-SECURITE-2026-10-09.md` (nouveau), `docs/DECISIONS.md`. Préprod : `public/.htaccess`, droits des sauvegardes.
+ANALYSE D'IMPACT : tunnel de commande (validation, message en cas de double validation, limite de 3 commandes/10 min/email), paiement Stripe (relances), montants HT/TVA des **nouvelles** commandes et factures (les documents existants ne changent pas), export CSV, uploads d'images du BO.
+SÉCURITÉ : voir rapport. PERFORMANCE : un appel Stripe de plus par relance de paiement (expiration de l'ancienne session).
+TESTS : 15 nouveaux tests de non-régression. Suite complète : 243 passés / 0 échec.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur, `composer audit` : aucune faille, `npm audit` : 0 vulnérabilité.
+DOCUMENTATION : `docs/AUDIT-SECURITE-2026-10-09.md`, `docs/DECISIONS.md`.
+À RENSEIGNER / QUESTIONS OUVERTES : validation du calcul HT/TVA du port par le comptable ; feu vert d'Ian pour T23.
+POINTS À RELIRE PAR UN HUMAIN : la section « Accepté / à décider » du rapport.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T23 (proxies Cloudflare + en-têtes + cookie Secure), puis T18 (rattachement des commandes invité), T21/T22 ; T01/T11 dès les identifiants Web Services Chronopost.

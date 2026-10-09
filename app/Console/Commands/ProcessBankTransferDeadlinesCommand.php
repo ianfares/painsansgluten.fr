@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Exceptions\Orders\InvalidOrderTransition;
 use App\Mail\BankTransferCancelledMail;
 use App\Mail\BankTransferReminderMail;
 use App\Models\Order;
@@ -43,12 +44,17 @@ class ProcessBankTransferDeadlinesCommand extends Command
             }
 
             if ($settings->auto_cancel_enabled && $order->created_at->lessThanOrEqualTo(now()->subDays($cancelAfterDays))) {
-                $orderStateMachine->transition(
-                    $order,
-                    OrderStatus::Cancelled,
-                    actorType: 'system',
-                    comment: "Virement non reçu sous {$cancelAfterDays} jours.",
-                );
+                try {
+                    $orderStateMachine->transition(
+                        $order,
+                        OrderStatus::Cancelled,
+                        actorType: 'system',
+                        comment: "Virement non reçu sous {$cancelAfterDays} jours.",
+                    );
+                } catch (InvalidOrderTransition) {
+                    // Virement validé entre-temps par l'admin : on passe à la commande suivante.
+                    continue;
+                }
                 Mail::to($order->email)->queue(new BankTransferCancelledMail($order));
             }
         }

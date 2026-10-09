@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Payments;
 
 use App\Enums\PaymentMethod;
+use App\Exceptions\Payments\PaymentAlreadyCompleted;
 use App\Models\Order;
 use App\Models\Payment;
 use RuntimeException;
+use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 
 /**
@@ -52,6 +54,8 @@ class StripeCheckoutService
             throw new RuntimeException("Montant Stripe ({$sent}) différent du total de la commande {$order->number} ({$order->total_ttc}).");
         }
 
+        $this->closePreviousSessions($order);
+
         $session = $this->stripe->checkout->sessions->create([
             'mode' => 'payment',
             // Carte uniquement (PLAN.md §10) : Apple Pay / Google Pay passent par la carte ;
@@ -76,5 +80,36 @@ class StripeCheckoutService
         ]);
 
         return (string) $session->url;
+    }
+
+    /**
+     * Relance de paiement : ferme les sessions encore ouvertes chez Stripe pour
+     * qu'un client ne puisse jamais payer deux fois la même commande. Elles sont
+     * marquées `superseded` avant d'être expirées, pour que leur webhook
+     * d'expiration n'annule pas la commande.
+     *
+     * @throws PaymentAlreadyCompleted si l'une d'elles a déjà été payée
+     */
+    private function closePreviousSessions(Order $order): void
+    {
+        $open = Payment::query()
+            ->where('order_id', $order->id)
+            ->where('method', PaymentMethod::Stripe)
+            ->where('status', 'pending')
+            ->get();
+
+        foreach ($open as $payment) {
+            $payment->update(['status' => 'superseded']);
+
+            try {
+                $this->stripe->checkout->sessions->expire((string) $payment->provider_ref);
+            } catch (ApiErrorException) {
+                // Déjà expirée (rien à faire) ou déjà payée : dans ce cas, pas de nouvelle session.
+                $previous = $this->stripe->checkout->sessions->retrieve((string) $payment->provider_ref);
+                if ($previous->status === 'complete') {
+                    throw new PaymentAlreadyCompleted("Session déjà payée pour la commande {$order->number}.");
+                }
+            }
+        }
     }
 }

@@ -15,7 +15,6 @@ use App\Services\Mail\AdminMailer;
 use App\Services\Orders\OrderStateMachine;
 use App\Services\Shipping\ShippingDateCalculator;
 use Carbon\CarbonImmutable;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -40,38 +39,44 @@ class HandleStripeWebhookAction
 
     public function execute(Event $event): void
     {
-        $anomaly = null;
+        /** @var array{order: Order, reason: string}|null $anomaly */
+        $anomaly = DB::transaction(function () use ($event) {
+            // Seul l'event_id peut être en doublon ici : toute autre erreur annule
+            // la transaction et remonte (Stripe renverra l'événement).
+            $inserted = StripeEvent::query()->insertOrIgnore([
+                'event_id' => $event->id,
+                'type' => $event->type,
+                'processed_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-        try {
-            DB::transaction(function () use ($event, &$anomaly) {
-                StripeEvent::query()->create(['event_id' => $event->id, 'type' => $event->type, 'processed_at' => now()]);
+            if ($inserted === 0) {
+                Log::info('Stripe : événement déjà traité, ignoré.', ['event_id' => $event->id]);
 
-                $object = $event->data->object;
+                return null;
+            }
 
-                $anomaly = match (true) {
-                    ! $object instanceof Session && ! $object instanceof Charge => null,
-                    $object instanceof Session && in_array($event->type, ['checkout.session.completed', 'checkout.session.async_payment_succeeded'], true) => $this->sessionPaid($object),
-                    $object instanceof Session && $event->type === 'checkout.session.async_payment_failed' => $this->sessionFailed($object),
-                    $object instanceof Session && $event->type === 'checkout.session.expired' => $this->sessionExpired($object),
-                    $object instanceof Charge && $event->type === 'charge.refunded' => $this->chargeRefunded($object),
-                    default => null,
-                };
-            });
-        } catch (UniqueConstraintViolationException) {
-            Log::info('Stripe : événement déjà traité, ignoré.', ['event_id' => $event->id]);
+            $object = $event->data->object;
 
-            return;
-        }
+            return match (true) {
+                $object instanceof Session && in_array($event->type, ['checkout.session.completed', 'checkout.session.async_payment_succeeded'], true) => $this->sessionPaid($object),
+                $object instanceof Session && $event->type === 'checkout.session.async_payment_failed' => $this->sessionFailed($object),
+                $object instanceof Session && $event->type === 'checkout.session.expired' => $this->sessionExpired($object),
+                $object instanceof Charge && $event->type === 'charge.refunded' => $this->chargeRefunded($object),
+                default => null,
+            };
+        });
 
-        if ($anomaly instanceof Order) {
-            AdminMailer::queue(new StripePaymentAnomalyMail($anomaly));
+        if ($anomaly !== null) {
+            AdminMailer::queue(new StripePaymentAnomalyMail($anomaly['order'], $anomaly['reason']));
         }
     }
 
     /**
-     * @return Order|null la commande en anomalie de montant, sinon null
+     * @return array{order: Order, reason: string}|null anomalie à signaler à l'admin
      */
-    private function sessionPaid(Session $session): ?Order
+    private function sessionPaid(Session $session): ?array
     {
         if ($session->payment_status !== 'paid') {
             return null; // moyen asynchrone : on attend async_payment_succeeded
@@ -83,9 +88,26 @@ class HandleStripeWebhookAction
         }
 
         if (! $order->status->canTransitionTo(OrderStatus::Paid)) {
-            Log::info('Stripe : paiement reçu pour une commande déjà traitée, ignoré.', ['order' => $order->number, 'status' => $order->status->value]);
+            // Session déjà traitée (événement en double) : rien à faire. Sinon c'est
+            // un second encaissement réel (ancienne session payée, commande annulée…) :
+            // l'argent est chez Stripe, l'admin doit le rembourser.
+            $payment = Payment::query()->where('order_id', $order->id)->where('provider_ref', $session->id)->first();
+            if (! $payment || ! in_array($payment->status, ['pending', 'superseded', 'expired'], true)) {
+                Log::info('Stripe : paiement déjà enregistré pour cette session, ignoré.', ['order' => $order->number]);
 
-            return null;
+                return null;
+            }
+
+            $payment->update([
+                'status' => 'paid_unexpected',
+                'provider_ref' => (string) $session->payment_intent,
+                'raw' => ['checkout_session' => $session->id, 'payment_intent' => $session->payment_intent],
+            ]);
+            $order->payment_anomaly = true;
+            $order->save();
+            Log::error('Stripe : paiement reçu sur une commande déjà payée ou annulée, à rembourser.', ['order' => $order->number, 'status' => $order->status->value]);
+
+            return ['order' => $order, 'reason' => "Un paiement de {$this->euros((int) $session->amount_total)} a été encaissé alors que la commande était déjà « {$order->status->label()} » (paiement en double ou commande annulée). Remboursez-le depuis le tableau de bord Stripe."];
         }
 
         if ((int) $session->amount_total !== $order->total_ttc || $session->currency !== 'eur') {
@@ -98,7 +120,7 @@ class HandleStripeWebhookAction
                 'currency' => $session->currency,
             ]);
 
-            return $order;
+            return ['order' => $order, 'reason' => "Le montant payé ({$this->euros((int) $session->amount_total)}) ne correspond pas au total de la commande. La commande n'a pas été passée en « payée »."];
         }
 
         Payment::query()
@@ -142,10 +164,16 @@ class HandleStripeWebhookAction
             return null;
         }
 
+        $payment = Payment::query()->where('provider_ref', $session->id)->first();
+        $wasOpen = $payment?->status === 'pending';
         $this->markPayment($session->id, 'expired');
 
-        // Le client a pu relancer un paiement depuis : seule l'expiration de la
-        // dernière session ouverte annule la commande.
+        // Session remplacée par une relance de paiement (`superseded`), ou autre
+        // session encore ouverte : la commande reste en attente.
+        if (! $wasOpen) {
+            return null;
+        }
+
         $hasOtherPending = Payment::query()
             ->where('order_id', $order->id)
             ->where('status', 'pending')
@@ -200,5 +228,10 @@ class HandleStripeWebhookAction
     private function markPayment(string $sessionId, string $status): void
     {
         Payment::query()->where('provider_ref', $sessionId)->update(['status' => $status]);
+    }
+
+    private function euros(int $cents): string
+    {
+        return number_format($cents / 100, 2, ',', ' ').' €';
     }
 }

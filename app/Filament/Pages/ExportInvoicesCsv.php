@@ -111,7 +111,7 @@ class ExportInvoicesCsv extends Page implements HasForms
             $invoice->issued_at->format('d/m/Y'),
             $invoice->type->label(),
             $invoice->order->number,
-            $customer,
+            self::csvText($customer),
             $invoice->order->payment_method->label(),
         ];
 
@@ -131,5 +131,14 @@ class ExportInvoicesCsv extends Page implements HasForms
     private function money(int $cents): string
     {
         return number_format($cents / 100, 2, ',', '');
+    }
+
+    /**
+     * Neutralise l'injection de formules (Excel/LibreOffice) : un nom saisi par
+     * un client qui commence par = + - @ ou une tabulation est préfixé d'une apostrophe.
+     */
+    private static function csvText(string $value): string
+    {
+        return preg_match('/^[=+\-@\t\r]/', $value) === 1 ? "'".$value : $value;
     }
 }
