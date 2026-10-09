@@ -63,12 +63,15 @@
             </ul>
         </div>
 
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Cookies</p>
-            <button type="button" class="mt-3 rounded-button border border-line bg-white px-3 py-1.5 text-sm text-ink-muted transition hover:border-sage hover:text-sage" data-tarteaucitron-manager>
-                Gérer mes préférences
-            </button>
-        </div>
+        {{-- Bouton affiché seulement si le bandeau est actif (production + GTM) ; gestionnaire : resources/js/consent.js --}}
+        @if (app(\App\Services\Consent\CookieConsent::class)->isActive())
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Cookies</p>
+                <button type="button" class="mt-3 rounded-button border border-line bg-white px-3 py-1.5 text-sm text-ink-muted transition hover:border-sage hover:text-sage" data-tarteaucitron-manager>
+                    Gérer mes préférences
+                </button>
+            </div>
+        @endif
     </div>
 
     <div class="bg-sage-dark px-4 py-3 text-center text-xs text-white/80">

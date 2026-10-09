@@ -51,4 +51,10 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    // Google Tag Manager (T22). GA4 est configuré DANS le conteneur GTM, jamais dans le code.
+    // Chargé uniquement en production, après consentement (tarteaucitron).
+    'gtm' => [
+        'id' => env('GTM_ID'),
+    ],
+
 ];
