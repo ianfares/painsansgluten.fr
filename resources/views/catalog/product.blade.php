@@ -31,28 +31,66 @@
         ]" class="mb-6" />
 
         <div class="grid gap-10 lg:grid-cols-2">
-            <div>
-                @php($mainImage = $product->getFirstMediaUrl('main', 'fiche'))
+            @php
+                // Galerie (T26) : photo principale + galerie ; clic = plein écran.
+                // « zoom » (1600 px) si générée, sinon « fiche » : jamais l'original.
+                $photos = collect([$product->getFirstMedia('main')])->merge($product->getMedia('gallery'))->filter()->values()
+                    ->map(fn ($media) => [
+                        'fiche' => $media->getUrl('fiche'),
+                        'zoom' => $media->hasGeneratedConversion('zoom') ? $media->getUrl('zoom') : $media->getUrl('fiche'),
+                        'thumb' => $media->getUrl('thumbnail'),
+                        'alt' => $media->getCustomProperty('alt') ?? $product->name,
+                    ]);
+            @endphp
+            <div
+                x-data="{ photos: @js($photos), current: 0, open: false,
+                    show(i) { this.current = (i + this.photos.length) % this.photos.length } }"
+                x-on:keydown.escape.window="open = false"
+                x-on:keydown.arrow-right.window="open && show(current + 1)"
+                x-on:keydown.arrow-left.window="open && show(current - 1)"
+            >
                 <div class="aspect-square overflow-hidden rounded-card bg-cream-alt">
-                    @if ($mainImage)
-                        <img src="{{ $mainImage }}" width="800" height="800" fetchpriority="high" alt="{{ $product->getFirstMedia('main')?->getCustomProperty('alt') ?? $product->name }}" class="h-full w-full object-cover">
+                    @if ($photos->isNotEmpty())
+                        <button type="button" class="block h-full w-full cursor-zoom-in" x-on:click="open = true" aria-label="Agrandir la photo">
+                            <img src="{{ $photos[0]['fiche'] }}" x-bind:src="photos[current].fiche" x-bind:alt="photos[current].alt"
+                                 width="800" height="800" fetchpriority="high" alt="{{ $photos[0]['alt'] }}" class="h-full w-full object-cover">
+                        </button>
                     @else
                         <span class="flex h-full items-center justify-center text-sm text-ink-muted">Photo à venir</span>
                     @endif
                 </div>
 
-                @if ($mainImage)
+                @if ($photos->isNotEmpty())
                     {{-- Demande d'Ian (09/10/2026) : garantir l'authenticité des photos. --}}
                     <p class="mt-2 text-center text-xs text-ink-muted">📷 Photos originales de nos produits, non traitées par l'IA.</p>
                 @endif
 
-                @if ($product->getMedia('gallery')->isNotEmpty())
-                    <div class="mt-4 grid grid-cols-4 gap-3">
-                        @foreach ($product->getMedia('gallery') as $media)
-                            <img src="{{ $media->getUrl('thumbnail') }}" width="150" height="150" loading="lazy" alt="{{ $media->getCustomProperty('alt') ?? '' }}" class="aspect-square rounded-card object-cover">
+                @if ($photos->count() > 1)
+                    <div class="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5">
+                        @foreach ($photos as $i => $photo)
+                            <button type="button" x-on:click="show({{ $i }})" aria-label="Voir la photo {{ $i + 1 }}"
+                                    class="overflow-hidden rounded-card ring-2 ring-transparent transition hover:ring-ochre focus-visible:ring-ochre"
+                                    x-bind:class="current === {{ $i }} && 'ring-sage!'">
+                                <img src="{{ $photo['thumb'] }}" width="150" height="150" loading="lazy" alt="{{ $photo['alt'] }}" class="aspect-square w-full object-cover">
+                            </button>
                         @endforeach
                     </div>
                 @endif
+
+                {{-- Visionneuse plein écran --}}
+                <template x-if="open">
+                    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" role="dialog" aria-modal="true" aria-label="Photos du produit" x-on:click.self="open = false">
+                        <img x-bind:src="photos[current].zoom" x-bind:alt="photos[current].alt" class="max-h-full max-w-full rounded-card object-contain">
+                        <button type="button" class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-xl text-ink" x-on:click="open = false" aria-label="Fermer">✕</button>
+                        <template x-if="photos.length > 1">
+                            <div>
+                                <button type="button" class="absolute left-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl text-ink" x-on:click="show(current - 1)" aria-label="Photo précédente">‹</button>
+                                <button type="button" class="absolute right-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl text-ink" x-on:click="show(current + 1)" aria-label="Photo suivante">›</button>
+                                <p class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/90 px-3 py-1 text-sm text-ink" x-text="(current + 1) + ' / ' + photos.length"></p>
+                            </div>
+                        </template>
+                    </div>
+                </template>
             </div>
 
             <div class="flex flex-col gap-4">
