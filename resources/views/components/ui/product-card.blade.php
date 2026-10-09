@@ -27,9 +27,6 @@
     <div class="flex flex-1 flex-col gap-2 p-4">
         <span class="text-xs uppercase tracking-wide text-ochre">{{ $product->category->name }}</span>
         <a href="{{ $url }}" class="font-medium text-ink hover:text-sage">{{ $product->name }}</a>
-        @if ($product->is_shippable)
-            <div><x-ui.badge variant="shippable">Livraison possible</x-ui.badge></div>
-        @endif
 
         <div class="mt-auto flex flex-wrap items-center justify-between gap-2">
             <span class="font-semibold text-ink">{{ number_format($product->price_ttc / 100, 2, ',', ' ') }} €</span>

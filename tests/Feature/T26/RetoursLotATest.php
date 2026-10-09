@@ -44,7 +44,7 @@ test('l\'en-tête affiche des icônes SVG au trait, sans emoji, avec des libell�
 
 // --- A4/A5 : fiche produit -----------------------------------------------------
 
-test('fiche produit : accordéons fermés sauf Ingrédients, bloc Expédition après Conservation, badge si expédiable', function () {
+test('fiche produit : accordéons fermés sauf Ingrédients, bloc Expédition après Conservation, sans badge de livraison', function () {
     $product = Product::factory()->create([
         'is_published' => true, 'is_shippable' => true,
         'ingredients' => '<p>Farine de riz</p>', 'storage' => 'Au sec', 'tasting_tips' => 'Toasté',
@@ -56,13 +56,22 @@ test('fiche produit : accordéons fermés sauf Ingrédients, bloc Expédition ap
         ->and($html)->toMatch('/<details open[^>]*>\s*<summary[^>]*>\s*<h2>Ingrédients<\/h2>/')
         ->and(strpos($html, '<h2>Expédition et livraison</h2>'))->toBeGreaterThan(strpos($html, '<h2>Conservation</h2>'))
         ->and($html)->toContain('retirer votre colis le jour même')
-        ->toContain('Livraison possible');
+        ->toContain('Livraison en point relais Chronopost, en France métropolitaine (hors Corse).')
+        ->not->toContain('Livraison possible');
 });
 
-test('pas de badge « Livraison possible » sur un produit non expédiable', function () {
-    $product = Product::factory()->create(['is_published' => true, 'is_shippable' => false]);
+test('pied de page : pages légales et pages de la boutique dans deux colonnes distinctes', function () {
+    Page::query()->create(['slug' => 'cgv', 'title' => 'Conditions générales de vente', 'content' => '<p>x</p>', 'is_published' => true]);
+    Page::query()->create(['slug' => 'notre-histoire', 'title' => 'Notre histoire', 'content' => '<p>x</p>', 'is_published' => true]);
 
-    expect($this->get(route('products.show', $product))->getContent())->not->toContain('>Livraison possible<');
+    $html = $this->get('/')->getContent();
+    $footer = substr($html, strpos($html, '<footer'));
+    $legal = substr($footer, strpos($footer, 'Informations légales'));
+    $shop = substr($footer, strpos($footer, 'La boutique'), strpos($footer, 'Informations légales') - strpos($footer, 'La boutique'));
+
+    expect($legal)->toContain('Conditions générales de vente')
+        ->and($shop)->toContain('Notre histoire')
+        ->not->toContain('Conditions générales de vente');
 });
 
 // --- A8 : coordonnées ---------------------------------------------------------

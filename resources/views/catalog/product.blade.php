@@ -59,10 +59,6 @@
 
                 <div class="text-2xl font-semibold text-ink">{{ number_format($product->price_ttc / 100, 2, ',', ' ') }} €</div>
 
-                @if ($product->is_shippable)
-                    <div><x-ui.badge variant="shippable">Livraison possible</x-ui.badge></div>
-                @endif
-
                 @if ($product->isOrderable())
                     <livewire:add-to-cart-button :product="$product" :with-quantity="true" />
                 @elseif (! $product->is_shippable)
