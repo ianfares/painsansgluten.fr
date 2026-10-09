@@ -10,14 +10,6 @@
         </div>
     @endif
 
-    {{-- Barre utilitaire (liens secondaires, masquée sur mobile — repris dans le menu coulissant) --}}
-    <div class="hidden border-b border-line bg-white lg:block">
-        <div class="mx-auto flex max-w-6xl items-center justify-end gap-6 px-4 py-2 text-xs font-medium text-ink-muted">
-            <a href="{{ route('faq') }}" class="hover:text-sage">F.A.Q.</a>
-            <a href="{{ route('contact') }}" class="hover:text-sage">Contact</a>
-        </div>
-    </div>
-
     {{-- Barre principale : logo en grand, centré --}}
     <div class="border-b border-line bg-cream">
         <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5 lg:grid lg:grid-cols-[1fr_auto_1fr]">
@@ -93,7 +85,7 @@
 
     {{-- Barre de catégories (persistante, masquée sur mobile — repris dans le menu coulissant) --}}
     <div class="hidden border-b border-line bg-white lg:block">
-        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-8 gap-y-2 px-4 py-3">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 py-3">
             <a href="{{ route('home') }}" class="text-sm font-medium text-ink hover:text-sage">Accueil</a>
             <a href="{{ route('boutique.index') }}" class="text-sm font-medium text-ink hover:text-sage">Toute la boutique</a>
             @foreach ($headerCategories as $category)
@@ -105,6 +97,8 @@
             @foreach ($menuPages as $menuPage)
                 <a href="{{ route('content.show', $menuPage) }}" class="text-sm font-medium text-ink hover:text-sage">{{ $menuPage->title }}</a>
             @endforeach
+            <a href="{{ route('faq') }}" class="text-sm font-medium text-ink hover:text-sage">FAQ</a>
+            <a href="{{ route('contact') }}" class="text-sm font-medium text-ink hover:text-sage">Contact</a>
         </div>
     </div>
 
@@ -131,7 +125,7 @@
             @foreach ($menuPages as $menuPage)
                 <a href="{{ route('content.show', $menuPage) }}" class="text-ink hover:text-sage">{{ $menuPage->title }}</a>
             @endforeach
-            <a href="{{ route('faq') }}" class="text-ink hover:text-sage">F.A.Q.</a>
+            <a href="{{ route('faq') }}" class="text-ink hover:text-sage">FAQ</a>
             <a href="{{ route('contact') }}" class="text-ink hover:text-sage">Contact</a>
         </nav>
     </div>

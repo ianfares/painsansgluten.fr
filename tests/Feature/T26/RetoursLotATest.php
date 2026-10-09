@@ -145,3 +145,24 @@ test('pied de page : contact uniquement par formulaire, sans adresse email', fun
 test('l\'accueil renvoie « Professionnels » vers le formulaire de demande de compte pro', function () {
     expect($this->get('/')->getContent())->toContain('href="'.route('pro.request.create').'"');
 });
+
+test('FAQ et Contact sont dans le menu principal ; le lien Facebook apparaît dans le pied de page', function () {
+    $shop = app(ShopSettings::class);
+    $shop->facebook_url = 'https://www.facebook.com/profile.php?id=61594767200246';
+    $shop->save();
+
+    $html = $this->get('/')->getContent();
+    $nav = substr($html, strpos($html, route('boutique.index').'"'), 3000);
+
+    expect($nav)->toContain('href="'.route('faq').'"')->toContain('href="'.route('contact').'"')
+        ->and($html)->not->toContain('F.A.Q.')
+        ->toContain('href="https://www.facebook.com/profile.php?id=61594767200246"');
+});
+
+test('« Sur les marchés » mène à « Où nous trouver » seulement une fois la page publiée', function () {
+    $page = Page::query()->create(['slug' => 'ou-nous-trouver', 'title' => 'Où nous trouver', 'content' => '<p>x</p>', 'is_published' => false]);
+    expect($this->get('/')->getContent())->not->toContain('href="'.route('content.show', $page).'"');
+
+    $page->update(['is_published' => true]);
+    expect($this->get('/')->getContent())->toContain('href="'.route('content.show', $page).'"');
+});
