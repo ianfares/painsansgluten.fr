@@ -34,9 +34,15 @@
                     <a href="{{ route('boutique.index') }}" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition hover:shadow-button">
                         🛒 Commande en ligne
                     </a>
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm">
-                        🧺 Sur les marchés
-                    </span>
+                    @if ($findUsPage)
+                        <a href="{{ route('content.show', $findUsPage) }}" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition hover:shadow-button">
+                            🧺 Sur les marchés
+                        </a>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm">
+                            🧺 Sur les marchés
+                        </span>
+                    @endif
                     <a href="{{ route('pro.request.create') }}" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition hover:shadow-button">
                         🤝 Professionnels
                     </a>

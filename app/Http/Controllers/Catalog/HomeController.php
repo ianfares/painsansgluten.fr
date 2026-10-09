@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Page;
 use App\Models\Product;
 use App\Settings\HomepageSettings;
 use App\Settings\ShopSettings;
@@ -35,6 +36,8 @@ class HomeController extends Controller
             'featured' => $featured,
             'homepageSettings' => $homepage,
             'shopSettings' => $shop,
+            // Badge « Sur les marchés » cliquable dès que « Où nous trouver » est publiée.
+            'findUsPage' => Page::query()->where('slug', 'ou-nous-trouver')->where('is_published', true)->first(),
         ]);
     }
 }
