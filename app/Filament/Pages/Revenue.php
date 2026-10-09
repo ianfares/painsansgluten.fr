@@ -48,15 +48,22 @@ class Revenue extends Dashboard
         ]);
     }
 
+    /**
+     * Hors de app/Filament/Widgets, ces widgets ne sont pas déclarés à Livewire
+     * automatiquement : AppServiceProvider les enregistre (sinon chaque
+     * chargement échoue en 419 « This page has expired »).
+     */
+    public const WIDGETS = [
+        RevenueStats::class,
+        RevenueTimelineChart::class,
+        RevenueByCategoryChart::class,
+        RevenueByPaymentMethodChart::class,
+        TopProductsChart::class,
+    ];
+
     public function getWidgets(): array
     {
-        return [
-            RevenueStats::class,
-            RevenueTimelineChart::class,
-            RevenueByCategoryChart::class,
-            RevenueByPaymentMethodChart::class,
-            TopProductsChart::class,
-        ];
+        return self::WIDGETS;
     }
 
     public function getColumns(): int|string|array

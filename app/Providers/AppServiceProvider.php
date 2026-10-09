@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Filament\Pages\Revenue;
 use App\Http\Controllers\Content\SeoFilesController;
 use App\Models\Category;
 use App\Models\FaqItem;
@@ -27,6 +28,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Livewire\Livewire;
 use Stripe\StripeClient;
 use Symfony\Component\Mime\Address;
 
@@ -45,6 +48,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Widgets de la page « Recettes » (voir App\Filament\Pages\Revenue::WIDGETS).
+        foreach (Revenue::WIDGETS as $widget) {
+            Livewire::component(Str::of($widget)->explode('\\')->map(fn (string $part) => Str::kebab($part))->implode('.'), $widget);
+        }
+
         // Garde-fou large sur toutes les soumissions du formulaire pro (échecs de validation compris) ;
         // la limite métier de 3 demandes acceptées / heure / IP est dans ProAccountRequestController.
         RateLimiter::for('pro-request', fn (Request $request) => Limit::perHour(30)->by((string) $request->ip()));
