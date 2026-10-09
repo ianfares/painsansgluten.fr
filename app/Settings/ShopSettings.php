@@ -32,13 +32,8 @@ class ShopSettings extends Settings
     /** Lien public de la fiche Google Business Profile. */
     public ?string $google_business_url;
 
-    /**
-     * Horaires d'ouverture : [['day' => 'Monday', 'opens' => '08:00', 'closes' => '12:30'], …]
-     * (une ligne par créneau ; jour en anglais, format schema.org). Pas de
-     * type PHPDoc détaillé : la librairie de paramètres tenterait de convertir
-     * chaque ligne et échouerait.
-     */
-    public array $opening_hours;
+    /** Mention affichée sous l'adresse (T26 A8), ex. « Laboratoire — pas d'accueil du public ». */
+    public ?string $address_note;
 
     public ?string $sender_email;
 

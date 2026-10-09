@@ -30,7 +30,7 @@ beforeEach(function () {
     $shipping->production_lead_days = 1;
     $shipping->free_shipping_enabled = false;
     $shipping->save();
-    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ttc' => 590]);
+    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ht' => 500]);
 
     $bankTransfer = app(BankTransferSettings::class);
     $bankTransfer->account_holder = 'Mon Sans Gluten SARL';

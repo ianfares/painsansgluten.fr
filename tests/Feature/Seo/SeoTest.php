@@ -82,18 +82,20 @@ test('llms.txt résume la boutique avec ses catégories et produits publiés', f
 
 // --- Balises et données structurées --------------------------------------------
 
-test('l\'accueil décrit la boulangerie, sans inventer les informations absentes', function () {
+test('l\'accueil décrit la marque (Organization, sans horaires) sans inventer les informations absentes', function () {
     $shop = app(ShopSettings::class);
     $shop->contact_phone = null;
-    $shop->opening_hours = [['day' => 'Saturday', 'opens' => '08:00', 'closes' => '12:30']];
     $shop->save();
 
     $html = $this->get('/')->assertOk()->getContent();
-    $bakery = jsonLd($html)['Organization+Bakery'];
+    $organization = jsonLd($html)['Organization'];
 
-    expect($bakery['openingHoursSpecification'][0])->toMatchArray(['dayOfWeek' => 'https://schema.org/Saturday', 'opens' => '08:00', 'closes' => '12:30'])
-        ->and($bakery)->not->toHaveKey('telephone')
-        ->and($html)->toContain('<meta name="description"')
+    expect($organization['slogan'])->toBe('Le gluten s\'efface, le goût reste.')
+        ->and($organization)->not->toHaveKey('telephone')
+        ->not->toHaveKey('openingHoursSpecification')
+        ->and($html)->not->toContain('LocalBusiness')
+        ->not->toContain('"Bakery"')
+        ->toContain('<meta name="description"')
         ->toContain('<link rel="canonical"');
 });
 

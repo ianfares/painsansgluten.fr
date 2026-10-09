@@ -55,6 +55,7 @@ class ManageHomepageSettings extends SettingsPage
 
             Section::make('Contenu')
                 ->schema([
+                    TextInput::make('slogan')->label('Slogan')->maxLength(255),
                     Textarea::make('presentation_text')->label('Texte de présentation')->rows(4),
                     Select::make('featured_product_ids')
                         ->label('Produits mis en avant')

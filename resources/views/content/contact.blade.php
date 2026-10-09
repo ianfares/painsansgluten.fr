@@ -7,6 +7,20 @@
             <div class="prose prose-sm mb-10 max-w-none">{!! $page->content !!}</div>
         @endif
 
+        @php($shop = app(\App\Settings\ShopSettings::class))
+        @if ($shop->address_line1 || $shop->city)
+            <address class="mb-8 text-sm not-italic text-ink-muted">
+                <span class="font-semibold text-ink">{{ $shop->shop_name ?: 'Mon Sans Gluten by Angélique' }}</span><br>
+                {{ $shop->address_line1 }}<br>{{ $shop->postal_code }} {{ $shop->city }}
+                @if ($shop->address_note)
+                    <br><span class="italic">{{ $shop->address_note }}</span>
+                @endif
+                @if ($shop->contact_phone)
+                    <br>{{ $shop->contact_phone }}
+                @endif
+            </address>
+        @endif
+
         <section aria-labelledby="contact-form-title" class="rounded-card border border-line bg-white p-6">
             <h2 id="contact-form-title" class="mb-4 text-lg font-semibold text-ink">Écrivez-nous</h2>
 

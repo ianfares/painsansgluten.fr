@@ -47,7 +47,7 @@ beforeEach(function () {
     $shipping->free_shipping_enabled = false;
     $shipping->shipping_vat_rate = 20.0;
     $shipping->save();
-    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ttc' => 600]);
+    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ht' => 500]);
 
     $shop = app(ShopSettings::class);
     $shop->admin_notification_email = 'admin@example.test';

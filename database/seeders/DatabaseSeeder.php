@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             PageSeeder::class,
             RedirectSeeder::class,
+            ChronoRelais13RatesSeeder::class,
+            T26ContentSeeder::class,
         ]);
 
         if (! app()->isProduction()) {

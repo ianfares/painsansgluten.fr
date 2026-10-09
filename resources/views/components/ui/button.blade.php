@@ -5,15 +5,8 @@
 ])
 
 @php
-    $base = 'inline-flex items-center justify-center gap-2 rounded-button px-6 py-3 text-sm font-semibold transition shadow-button focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage disabled:opacity-50 disabled:cursor-not-allowed';
-
-    $variants = [
-        'primary' => 'bg-sage text-white hover:bg-sage-dark',
-        'secondary' => 'bg-ochre text-white hover:brightness-95',
-        'outline' => 'bg-transparent text-ink border border-ink/20 hover:bg-cream-alt shadow-none',
-    ];
-
-    $classes = $base.' '.($variants[$variant] ?? $variants['primary']);
+    // Style unique des boutons : classes .btn dans resources/css/app.css (T26 A2).
+    $classes = $variant === 'outline' ? 'btn btn-outline' : 'btn';
 @endphp
 
 @if ($href)

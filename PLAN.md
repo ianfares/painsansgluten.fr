@@ -167,6 +167,17 @@ Reproduire le **rendu visuel** de https://painsansgluten.fr :
 
 Mobile first. Le tiroir panier, le menu et le tunnel doivent être irréprochables sur mobile.
 
+**Charte officielle (T26, 09/10/2026)** — utilisée sur tous les supports de la marque :
+| Rôle | Couleur | Variable (`resources/css/app.css`) | Usage |
+|---|---|---|---|
+| Fond | `#FEFCF2` | `--color-cream` | fond général |
+| Primaire | `#5D6E41` (« Mon Sans Gluten ») | `--color-sage` | boutons, icônes, liens importants, titres d'accent |
+| Accent | `#B47C38` (« by Angélique ») | `--color-ochre` | survol/focus des boutons, pastille panier, détails |
+
+- **Boutons** : un seul style (classe `.btn`, composant `<x-ui.button>`) — fond vert, texte blanc **gras 16 px**, ocre au survol et au focus clavier, transition 150 ms, désactivé = opacité réduite. Le back-office Filament n'est pas concerné.
+- ⚠️ Contraste : blanc sur ocre = 3,6:1 (sous le seuil AA 4,5:1 du texte normal ; AA « grand texte » exige 18,7 px gras). Blanc sur vert = 5,6:1 (conforme).
+- En-tête : icônes « Mon compte » / « Mon panier » au trait (SVG), vertes, ocre au survol ; pastille panier ocre.
+
 ### 5.2 Pages publiques et URLs
 | Page | URL |
 |---|---|
@@ -186,7 +197,7 @@ Mobile first. Le tiroir panier, le menu et le tunnel doivent être irréprochabl
 Contact : V1 = page de contenu éditable (coordonnées). Formulaire de contact : **non** en V1 (anti-spam, RGPD) → BACKLOG.
 
 ### 5.3 Produits non expédiables
-Champ `is_shippable` (défaut : oui). Un produit non expédiable reste **visible** mais **non commandable**, avec un message éditable en BO (par défaut : « Disponible uniquement sur nos marchés »). **`À VALIDER` par Ian / la cliente.**
+Champ `is_shippable` (défaut : oui). Un produit non expédiable reste **visible** mais **non commandable**, avec un message éditable en BO (par défaut : « Disponible uniquement sur nos marchés »). **Principe validé (T26, 09/10/2026).** Les produits expédiables portent un badge **« Livraison possible »** (fiche et cartes produits).
 
 ---
 
@@ -216,7 +227,9 @@ Seed initial : Pains, Viennoiseries, Pâtisseries, Biscuits.
 ⚠️ Le texte « sans gluten » engage la cliente (seuil réglementaire 20 mg/kg) : le site affiche, il ne certifie pas.
 
 ### 6.3 Affichage fiche produit
-Ordre des blocs, repris du site actuel : description → ingrédients → allergènes (contient / traces / mention atelier) → valeurs nutritionnelles (tableau) → conditionnement → conseils de dégustation → conservation → bloc expédition (texte global éditable en BO, identique pour tous les produits) → « Vous aimerez aussi » (4 produits disponibles de la même catégorie, aléatoires ou par position).
+Ordre des blocs, repris du site actuel : description → ingrédients → allergènes (contient / traces / mention atelier) → valeurs nutritionnelles (tableau) → conditionnement → conseils de dégustation → conservation → **Expédition et livraison** (texte global éditable en BO, identique pour tous les produits) → « Vous aimerez aussi » (4 produits disponibles de la même catégorie, aléatoires ou par position).
+
+Depuis T26 : chaque bloc est un **accordéon natif `<details>`** (sans JavaScript, indexable), fermé par défaut **sauf « Ingrédients »** ouvert. Badge « Livraison possible » sous le prix si le produit est expédiable.
 
 Un bloc vide n'est pas affiché.
 
@@ -260,9 +273,9 @@ Un bloc vide n'est pas affiché.
 - Génération d'étiquettes par API → V2.
 
 ### 8.3 Frais de port
-- Table `shipping_rates` : tranches de **poids d'expédition total** du panier (min g, max g, prix TTC centimes).
-- Paramètres : franco à partir de X € TTC (optionnel, désactivable), taux de TVA appliqué aux frais de port (`À RENSEIGNER` — ⚠️ à valider par le comptable).
-- Valeurs : **`À RENSEIGNER`** (fournies par Ian). Tant que la grille est vide, **le tunnel est bloqué** avec un message admin (pas de livraison gratuite par accident).
+- Table `shipping_rates` : tranches de **poids d'expédition total** du panier (min g, max g, **prix HT** centimes — saisie en HT depuis T26). Prix client TTC = HT × (1 + TVA du port), arrondi au centime.
+- Paramètres : franco à partir de X € TTC (optionnel, désactivable), taux de TVA appliqué aux frais de port (**20 % par défaut — `À CONFIRMER` par le comptable** : la TVA du transport peut suivre celle des produits livrés), libellé transporteur affiché au client (« Chronopost — Point relais (Chrono Relais 13) »).
+- Valeurs : **grille Chrono Relais 13** fournie par Ian le 09/10/2026 (22 tranches de 0,5 à 20 kg, 8,34 € à 17,99 € HT, seeder `ChronoRelais13RatesSeeder`). Refacturation **à prix coûtant, sans marge ni arrondi** (`À CONFIRMER`). Tant que la grille est vide, **le tunnel est bloqué** avec un message admin (pas de livraison gratuite par accident).
 - Poids hors grille → commande impossible + message « contactez-nous ».
 
 ### 8.4 Calcul de la date d'expédition
@@ -493,7 +506,7 @@ Table `redirects` (source, cible, code 301, actif) + middleware ; CRUD simple da
 - `sitemap.xml` (accueil, boutique, catégories, produits disponibles, pages, FAQ) régénéré quotidiennement et à la modification.
 - `robots.txt` : prod = autorisé + sitemap ; préprod = `Disallow: /` + `X-Robots-Tag: noindex`.
 - Exclure de l'indexation : `/panier`, `/commande*`, `/mon-compte*`, `/admin*`.
-- Données structurées JSON-LD : `Product` (+ `Offer` : prix, devise, disponibilité), `BreadcrumbList`, `Organization` + `Bakery` (adresse Avranches — coordonnées `À RENSEIGNER`) sur l'accueil, `FAQPage`.
+- Données structurées JSON-LD : `Product` (+ `Offer` : prix, devise, disponibilité), `BreadcrumbList`, **`Organization`** (nom, logo, slogan, adresse du laboratoire, réseaux) sur l'accueil, `FAQPage`. **Pas de `LocalBusiness`/`Bakery` ni d'horaires** : le laboratoire (71 bis rue du Commandant Bindel, 50300 Avranches) ne reçoit pas de public (T26).
 - Fil d'Ariane visible sur catégories et fiches.
 - Page 404 personnalisée avec liens vers les catégories.
 - Images : `alt` obligatoire, `width`/`height` explicites, lazy loading hors image principale, WebP.
@@ -676,7 +689,7 @@ Voir `tasks/`. Ordre :
 | 1 | URL du dépôt Git | Ian |
 | 2 | Identifiants Chronopost (compte, mot de passe WS), code produit Relais, URL de suivi | Ian / cliente |
 | 3 | Jours d'expédition, heure limite, délai de fabrication | Cliente |
-| 4 | Grille de frais de port, franco, TVA sur port | Ian / comptable |
+| 4 | ~~Grille de frais de port~~ (Chrono Relais 13, fournie le 09/10) ; franco ; **TVA sur port (20 % par défaut, à confirmer)** ; refacturation à prix coûtant (à confirmer) | Ian / comptable |
 | 5 | Taux de TVA par produit | Comptable |
 | 6 | Mentions légales vendeur pour factures (raison sociale, SIRET, RCS, TVA intra, capital, adresse) | Cliente |
 | 7 | Format numéros de commande / facture / avoir | Comptable |
@@ -685,9 +698,11 @@ Voir `tasks/`. Ordre :
 | 10 | Clés Stripe (test + live), secret webhook | Ian |
 | 11 | Clé / SMTP Brevo, expéditeur, email admin | Ian |
 | 12 | ID GTM, ID GA4 | Ian |
-| 13 | Coordonnées boulangerie (adresse, téléphone) pour pied de page et schema.org | Cliente |
-| 14 | Textes légaux (CGV, mentions, confidentialité, remboursement, livraison) | Cliente / juriste |
-| 15 | Message produits non expédiables (« marchés ») — validation du principe | Ian / cliente |
+| 13 | ~~Adresse~~ (laboratoire, sans accueil du public — fournie le 09/10). Téléphone : aucun pour l'instant (s'affichera s'il est saisi) | Cliente |
+| 14 | Textes légaux : repris du Shopify (non publiés) — à adapter (hébergeur, paiement Stripe/virement, livraison en relais, SIREN/SIRET/TVA, médiateur, capital) puis valider | Cliente / juriste |
+| 15 | ~~Message produits non expédiables — principe~~ validé le 09/10 | — |
+| 18 | Page « Où nous trouver » : marchés et partenaires (page créée, non publiée) | Cliente |
+| 19 | Relecture de la FAQ (brouillon non publié) | Cliente |
 | 16 | Clients Shopify existants à migrer ? | Ian |
 | 17 | Assets HD (logo, bannière, photos) | Ian |
 

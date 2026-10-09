@@ -6,6 +6,7 @@
         'unavailable' => 'bg-ink text-white',
         'success' => 'bg-sage/10 text-sage-dark',
         'warning' => 'bg-ochre/10 text-ochre',
+        'shippable' => 'bg-sage text-white',
     ];
 @endphp
 

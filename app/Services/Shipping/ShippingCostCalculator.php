@@ -47,6 +47,6 @@ class ShippingCostCalculator
             throw new WeightOutOfRange("Aucune tranche de frais de port ne couvre {$grams} g.");
         }
 
-        return $rate->price_ttc;
+        return $rate->priceTtc((float) ($this->settings->shipping_vat_rate ?? 0));
     }
 }

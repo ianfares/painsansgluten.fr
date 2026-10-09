@@ -25,11 +25,12 @@ class StructuredData
     ) {}
 
     /**
-     * La boulangerie (Organization + Bakery), sur l'accueil.
+     * La marque (Organization), sur l'accueil. Pas de LocalBusiness/Bakery ni
+     * d'horaires : le laboratoire ne reçoit pas de public (T26 A8).
      *
      * @return array<string, mixed>
      */
-    public function bakery(): array
+    public function organization(): array
     {
         $sameAs = array_values(array_filter([$this->shop->facebook_url, $this->shop->instagram_url, $this->shop->google_business_url]));
 
@@ -41,30 +42,18 @@ class StructuredData
             'addressCountry' => 'FR',
         ]);
 
-        $hours = collect($this->shop->opening_hours ?? [])
-            ->filter(fn ($slot) => ! empty($slot['day']) && ! empty($slot['opens']) && ! empty($slot['closes']))
-            ->map(fn ($slot) => [
-                '@type' => 'OpeningHoursSpecification',
-                'dayOfWeek' => 'https://schema.org/'.$slot['day'],
-                'opens' => substr((string) $slot['opens'], 0, 5),
-                'closes' => substr((string) $slot['closes'], 0, 5),
-            ])
-            ->values()
-            ->all();
-
         return array_filter([
             '@context' => 'https://schema.org',
-            '@type' => ['Organization', 'Bakery'],
-            '@id' => url('/').'#boulangerie',
+            '@type' => 'Organization',
+            '@id' => url('/').'#organisation',
             'name' => $this->shopName(),
             'url' => url('/'),
             'logo' => $this->logoUrl(),
-            'image' => $this->logoUrl(),
+            'slogan' => $this->homepage->slogan,
             'description' => 'Boulangerie artisanale 100 % sans gluten à Avranches (Manche) : pains, viennoiseries, pâtisseries et biscuits fabriqués à la commande, livrés en point relais Chronopost en France métropolitaine (hors Corse).',
             'email' => $this->shop->contact_email,
             'telephone' => $this->shop->contact_phone,
             'address' => count($address) > 2 ? $address : null,
-            'openingHoursSpecification' => $hours ?: null,
             'sameAs' => $sameAs ?: null,
             'areaServed' => ['@type' => 'Country', 'name' => 'France métropolitaine (hors Corse)'],
         ]);
@@ -89,7 +78,7 @@ class StructuredData
             'price' => number_format($product->price_ttc / 100, 2, '.', ''),
             'priceCurrency' => 'EUR',
             'availability' => $product->isOrderable() ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-            'seller' => ['@id' => url('/').'#boulangerie'],
+            'seller' => ['@id' => url('/').'#organisation'],
         ] : null;
 
         return array_filter([

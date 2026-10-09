@@ -26,6 +26,9 @@ class ShippingSettings extends Settings
 
     public ?string $chronopost_product_code;
 
+    /** Libellé du transporteur affiché au client (tunnel, Stripe) — T26 A7. */
+    public ?string $carrier_label;
+
     public int $max_quantity_per_line;
 
     public ?string $shipping_block_text;

@@ -17,7 +17,7 @@ beforeEach(function () {
     $settings->free_shipping_enabled = false;
     $settings->save();
 
-    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ttc' => 590]);
+    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ht' => 500]);
 });
 
 test('ajouter un produit crée une ligne de panier', function () {
@@ -78,8 +78,8 @@ test('les totaux calculent sous-total, port et date d\'expédition', function ()
     $totals = $service->totals($service->currentCart());
 
     expect($totals['subtotal_ttc'])->toBe(1000)
-        ->and($totals['shipping_ttc'])->toBe(590)
-        ->and($totals['total_ttc'])->toBe(1590)
+        ->and($totals['shipping_ttc'])->toBe(600)
+        ->and($totals['total_ttc'])->toBe(1600)
         ->and($totals['planned_ship_date'])->not->toBeNull()
         ->and($totals['shipping_error'])->toBeNull();
 });
