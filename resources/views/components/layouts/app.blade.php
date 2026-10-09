@@ -52,6 +52,8 @@
     @if (($homepageSettings ?? null)?->favicon_path)
         <link rel="icon" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepageSettings->favicon_path) }}">
     @endif
+    {{-- Consent Mode v2 « denied » + tarteaucitron : avant tout script d'application (T22). --}}
+    <x-site.consent />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -70,8 +72,6 @@
     <x-ui.drawer name="cart" title="Votre panier">
         <livewire:cart-widget />
     </x-ui.drawer>
-
-    {{-- Bannière de consentement cookies (tarteaucitron.js) : intégration réelle en T22. --}}
 
     @livewireScripts
 </body>

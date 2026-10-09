@@ -11,18 +11,19 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * En-têtes de sécurité sur toutes les réponses (T23, PLAN.md §20).
  * La CSP est en mode « report-only » : elle ne bloque rien, le navigateur
- * signale seulement en console ce qu'elle bloquerait (à durcir après GTM / T22).
+ * signale seulement en console ce qu'elle bloquerait. T22 : GTM / GA4 autorisés ci-dessous ;
+ * passage en mode bloquant à décider après observation en production (docs/DECISIONS.md).
  */
 class SecurityHeaders
 {
     private const CSP = [
         "default-src 'self'",
         // Livewire/Alpine évaluent des expressions : 'unsafe-eval' nécessaire.
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://*.google-analytics.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' data: https://fonts.gstatic.com",
         "img-src 'self' data: blob: https:",
-        "connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com",
+        "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net",
         'frame-src https://challenges.cloudflare.com https://www.googletagmanager.com',
         "frame-ancestors 'self'",
         "base-uri 'self'",
