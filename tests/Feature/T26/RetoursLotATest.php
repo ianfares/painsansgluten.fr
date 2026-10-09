@@ -130,3 +130,18 @@ test('le seeder de contenus ne publie ni la FAQ ni les textes légaux, et n\'éc
         ->and(FaqItem::query()->where('is_published', true)->count())->toBe(0)
         ->and(Page::query()->where('slug', 'notre-histoire')->count())->toBe(1);
 });
+
+test('pied de page : contact uniquement par formulaire, sans adresse email', function () {
+    $shop = app(ShopSettings::class);
+    $shop->contact_email = 'contact@example.test';
+    $shop->save();
+
+    $html = $this->get('/')->getContent();
+    $footer = substr($html, strpos($html, '<footer'));
+
+    expect($footer)->toContain(route('contact'))->not->toContain('contact@example.test');
+});
+
+test('l\'accueil renvoie « Professionnels » vers le formulaire de demande de compte pro', function () {
+    expect($this->get('/')->getContent())->toContain('href="'.route('pro.request.create').'"');
+});

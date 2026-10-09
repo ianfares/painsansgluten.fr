@@ -68,15 +68,10 @@ test('la bannière d\'accueil affiche les 3 canaux de vente', function () {
     $response->assertSee('Professionnels');
 });
 
-test('le badge "Professionnels" est un lien mailto uniquement si un email de contact est renseigné', function () {
+test('aucun lien mailto sur l\'accueil : contact par formulaire, Professionnels vers la page dédiée', function () {
     $shop = app(ShopSettings::class);
-    $shop->contact_email = null;
-    $shop->save();
-
-    $this->get('/')->assertDontSee('mailto:', false);
-
     $shop->contact_email = 'contact@painsansgluten.fr';
     $shop->save();
 
-    $this->get('/')->assertSee('mailto:contact@painsansgluten.fr', false);
+    $this->get('/')->assertDontSee('mailto:', false);
 });
