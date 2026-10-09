@@ -617,3 +617,21 @@ ANALYSE D'IMPACT / SÉCURITÉ / PERFORMANCE : le formulaire de contact de la pr�
 TESTS : vérification réelle auprès de Cloudflare. QUALITÉ / DOCUMENTATION : sans objet / ce journal.
 À RENSEIGNER / QUESTIONS OUVERTES : aucune. POINTS À RELIRE PAR UN HUMAIN : envoyer un vrai message depuis /contact. AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des emails, T23.
+
+---
+
+## [2026-10-09 11:45] — Claude Opus 5.5 — (hors plan, demande Ian) — Captcha Turnstile sur création de compte et mot de passe oublié
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : suite du formulaire de contact. Voir docs/DECISIONS.md (2026-10-09, Turnstile).
+RÉSUMÉ : widget Cloudflare Turnstile + vérification serveur sur `/inscription` et `/forgot-password` (middleware `VerifyTurnstile`), composant `<x-ui.turnstile />` réutilisé sur `/contact`.
+FICHIERS : créés : `app/Http/Middleware/VerifyTurnstile.php`, `resources/views/components/ui/turnstile.blade.php`. Modifiés : `bootstrap/app.php`, `resources/views/auth/{register,forgot-password}.blade.php`, `resources/views/content/contact.blade.php`, `app/Http/Controllers/Content/ContactController.php`, `tests/Feature/Auth/{RegistrationTest,PasswordResetTest}.php`, `docs/DECISIONS.md`.
+ANALYSE D'IMPACT : création de compte et demande de lien de réinitialisation impossibles sans jeton Turnstile valide (y compris pour un script) ; connexion et réinitialisation par lien inchangées.
+SÉCURITÉ : vérification côté serveur ; Cloudflare injoignable → refus.
+PERFORMANCE : un appel à Cloudflare (5 s max) par envoi de ces deux formulaires.
+TESTS : 5 nouveaux (compte non créé si jeton refusé, widget affiché ×2, aucun lien envoyé sans jeton, réinitialisation par lien sans captcha) ; tests existants adaptés (jeton fourni). Suite complète : 226 passés / 0 échec.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur. Pas de nouvelle dépendance.
+DOCUMENTATION : `docs/DECISIONS.md`.
+À RENSEIGNER / QUESTIONS OUVERTES : aucune.
+POINTS À RELIRE PAR UN HUMAIN : **constat hors périmètre** : les pages connexion / inscription / mot de passe oublié / réinitialisation / vérification d'email (`resources/views/auth/*`, layout `x-layouts.auth`) n'ont aucune mise en forme (ni en-tête ni charte de la boutique). À reprendre (proposé à Ian).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : mise en forme des pages de compte (si Ian valide), fin de T14, corrections des emails, T23.

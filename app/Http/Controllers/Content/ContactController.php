@@ -26,7 +26,6 @@ class ContactController extends Controller
     {
         return view('content.contact', [
             'page' => Page::query()->where('slug', 'contact')->where('is_published', true)->first(),
-            'siteKey' => config('services.turnstile.site_key'),
         ]);
     }
 

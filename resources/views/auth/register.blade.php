@@ -25,6 +25,9 @@
         <label for="password_confirmation">Confirmer le mot de passe</label>
         <input id="password_confirmation" type="password" name="password_confirmation" required>
 
+        <x-ui.turnstile />
+        @error('cf-turnstile-response') <p class="error">{{ $message }}</p> @enderror
+
         <button type="submit">Créer mon compte</button>
     </form>
 

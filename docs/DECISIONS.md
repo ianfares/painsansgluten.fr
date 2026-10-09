@@ -327,3 +327,8 @@
 - **Réception** : `contact_email` (Paramètres boutique), sinon `admin_notification_email` ; aucun des deux → message clair au visiteur + log. « Répondre » écrit directement au visiteur (Reply-To).
 - **Page** : `/contact` a sa route dédiée (avant le résolveur générique, ajoutée à sa liste d'exclusion) ; le texte de la page « contact » du BO s'affiche au-dessus du formulaire s'il est publié.
 - **À prévoir en T23** : autoriser `https://challenges.cloudflare.com` (script + iframe) dans la CSP.
+
+## 2026-10-09 — Turnstile aussi sur la création de compte et le mot de passe oublié
+
+- Demande d'Ian. Middleware `VerifyTurnstile` ajouté au groupe `web`, actif uniquement sur les `POST` des routes Fortify `register.store` et `password.email` : Fortify n'est pas modifié. Le formulaire de contact garde sa vérification dans son contrôleur. Widget factorisé dans `<x-ui.turnstile />` (script Cloudflare chargé une seule fois).
+- Non protégés volontairement : la connexion (déjà limitée par Fortify, et un captcha à chaque connexion gênerait les clients) et la réinitialisation par lien reçu par email (le lien fait office de preuve).
