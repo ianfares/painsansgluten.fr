@@ -43,7 +43,8 @@ test('payer par carte redirige vers Stripe avec les montants de la commande', fu
 
     $params = $this->stripeHttp->requests[0]['params'];
     expect($params['mode'])->toBe('payment')
-        ->and($params['payment_method_types'])->toBe(['card'])
+        // Refusé par l'API Stripe actuelle (vérifié en réel le 2026-10-09) : ne jamais l'envoyer.
+        ->and($params)->not->toHaveKey('payment_method_types')
         ->and($params['locale'])->toBe('fr')
         ->and($params['metadata']['order_id'])->toBe((string) $this->order->id)
         ->and($params['line_items'][0]['price_data']['unit_amount'])->toBe(750)
