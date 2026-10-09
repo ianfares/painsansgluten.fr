@@ -69,12 +69,14 @@ test('le sitemap se met à jour dès qu\'un produit est publié', function () {
 test('llms.txt résume la boutique avec ses catégories et produits publiés', function () {
     $category = Category::factory()->create(['name' => 'Pains', 'is_active' => true, 'description' => 'Nos pains au levain.']);
     Product::factory()->create(['category_id' => $category->id, 'name' => 'Pain Nordique', 'is_published' => true]);
+    Product::factory()->create(['category_id' => $category->id, 'name' => "L'Insolent cookie", 'is_published' => true]);
     Product::factory()->create(['category_id' => $category->id, 'name' => 'Pain secret', 'is_published' => false]);
 
     $this->get('/llms.txt')->assertOk()
         ->assertSee('100 % sans gluten', false)
         ->assertSee('[Pains]('.route('content.show', $category).'): Nos pains au levain.', false)
         ->assertSee('Pain Nordique')
+        ->assertSee("[L'Insolent cookie]", false)
         ->assertDontSee('Pain secret');
 });
 
