@@ -332,3 +332,8 @@
 
 - Demande d'Ian. Middleware `VerifyTurnstile` ajouté au groupe `web`, actif uniquement sur les `POST` des routes Fortify `register.store` et `password.email` : Fortify n'est pas modifié. Le formulaire de contact garde sa vérification dans son contrôleur. Widget factorisé dans `<x-ui.turnstile />` (script Cloudflare chargé une seule fois).
 - Non protégés volontairement : la connexion (déjà limitée par Fortify, et un captcha à chaque connexion gênerait les clients) et la réinitialisation par lien reçu par email (le lien fait office de preuve).
+
+## 2026-10-09 — Bandeau d'engagements et pages de compte aux couleurs du site
+
+- **Bandeau** (`<x-site.reassurance />`, bas de l'accueil) inspiré de `docs/reference/capture/look.png` fourni par Ian : 4 pastilles de couleur à double cercle et icône blanche au trait (SVG maison, aucune dépendance), mots-clés colorés. Remplace « Fabrication à la commande / Livraison Chronopost Relais / Paiement sécurisé ». Textes limités à ce qui est vérifié : « bio » retiré (demande d'Ian), certification AFDIAG non reprise (non confirmée, cf. décision du 2026-10-06), congélation sans durée (seules 2 fiches citent « jusqu'à 1 mois », la référence disait « 1 à 2 mois »), « planifiez votre livraison » remplacé par « fabriqués à la commande, date d'expédition annoncée » (choix de date client = V2). « Paiement sécurisé » n'y figure plus (4 pastilles comme la référence).
+- **Pages de compte** : `x-layouts.auth` réutilise le gabarit du site (en-tête, menu, pied de page, panier) avec une carte centrée ; les champs des vues `auth/*` sont stylés par `.auth-card` dans `resources/css/app.css`, sans réécrire les vues.

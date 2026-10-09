@@ -70,3 +70,22 @@ test('la grille boutique n\'affiche jamais un produit non publié', function () 
 
     $this->get(route('boutique.index'))->assertDontSee('Produit brouillon secret');
 });
+
+test('l\'accueil affiche les 4 engagements, sans « bio » ni certification non confirmée', function () {
+    $response = $this->get(route('home'))->assertOk();
+
+    $response->assertSee('Nos engagements')
+        ->assertSee('en point relais Chronopost', false)
+        ->assertSee('100 % sans gluten', false)
+        ->assertSee('se congèlent tranchés', false)
+        ->assertSee('fabriqués à la commande', false);
+
+    $section = str($response->getContent())->between('aria-label="Nos engagements"', '</section>');
+    expect((string) $section)->not->toContain('bio')->not->toContain('AFDIAG');
+});
+
+test('les pages de compte utilisent le gabarit du site (en-tête et pied de page)', function () {
+    foreach (['login', 'register', 'password.request'] as $route) {
+        $this->get(route($route))->assertOk()->assertSee('auth-card', false)->assertSee('Mon Sans Gluten by Angélique');
+    }
+});

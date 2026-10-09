@@ -10,7 +10,7 @@
         <input id="password" type="password" name="password" required>
         @error('password') <p class="error">{{ $message }}</p> @enderror
 
-        <label><input type="checkbox" name="remember" style="width:auto;display:inline"> Se souvenir de moi</label>
+        <label><input type="checkbox" name="remember"> Se souvenir de moi</label>
 
         <button type="submit">Se connecter</button>
     </form>

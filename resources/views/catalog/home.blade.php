@@ -115,21 +115,6 @@
         </div>
     @endif
 
-    {{-- Info livraison --}}
-    <div class="bg-sage px-4 py-12 text-center text-white">
-        <div class="mx-auto grid max-w-4xl gap-8 sm:grid-cols-3">
-            <div>
-                <p class="text-2xl" aria-hidden="true">🍞</p>
-                <p class="mt-2 font-medium">Fabrication à la commande</p>
-            </div>
-            <div>
-                <p class="text-2xl" aria-hidden="true">📦</p>
-                <p class="mt-2 font-medium">Livraison Chronopost Relais</p>
-            </div>
-            <div>
-                <p class="text-2xl" aria-hidden="true">🔒</p>
-                <p class="mt-2 font-medium">Paiement sécurisé</p>
-            </div>
-        </div>
-    </div>
+    {{-- Engagements (livraison, sans gluten, congélation, fabrication à la commande) --}}
+    <x-site.reassurance />
 </x-layouts.app>
