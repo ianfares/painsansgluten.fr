@@ -300,3 +300,16 @@ test('une commande impossible à annuler n\'empêche pas le traitement des virem
     expect($second->fresh()->status)->toBe(OrderStatus::Cancelled)
         ->and($first->fresh()->status)->toBe(OrderStatus::Paid);
 });
+
+// --- T23 : en-têtes de sécurité ------------------------------------------------
+
+test('toutes les pages envoient les en-têtes de sécurité, sans divulguer la version de PHP', function () {
+    foreach (['/', '/connexion', '/admin/login'] as $url) {
+        $this->get($url)
+            ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+            ->assertHeader('Content-Security-Policy-Report-Only')
+            ->assertHeaderMissing('X-Powered-By');
+    }
+});

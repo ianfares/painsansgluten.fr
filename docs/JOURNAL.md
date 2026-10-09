@@ -712,3 +712,20 @@ DOCUMENTATION : `docs/AUDIT-SECURITE-2026-10-09.md`, `docs/DECISIONS.md`.
 POINTS À RELIRE PAR UN HUMAIN : la section « Accepté / à décider » du rapport.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T23 (proxies Cloudflare + en-têtes + cookie Secure), puis T18 (rattachement des commandes invité), T21/T22 ; T01/T11 dès les identifiants Web Services Chronopost.
+
+---
+
+## [2026-10-09 14:15] — Claude Opus 5.5 — T23 — Durcissement sécurité
+STATUT : terminée. Livrable : `docs/SECURITY-REVIEW.md`.
+CONTEXTE POUR LA PROCHAINE IA : fait suite à l'audit du jour (`docs/AUDIT-SECURITE-2026-10-09.md`). Ian a configuré `mod_remoteip` sur Apache (guide donné, vérifié via la table `sessions`). Ian a aussi activé dans Cloudflare un **défi pour tous les pays sauf la France et les robots SEO connus** : il faut une règle d'exception pour `POST /webhooks/stripe` (sinon les paiements ne sont plus confirmés) — signalé à Ian.
+RÉSUMÉ : middleware `SecurityHeaders` (X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS hors local, CSP report-only, `X-Powered-By` retiré) ; `SESSION_SECURE_COOKIE` documenté et activé en préprod ; revue des points T23 (policies, validations, purification, uploads, logs, APP_DEBUG, audits de dépendances) consignée dans `docs/SECURITY-REVIEW.md`.
+FICHIERS : `app/Http/Middleware/SecurityHeaders.php` (nouveau), `bootstrap/app.php`, `.env.example`, `tests/Feature/Security/AuditFixesTest.php`, `docs/SECURITY-REVIEW.md` (nouveau), `docs/DECISIONS.md`. Préprod : `.env` (`SESSION_SECURE_COOKIE=true`).
+ANALYSE D'IMPACT : toutes les réponses reçoivent les en-têtes ; la CSP ne bloque rien (report-only). Le cookie de session n'est plus envoyé en HTTP en préprod.
+SÉCURITÉ : voir livrable. PERFORMANCE : négligeable.
+TESTS : 1 nouveau test (en-têtes sur 3 pages). Suite complète : 244 passés / 0 échec.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur.
+DOCUMENTATION : `docs/SECURITY-REVIEW.md`, `docs/DECISIONS.md`.
+À RENSEIGNER / QUESTIONS OUVERTES : règle d'exception Cloudflare pour le webhook Stripe ; pare-feu du serveur limité aux IP Cloudflare (recommandé).
+POINTS À RELIRE PAR UN HUMAIN : règles Cloudflare (pays, webhook).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T18 (rattachement des commandes invité), T21 (SEO), T22 (GTM/cookies, puis durcir la CSP) ; T01/T11 dès les identifiants WS Chronopost.
