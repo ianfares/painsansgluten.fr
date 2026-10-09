@@ -35,3 +35,87 @@
 [x-cloak] {
     display: none !important;
 }
+
+/*
+ * Pages de compte (`x-layouts.auth`) : mise en forme des champs des vues
+ * `resources/views/auth/*`, aux couleurs de la boutique.
+ */
+.auth-card p {
+    font-size: 0.875rem;
+    color: var(--color-ink-muted);
+}
+.auth-card label {
+    display: block;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-ink);
+}
+.auth-card label:has(input[type='checkbox']) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 400;
+}
+.auth-card input:not([type='checkbox']):not([type='hidden']) {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-field);
+    font-size: 0.875rem;
+    color: var(--color-ink);
+    background: #fff;
+}
+.auth-card input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-sage);
+}
+.auth-card input[type='checkbox'] {
+    accent-color: var(--color-sage);
+}
+.auth-card .cf-turnstile {
+    margin-top: 1.25rem;
+}
+.auth-card button {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-button);
+    background: var(--color-sage);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-button);
+    cursor: pointer;
+}
+.auth-card button:hover {
+    background: var(--color-sage-dark);
+}
+.auth-card form + form button {
+    margin-top: 0.75rem;
+    background: transparent;
+    color: var(--color-ink);
+    border: 1px solid rgb(0 0 0 / 0.2);
+    box-shadow: none;
+}
+.auth-card .error {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: #dc2626;
+}
+.auth-card .status {
+    margin-block: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-field);
+    background: var(--color-cream-alt);
+    color: var(--color-sage-dark);
+}
+.auth-card a {
+    color: var(--color-sage-dark);
+    text-decoration: underline;
+}
+.auth-card form + p {
+    margin-top: 1.5rem;
+}

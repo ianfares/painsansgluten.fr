@@ -635,3 +635,20 @@ DOCUMENTATION : `docs/DECISIONS.md`.
 POINTS À RELIRE PAR UN HUMAIN : **constat hors périmètre** : les pages connexion / inscription / mot de passe oublié / réinitialisation / vérification d'email (`resources/views/auth/*`, layout `x-layouts.auth`) n'ont aucune mise en forme (ni en-tête ni charte de la boutique). À reprendre (proposé à Ian).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : mise en forme des pages de compte (si Ian valide), fin de T14, corrections des emails, T23.
+
+---
+
+## [2026-10-09 12:30] — Claude Opus 5.5 — (hors plan, demande Ian) — Bandeau d'engagements + pages de compte aux couleurs du site
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : référence visuelle `docs/reference/capture/look.png` (déplacée depuis la racine). Voir docs/DECISIONS.md (2026-10-09, bandeau) pour les textes volontairement écartés (bio, AFDIAG, durée de congélation, choix de date).
+RÉSUMÉ : (1) bandeau de 4 engagements en bas de l'accueil (livraison en point relais Chronopost hors Corse, 100 % sans gluten à Avranches, pains qui se congèlent tranchés, fabrication à la commande avec date d'expédition annoncée). (2) Connexion, inscription, mot de passe oublié/réinitialisation et vérification d'email : gabarit du site + carte centrée, champs et boutons aux couleurs de la boutique.
+FICHIERS : créés : `resources/views/components/site/reassurance.blade.php`. Modifiés : `resources/views/catalog/home.blade.php`, `resources/views/components/layouts/auth.blade.php`, `resources/views/auth/login.blade.php`, `resources/css/app.css`, `tests/Feature/Catalog/CatalogPagesTest.php`, `docs/DECISIONS.md`. Déplacé : `look.png` → `docs/reference/capture/look.png`.
+ANALYSE D'IMPACT : accueil (bas de page) et 6 pages de compte ; aucune logique modifiée.
+SÉCURITÉ : textes du bandeau en dur (pas d'entrée utilisateur). PERFORMANCE : icônes SVG en ligne, aucune image chargée.
+TESTS : 2 nouveaux (bandeau sans « bio »/AFDIAG, gabarit des pages de compte). Rendu vérifié dans le navigateur. Suite complète : 228 passés / 0 échec.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur, `npm audit` : 0 vulnérabilité.
+DOCUMENTATION : `docs/DECISIONS.md`.
+À RENSEIGNER / QUESTIONS OUVERTES : la cliente confirme-t-elle une certification AFDIAG (avec justificatif) ? Si oui, l'ajouter au bandeau.
+POINTS À RELIRE PAR UN HUMAIN : textes du bandeau.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des emails, T18 (rattachement des commandes invité), T23.
