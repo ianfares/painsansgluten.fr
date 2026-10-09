@@ -35,7 +35,9 @@ class SecurityHeaders
         $response = $next($request);
 
         // Version de PHP non divulguée.
-        header_remove('X-Powered-By');
+        if (! headers_sent()) {
+            header_remove('X-Powered-By');
+        }
         $response->headers->remove('X-Powered-By');
 
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
