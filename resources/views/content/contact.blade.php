@@ -1,4 +1,4 @@
-<x-layouts.app :title="$page?->seo_title ?: 'Contact'">
+<x-layouts.app :title="$page?->seo_title ?: 'Contact'" :description="$page?->seo_description ?: 'Contactez Mon Sans Gluten by Angélique, boulangerie 100 % sans gluten à Avranches : questions sur nos produits, une commande ou la livraison.'">
     <div class="mx-auto max-w-3xl px-4 py-10">
         <x-ui.breadcrumb :items="[['label' => 'Contact']]" class="mb-6" />
         <h1 class="mb-6 text-2xl font-semibold text-ink">{{ $page?->title ?: 'Contact' }}</h1>

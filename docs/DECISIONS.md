@@ -353,3 +353,15 @@
 - **Vraie IP** : `mod_remoteip` côté Apache (configuré par Ian : `/etc/apache2/conf-available/cloudflare-remoteip.conf`, plages téléchargées depuis cloudflare.com/ips-v4 et ips-v6 ; logs en `%a`). Préféré au `trustProxies` de Laravel : une seule source de vérité pour Apache (logs, règles) et PHP. ⚠️ Liste Cloudflare à rafraîchir périodiquement (T25).
 - **En-têtes** : middleware global `SecurityHeaders` ; CSP en report-only tant que GTM (T22) n'est pas en place.
 - **Cookie** : `SESSION_SECURE_COOKIE=true` en préprod/prod.
+
+## 2026-10-09 — T21 — SEO technique orienté moteurs et assistants IA
+
+- **Écart à la stack à valider par Ian** : `spatie/laravel-sitemap` (prévu par CLAUDE.md §2) n'est **pas** installé : il ajoutait 7 paquets (dont un pilote de navigateur headless et un crawler) et rétrogradait Guzzle 8 → 7 (client HTTP de Stripe, Brevo, Turnstile). Remplacé par une vue Blade XML (`resources/views/seo/sitemap.blade.php`) générée à la demande, mise en cache et invalidée à chaque modification de produit, catégorie, page ou FAQ (plus fraîche qu'une génération quotidienne, sans tâche planifiée). Revenir au paquet si Ian le préfère.
+- **Données structurées** (`App\Services\Seo\StructuredData`) : Organization + Bakery (accueil), Product + Offer (fiche ; **pas d'offre si prix = 0**), BreadcrumbList (catégories, fiches, pages), FAQPage. Uniquement les champs renseignés en BO, jamais de valeur inventée. Encodage `JSON_HEX_TAG` (une réponse FAQ contenant `</script>` ne peut pas sortir du bloc).
+- **Balises** : gabarit `layouts.app` (title, description avec repli, canonical, Open Graph, Twitter) ; `noindex` sur panier, commande, compte, connexion/inscription ; `X-Robots-Tag: noindex` sur toute réponse hors production.
+- **robots.txt dynamique** : hors production `Disallow: /` ; en production, pages privées interdites, **robots d'IA explicitement autorisés** (GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended, Bingbot) + `Sitemap:`. Fichier statique `public/robots.txt` supprimé.
+- **llms.txt** : résumé Markdown de la boutique (activité, livraison, catégories avec leur texte, produits publiés, pages), généré depuis la base, même cache que le sitemap.
+- **Paramètres ajoutés** (référencement local) : Instagram, lien de la fiche Google Business, horaires d'ouverture (répéteur jour/ouverture/fermeture, format schema.org).
+- **Catégories** : le texte de présentation (déjà saisi en BO mais jamais affiché) est affiché sous le titre.
+- **Logo** : version HD fournie par Ian (`docs/reference/branding/logo-hd.png`, 1254 px) ; `branding/logo.jpg` 512 px (33 Ko, fond crème plein → JPEG, lisible par toutes les messageries) et `branding/logo-og.jpg` 1200×630 (48 Ko) comme image de partage par défaut.
+- **Cloudflare** : les règles de défi par pays et la fonction « bloquer les robots d'IA » de Cloudflare peuvent bloquer GPTBot, PerplexityBot… : à vérifier avant la mise en production.

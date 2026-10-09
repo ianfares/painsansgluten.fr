@@ -5,7 +5,25 @@
         ->implode(', ');
 @endphp
 
-<x-layouts.app :title="$product->name">
+@php
+    $seoData = app(\App\Services\Seo\StructuredData::class);
+    $mainMedia = $product->getFirstMedia('main');
+    $seoSchema = [
+        $seoData->product($product),
+        $seoData->breadcrumb([
+            ['label' => $product->category->name, 'url' => route('content.show', $product->category)],
+            ['label' => $product->name, 'url' => route('products.show', $product)],
+        ]),
+    ];
+@endphp
+
+<x-layouts.app
+    :title="$product->seo_title ?: $product->name"
+    :description="$product->seo_description ?: $seoData->plainText($product->short_description ?: $product->description, 160)"
+    :image="$mainMedia?->getUrl('fiche')"
+    og-type="product"
+    :schema="$seoSchema"
+>
     <div class="mx-auto max-w-6xl px-4 py-10">
         <x-ui.breadcrumb :items="[
             ['label' => $product->category->name, 'url' => route('content.show', $product->category)],
@@ -17,7 +35,7 @@
                 @php($mainImage = $product->getFirstMediaUrl('main', 'fiche'))
                 <div class="aspect-square overflow-hidden rounded-card bg-cream-alt">
                     @if ($mainImage)
-                        <img src="{{ $mainImage }}" alt="{{ $product->getFirstMedia('main')?->getCustomProperty('alt') ?? $product->name }}" class="h-full w-full object-cover">
+                        <img src="{{ $mainImage }}" width="800" height="800" fetchpriority="high" alt="{{ $product->getFirstMedia('main')?->getCustomProperty('alt') ?? $product->name }}" class="h-full w-full object-cover">
                     @else
                         <span class="flex h-full items-center justify-center text-sm text-ink-muted">Photo à venir</span>
                     @endif
@@ -26,7 +44,7 @@
                 @if ($product->getMedia('gallery')->isNotEmpty())
                     <div class="mt-4 grid grid-cols-4 gap-3">
                         @foreach ($product->getMedia('gallery') as $media)
-                            <img src="{{ $media->getUrl('thumbnail') }}" alt="{{ $media->getCustomProperty('alt') ?? '' }}" class="aspect-square rounded-card object-cover">
+                            <img src="{{ $media->getUrl('thumbnail') }}" width="150" height="150" loading="lazy" alt="{{ $media->getCustomProperty('alt') ?? '' }}" class="aspect-square rounded-card object-cover">
                         @endforeach
                     </div>
                 @endif

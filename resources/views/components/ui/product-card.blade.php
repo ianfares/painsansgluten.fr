@@ -12,7 +12,7 @@
 <div {{ $attributes->merge(['class' => 'flex flex-col overflow-hidden rounded-card border border-line bg-white']) }}>
     <a href="{{ $url }}" class="relative block aspect-square bg-cream-alt">
         @if ($image)
-            <img src="{{ $image }}" alt="{{ $product->getFirstMedia('main')?->getCustomProperty('alt') ?? $product->name }}" class="h-full w-full object-cover" loading="lazy" width="400" height="400">
+            <img src="{{ $image }}" width="400" height="400" loading="lazy" decoding="async" alt="{{ $product->getFirstMedia('main')?->getCustomProperty('alt') ?? $product->name }}" class="h-full w-full object-cover" loading="lazy" width="400" height="400">
         @else
             <span class="flex h-full items-center justify-center text-xs text-ink-muted">Photo à venir</span>
         @endif

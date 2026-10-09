@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Http\Controllers\Content\SeoFilesController;
+use App\Models\Category;
+use App\Models\FaqItem;
+use App\Models\Page;
+use App\Models\Product;
 use App\Models\User;
 use App\Services\Cart\CartService;
 use App\Settings\ShopSettings;
@@ -15,6 +20,7 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -61,6 +67,12 @@ class AppServiceProvider extends ServiceProvider
                 'url' => url(route('password.reset', ['token' => $token, 'email' => $notifiable->getEmailForPasswordReset()], false)),
                 'minutes' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire'),
             ]));
+
+        // Plan du site et llms.txt régénérés dès qu'un contenu change (T21).
+        foreach ([Product::class, Category::class, Page::class, FaqItem::class] as $model) {
+            $model::saved(fn () => Cache::deleteMultiple(SeoFilesController::CACHE_KEYS));
+            $model::deleted(fn () => Cache::deleteMultiple(SeoFilesController::CACHE_KEYS));
+        }
 
         // Expéditeur et adresse de réponse paramétrables en BO (PLAN.md §15).
         Event::listen(function (MessageSending $event): void {
