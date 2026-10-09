@@ -605,3 +605,15 @@ DOCUMENTATION : `docs/DECISIONS.md`.
 POINTS À RELIRE PAR UN HUMAIN : mention de finalité sous le formulaire.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des emails, T23.
+
+---
+
+## [2026-10-09 11:00] — Claude Opus 5.5 — (configuration) — Vraies clés Cloudflare Turnstile sur la préprod
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : suite de l'entrée « Page Contact ». Widget Turnstile créé par Ian pour `painsansgluten.fr` et `preprod.painsansgluten.fr` : les mêmes clés serviront en production.
+RÉSUMÉ : `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` posées dans le `.env` de la préprod (le local garde les clés de test, les vraies refusant `localhost`). Clé secrète validée auprès de Cloudflare (réponse `invalid-input-response` à un jeton bidon, et non `invalid-input-secret`).
+FICHIERS : `.env` préprod (hors dépôt), `docs/JOURNAL.md`.
+ANALYSE D'IMPACT / SÉCURITÉ / PERFORMANCE : le formulaire de contact de la préprod est désormais réellement protégé. La clé secrète a transité dans la conversation : à régénérer si besoin avant la production.
+TESTS : vérification réelle auprès de Cloudflare. QUALITÉ / DOCUMENTATION : sans objet / ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : aucune. POINTS À RELIRE PAR UN HUMAIN : envoyer un vrai message depuis /contact. AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : fin de T14 (secret webhook Stripe), corrections des emails, T23.
