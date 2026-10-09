@@ -681,3 +681,17 @@ DOCUMENTATION : ce journal.
 POINTS À RELIRE PAR UN HUMAIN : aucun.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T01 Chronopost (Ian a fourni numéro client + identifiant ; mot de passe WS attendu), puis T11.
+
+---
+
+## [2026-10-09 12:15] — Claude Opus 5.5 — T01 — Spike Chronopost : accès Web Services refusé
+STATUT : **bloquée** (identifiants Web Services non valides), aucun code applicatif écrit.
+CONTEXTE POUR LA PROCHAINE IA : Ian a confirmé « Chronopost seulement » (le compte Colissimo de la cliente ne sert pas). Il a fourni : numéro client `W3183964`, identifiant de l'espace client `aguyapi50300`, et un mot de passe (dans le `.env` **local** seulement, pas sur la préprod). Ces informations sont celles de l'espace client Chronopost, pas (ou pas encore) des identifiants Web Services.
+RÉSUMÉ : WSDL officiel récupéré : `https://ws.chronopost.fr/recherchebt-ws-cxf/PointRelaisServiceWS?wsdl` (SOAP, espace de noms `http://cxf.rechercheBt.soap.chronopost.fr/`). Opération retenue : `recherchePointChronopostInter` (paramètres : accountNumber, password, address, zipCode, city, countryCode, type, productCode, service, weight, shippingDate, maxPointChronopost, maxDistanceSearch, holidayTolerant, language, version). Réponse `pointCHRResult` : errorCode, errorMessage, qualiteReponse, listePointRelais (`pointCHR` : identifiant, nom, adresse1-3, codePostal, localite, codePays, coordonnées GPS, distanceEnMetre, horaires par jour avec créneaux début/fin, périodes de fermeture, poidsMaxi, typeDePoint, accesPersonneMobiliteReduite, actif, urlGoogleMaps). **2 appels réels** (50300, type P, productCode 86, service L) avec accountNumber `W3183964` puis `aguyapi50300` + le mot de passe fourni → `errorCode 1500 : « Vous n'êtes pas autorisé à utiliser ce service »`. Arrêt volontaire après 2 essais (risque de blocage du compte). PHP n'a pas l'extension SOAP (local et serveur) : prévoir des appels XML via le client HTTP de Laravel (pas de dépendance).
+FICHIERS : `docs/JOURNAL.md` ; `.env` local (identifiants, hors dépôt).
+ANALYSE D'IMPACT : aucune. SÉCURITÉ : identifiants hors Git ; mot de passe non posé sur la préprod. PERFORMANCE : sans objet.
+TESTS : appels réels décrits ci-dessus. QUALITÉ : sans objet. DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : la cliente doit obtenir de Chronopost ses **identifiants Web Services** : numéro de compte (souvent 8 chiffres, différent du numéro client `W…`) + mot de passe Web Services, avec l'activation du service de recherche de points relais pour ce compte, et le code produit du contrat (ex. Chrono Relais). Les valeurs `type=P`, `productCode=86`, `service=L` restent à confirmer par la doc Chronopost / l'interlocuteur.
+POINTS À RELIRE PAR UN HUMAIN : aucun.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : reprendre T01 dès réception des identifiants WS (relancer `scratchpad`-équivalent : un appel `recherchePointChronopostInter` sur 50300), puis T11. En attendant : T18 (rattachement des commandes invité), T23, T21/T22.
