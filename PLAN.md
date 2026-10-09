@@ -123,6 +123,7 @@ Catalogue → Fiche produit → Panier → Coordonnées → Choix relais Chronop
 - Filtres allergènes (« sans œuf », « sans lactose »).
 - FAQ contextuelle sur les fiches produits.
 - Événement GA4 `purchase` pour les virements (Measurement Protocol côté serveur).
+- **Espace professionnels (Lot B, T26)** : B1 (formulaire de demande de compte pro, page `/professionnels`, ressource BO « Demandes pro ») est livré ; **B2 catégories de clients et comptes pro, B3 prix remisés, B4 facturation et commandes pro sont en V2**, après réponse de Ian aux 8 points `À TRANCHER` (voir `docs/BACKLOG.md`). Rappel : la facturation électronique B2B est à valider avec l'expert-comptable avant d'ouvrir les ventes pro.
 
 > Toute demande hors V1 pendant le développement → `docs/BACKLOG.md`.
 
@@ -493,6 +494,10 @@ Note : Google n'affiche plus les résultats enrichis FAQ pour la plupart des sit
 ### 16.3 Accueil / Apparence (paramètres)
 Logo (+ favicon), bandeau d'annonce (texte + actif), bannière d'accueil (image, titre, sous-titre, texte et lien du bouton), produits mis en avant (sélection), texte de présentation, lien Facebook, coordonnées du pied de page, texte du bloc expédition des fiches, message produits non expédiables, message retrait relais.
 Couleurs et polices : **figées dans le code** (variables) en V1.
+
+### 16.3 bis Page Professionnels (T26 B1)
+Page publique `/professionnels` (lien « Professionnels » dans le pied de page, présente dans le sitemap) : texte de présentation éditable en BO (Paramètres > Boutique > Espace professionnels, valeur initiale reprise de la page B2B du Shopify) + formulaire de demande de compte pro : raison sociale, SIRET (14 chiffres, clé de Luhn), TVA intracommunautaire FR (facultatif), type d'activité (liste éditable en BO, « Autre » à préciser), contact, email, téléphone, adresse de l'établissement, produits d'intérêt (catégories actives, pâte à pizza crue, autre), volumes, description du besoin (2 000 caractères), consentement (lien vers la politique de confidentialité). Anti-spam : Turnstile + 3 demandes par heure et par IP. Stockage `pro_account_requests` (statuts `pending`, `approved`, `rejected`, commentaire admin, date de traitement). Emails : accusé de réception au demandeur, notification à l'admin, email à l'approbation (« nous revenons vers vous ») et au refus. BO : ressource « Demandes pro » (liste, filtre par statut, détail, actions Approuver / Refuser avec commentaire). La création du compte pro n'existe pas en B1.
+⚠️ Données personnelles : conservation des demandes refusées `À CONFIRMER` (proposition : 12 mois), à reporter dans la politique de confidentialité ; pas de purge automatique en V1.
 
 ### 16.4 Redirections
 Table `redirects` (source, cible, code 301, actif) + middleware ; CRUD simple dans le BO. Seed : voir §23.

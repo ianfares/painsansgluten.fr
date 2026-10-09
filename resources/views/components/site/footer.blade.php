@@ -38,6 +38,7 @@
             <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Informations</p>
             <ul class="mt-3 space-y-2 text-sm text-ink-muted">
                 <li><a href="{{ route('faq') }}" class="hover:text-sage">FAQ</a></li>
+                <li><a href="{{ route('pro.request.create') }}" class="hover:text-sage">Professionnels</a></li>
                 @foreach ($footerPages as $page)
                     <li>
                         <a href="{{ route('content.show', $page) }}" class="hover:text-sage">

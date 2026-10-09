@@ -18,10 +18,13 @@ use App\View\Composers\HeaderComposer;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Stripe\StripeClient;
@@ -42,6 +45,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Garde-fou large sur toutes les soumissions du formulaire pro (échecs de validation compris) ;
+        // la limite métier de 3 demandes acceptées / heure / IP est dans ProAccountRequestController.
+        RateLimiter::for('pro-request', fn (Request $request) => Limit::perHour(30)->by((string) $request->ip()));
+
         View::composer('components.site.header', HeaderComposer::class);
         View::composer('components.site.footer', FooterComposer::class);
         View::composer('components.layouts.app', CartCountComposer::class);

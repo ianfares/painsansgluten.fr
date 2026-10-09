@@ -58,6 +58,7 @@ class SeoFilesController extends Controller
                 ['loc' => route('boutique.index'), 'lastmod' => null],
                 ['loc' => route('faq'), 'lastmod' => FaqItem::query()->max('updated_at')],
                 ['loc' => route('contact'), 'lastmod' => null],
+                ['loc' => route('pro.request.create'), 'lastmod' => null],
             ])
                 ->merge(Category::query()->where('is_active', true)->orderBy('position')->get()
                     ->map(fn (Category $c) => ['loc' => route('content.show', $c), 'lastmod' => $c->updated_at]))

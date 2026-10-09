@@ -35,6 +35,12 @@ class ShopSettings extends Settings
     /** Mention affichée sous l'adresse (T26 A8), ex. « Laboratoire — pas d'accueil du public ». */
     public ?string $address_note;
 
+    /** Texte de présentation de la page « Professionnels » (HTML, purifié à l'affichage). */
+    public ?string $pro_intro_html;
+
+    /** @var list<string> Types d'activité proposés dans le formulaire de demande pro. */
+    public array $pro_activity_types;
+
     public ?string $sender_email;
 
     public ?string $reply_to_email;
