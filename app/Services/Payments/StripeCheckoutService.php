@@ -58,9 +58,9 @@ class StripeCheckoutService
 
         $session = $this->stripe->checkout->sessions->create([
             'mode' => 'payment',
-            // Carte uniquement (PLAN.md §10) : Apple Pay / Google Pay passent par la carte ;
-            // sans cela Stripe propose aussi Klarna, Bancontact… selon le tableau de bord.
-            'payment_method_types' => ['card'],
+            // Moyens de paiement : réglés dans le tableau de bord Stripe (Paramètres >
+            // Moyens de paiement), l'API n'accepte plus `payment_method_types`.
+            // PLAN.md §10 : carte uniquement (Apple Pay / Google Pay inclus).
             'locale' => 'fr',
             'customer_email' => $order->email,
             'client_reference_id' => (string) $order->id,

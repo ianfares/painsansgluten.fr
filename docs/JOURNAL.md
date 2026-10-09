@@ -729,3 +729,18 @@ DOCUMENTATION : `docs/SECURITY-REVIEW.md`, `docs/DECISIONS.md`.
 POINTS À RELIRE PAR UN HUMAIN : règles Cloudflare (pays, webhook).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T18 (rattachement des commandes invité), T21 (SEO), T22 (GTM/cookies, puis durcir la CSP) ; T01/T11 dès les identifiants WS Chronopost.
+
+---
+
+## [2026-10-09 14:40] — Claude Opus 5.5 — (correctif urgent) — T14 : `payment_method_types` refusé par l'API Stripe
+STATUT : terminée
+CONTEXTE POUR LA PROCHAINE IA : le correctif « carte uniquement » du 2026-10-09 11:50 envoyait `payment_method_types: ['card']`. L'API Stripe utilisée par stripe-php v22 le **refuse** (« no longer supported… Payment methods are now managed from your Dashboard settings »). Découvert en réel en testant l'acheminement des webhooks : toute création de session échouait en préprod entre 11:50 et 14:40 (le client voyait « Le paiement par carte est momentanément indisponible »). Les tests ne l'avaient pas vu car Stripe y est simulé.
+RÉSUMÉ : paramètre retiré ; le test vérifie désormais qu'il n'est jamais envoyé. **Carte uniquement = réglage du tableau de bord Stripe** (Paramètres > Moyens de paiement : désactiver Klarna, Bancontact, MB WAY…) — à faire par Ian, en mode test puis en mode live.
+FICHIERS : `app/Services/Payments/StripeCheckoutService.php`, `tests/Feature/Payments/StripeCheckoutTest.php`, `docs/JOURNAL.md`.
+ANALYSE D'IMPACT : création des sessions Stripe rétablie. SÉCURITÉ / PERFORMANCE : sans objet.
+TESTS : suite Payments au vert ; création de session vérifiée en réel sur la préprod après déploiement.
+QUALITÉ : pint/phpstan au vert. DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : moyens de paiement à régler dans le tableau de bord Stripe (Ian).
+POINTS À RELIRE PAR UN HUMAIN : leçon : toute modification des paramètres envoyés à Stripe doit être vérifiée par un appel réel en mode test, pas seulement par les tests simulés.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : vérifier l'acheminement des webhooks Stripe à travers les règles pays de Cloudflare.
