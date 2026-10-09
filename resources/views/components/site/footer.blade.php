@@ -20,6 +20,9 @@
                     <br>{{ $shopSettings->postal_code }} {{ $shopSettings->city }}
                 @endif
             </p>
+            @if ($shopSettings->address_note)
+                <p class="mt-1 text-xs italic text-ink-muted">{{ $shopSettings->address_note }}</p>
+            @endif
             @if ($shopSettings->facebook_url)
                 <a
                     href="{{ $shopSettings->facebook_url }}"

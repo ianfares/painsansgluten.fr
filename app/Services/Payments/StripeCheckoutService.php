@@ -8,6 +8,7 @@ use App\Enums\PaymentMethod;
 use App\Exceptions\Payments\PaymentAlreadyCompleted;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Settings\ShippingSettings;
 use RuntimeException;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
@@ -43,7 +44,7 @@ class StripeCheckoutService
                 'price_data' => [
                     'currency' => 'eur',
                     'unit_amount' => $order->shipping_ttc,
-                    'product_data' => ['name' => 'Livraison Chronopost Relais'],
+                    'product_data' => ['name' => app(ShippingSettings::class)->carrier_label ?: 'Livraison Chronopost Relais'],
                 ],
             ];
         }

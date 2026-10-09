@@ -17,7 +17,7 @@ class ShippingRateFactory extends Factory
         return [
             'min_weight_g' => 0,
             'max_weight_g' => 1000,
-            'price_ttc' => 590,
+            'price_ht' => 500,
         ];
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\View\Composers;
 
 use App\Models\Category;
+use App\Models\Page;
 use App\Settings\HomepageSettings;
 use App\Settings\ShopSettings;
 use Illuminate\View\View;
@@ -16,12 +17,17 @@ use Illuminate\View\View;
  */
 class HeaderComposer
 {
+    public const MENU_PAGE_SLUGS = ['notre-histoire', 'ou-nous-trouver'];
+
     public function compose(View $view): void
     {
         $view->with([
             'homepageSettings' => app(HomepageSettings::class),
             'shopSettings' => app(ShopSettings::class),
             'headerCategories' => Category::query()->where('is_active', true)->orderBy('position')->get(),
+            // Pages du menu (T26 A8/A9) : affichées seulement une fois publiées.
+            'menuPages' => Page::query()->whereIn('slug', self::MENU_PAGE_SLUGS)->where('is_published', true)->get()
+                ->sortBy(fn (Page $page) => array_search($page->slug, self::MENU_PAGE_SLUGS, true))->values(),
         ]);
     }
 }

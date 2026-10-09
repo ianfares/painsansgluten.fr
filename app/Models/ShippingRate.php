@@ -9,11 +9,20 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['min_weight_g', 'max_weight_g', 'price_ttc'])]
+/**
+ * Tranche de la grille transporteur. Prix saisi en HT (T26 A7), en centimes.
+ */
+#[Fillable(['min_weight_g', 'max_weight_g', 'price_ht'])]
 class ShippingRate extends Model
 {
     /** @use HasFactory<ShippingRateFactory> */
     use HasFactory;
+
+    /** Prix TTC facturé au client, en centimes, arrondi au centime. */
+    public function priceTtc(float $vatRate): int
+    {
+        return (int) round($this->price_ht * (1 + $vatRate / 100));
+    }
 
     /**
      * @return array<string, string>
@@ -23,7 +32,7 @@ class ShippingRate extends Model
         return [
             'min_weight_g' => 'integer',
             'max_weight_g' => 'integer',
-            'price_ttc' => 'integer',
+            'price_ht' => 'integer',
         ];
     }
 }

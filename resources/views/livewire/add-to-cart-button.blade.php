@@ -11,7 +11,7 @@
         type="button"
         wire:click="add"
         wire:loading.attr="disabled"
-        class="inline-flex items-center justify-center gap-2 rounded-button bg-sage px-4 py-2 text-xs font-semibold text-white shadow-button hover:bg-sage-dark disabled:opacity-50"
+        class="btn btn-sm"
     >
         {{ $added ? 'Ajouté ✓' : 'Ajouter au panier' }}
     </button>

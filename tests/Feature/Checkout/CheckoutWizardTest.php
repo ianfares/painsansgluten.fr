@@ -28,7 +28,7 @@ function seedShippingOk(): void
     $settings->free_shipping_enabled = false;
     $settings->save();
 
-    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ttc' => 590]);
+    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ht' => 500]);
 }
 
 function fillStep1(Testable $component): Testable

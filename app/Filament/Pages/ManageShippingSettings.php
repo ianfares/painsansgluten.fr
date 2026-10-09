@@ -44,6 +44,7 @@ class ManageShippingSettings extends SettingsPage
             Section::make('Chronopost')
                 ->schema([
                     TextInput::make('chronopost_product_code')->label('Code produit Chronopost')->maxLength(50),
+                    TextInput::make('carrier_label')->label('Libellé du transporteur (affiché au client)')->maxLength(100),
                     TextInput::make('tracking_url_template')
                         ->label('Modèle d\'URL de suivi')
                         ->placeholder('https://www.chronopost.fr/tracking-no-cms/suivi-page?listeNumerosLT={tracking}')
@@ -68,7 +69,7 @@ class ManageShippingSettings extends SettingsPage
 
             Section::make('Textes éditables')
                 ->schema([
-                    Textarea::make('shipping_block_text')->label('Bloc expédition (fiche produit)')->rows(2),
+                    Textarea::make('shipping_block_text')->label('Bloc « Expédition et livraison » (fiche produit)')->helperText('Une ligne vide sépare deux paragraphes.')->rows(8),
                     Textarea::make('non_shippable_message')->label('Message produit non expédiable')->rows(2),
                     Textarea::make('relay_pickup_message')->label('Message retrait en relais')->rows(2),
                 ]),

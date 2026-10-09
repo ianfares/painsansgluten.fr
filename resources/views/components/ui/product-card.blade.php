@@ -12,7 +12,7 @@
 <div {{ $attributes->merge(['class' => 'flex flex-col overflow-hidden rounded-card border border-line bg-white']) }}>
     <a href="{{ $url }}" class="relative block aspect-square bg-cream-alt">
         @if ($image)
-            <img src="{{ $image }}" width="400" height="400" loading="lazy" decoding="async" alt="{{ $product->getFirstMedia('main')?->getCustomProperty('alt') ?? $product->name }}" class="h-full w-full object-cover" loading="lazy" width="400" height="400">
+            <img src="{{ $image }}" width="400" height="400" loading="lazy" decoding="async" alt="{{ $product->getFirstMedia('main')?->getCustomProperty('alt') ?? $product->name }}" class="h-full w-full object-cover">
         @else
             <span class="flex h-full items-center justify-center text-xs text-ink-muted">Photo à venir</span>
         @endif
@@ -27,8 +27,11 @@
     <div class="flex flex-1 flex-col gap-2 p-4">
         <span class="text-xs uppercase tracking-wide text-ochre">{{ $product->category->name }}</span>
         <a href="{{ $url }}" class="font-medium text-ink hover:text-sage">{{ $product->name }}</a>
+        @if ($product->is_shippable)
+            <div><x-ui.badge variant="shippable">Livraison possible</x-ui.badge></div>
+        @endif
 
-        <div class="mt-auto flex items-center justify-between gap-2">
+        <div class="mt-auto flex flex-wrap items-center justify-between gap-2">
             <span class="font-semibold text-ink">{{ number_format($product->price_ttc / 100, 2, ',', ' ') }} €</span>
 
             @if ($orderable)

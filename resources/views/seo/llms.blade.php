@@ -8,7 +8,7 @@
 - Produits frais, fabriqués à la commande : la date d'expédition est annoncée avant le paiement.
 - Livraison uniquement en point relais Chronopost, en France métropolitaine (hors Corse). Les colis sont à retirer le jour même de leur mise à disposition.
 @if ($shop->city)
-- Adresse : {!! collect([$shop->address_line1, trim(($shop->postal_code ?? '').' '.$shop->city)])->filter()->implode(', ') !!}
+- Adresse : {!! collect([$shop->address_line1, trim(($shop->postal_code ?? '').' '.$shop->city)])->filter()->implode(', ') !!}@if ($shop->address_note) ({!! $shop->address_note !!})@endif
 @endif
 @if ($shop->contact_email)
 - Contact : {!! $shop->contact_email !!}@if ($shop->contact_phone) — {!! $shop->contact_phone !!}@endif

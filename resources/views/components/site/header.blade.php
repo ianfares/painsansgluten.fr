@@ -51,34 +51,41 @@
             </a>
 
             <div class="flex items-center justify-end gap-3 lg:justify-self-end">
+                {{-- Icônes monochromes au trait (T26 A3) : vert, ocre au survol. --}}
                 <a
                     href="{{ auth()->check() ? route('compte.dashboard') : route('login') }}"
                     aria-label="Mon compte"
-                    class="group flex flex-col items-center gap-1"
+                    class="group flex flex-col items-center gap-1 text-sage transition hover:text-ochre focus-visible:text-ochre"
                 >
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-sage-dark text-white transition group-hover:bg-sage">
-                        <span aria-hidden="true" class="text-base">👤</span>
-                    </span>
-                    <span class="hidden text-[10px] font-semibold uppercase tracking-wide text-ink-muted sm:block">Mon compte</span>
+                    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+                    </svg>
+                    <span class="hidden text-[10px] font-semibold uppercase tracking-wide sm:block">Mon compte</span>
                 </a>
                 <button
                     type="button"
+                    x-data="{ count: {{ (int) ($cartCount ?? 0) }} }"
+                    x-on:cart-count.window="count = $event.detail.count"
                     x-on:click="window.dispatchEvent(new CustomEvent('open-drawer-cart'))"
-                    class="group flex flex-col items-center gap-1"
-                    aria-label="Panier"
+                    x-bind:aria-label="'Mon panier, ' + count + (count > 1 ? ' articles' : ' article')"
+                    aria-label="Mon panier, {{ (int) ($cartCount ?? 0) }} {{ ($cartCount ?? 0) > 1 ? 'articles' : 'article' }}"
+                    class="group flex flex-col items-center gap-1 text-sage transition hover:text-ochre focus-visible:text-ochre"
                 >
-                    <span class="relative flex h-10 w-10 items-center justify-center rounded-full bg-sage-dark text-white transition group-hover:bg-sage">
-                        <span aria-hidden="true" class="text-base">🛍️</span>
+                    <span class="relative">
+                        <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 8h14l-1.2 12H6.2L5 8z" />
+                            <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+                        </svg>
                         <span
-                            x-data="{ count: {{ (int) ($cartCount ?? 0) }} }"
-                            x-on:cart-count.window="count = $event.detail.count"
                             x-show="count > 0"
                             x-text="count"
                             @if (($cartCount ?? 0) === 0) style="display: none" @endif
-                            class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-ochre text-[10px] text-white"
+                            aria-hidden="true"
+                            class="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-ochre px-1 text-[10px] font-bold text-white"
                         >{{ $cartCount ?? 0 }}</span>
                     </span>
-                    <span class="hidden text-[10px] font-semibold uppercase tracking-wide text-ink-muted sm:block">Mon panier</span>
+                    <span class="hidden text-[10px] font-semibold uppercase tracking-wide sm:block">Mon panier</span>
                 </button>
             </div>
         </div>
@@ -94,6 +101,9 @@
                     <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
                     {{ $category->name }}
                 </a>
+            @endforeach
+            @foreach ($menuPages as $menuPage)
+                <a href="{{ route('content.show', $menuPage) }}" class="text-sm font-medium text-ink hover:text-sage">{{ $menuPage->title }}</a>
             @endforeach
         </div>
     </div>
@@ -117,6 +127,9 @@
                     <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
                     {{ $category->name }}
                 </a>
+            @endforeach
+            @foreach ($menuPages as $menuPage)
+                <a href="{{ route('content.show', $menuPage) }}" class="text-ink hover:text-sage">{{ $menuPage->title }}</a>
             @endforeach
             <a href="{{ route('faq') }}" class="text-ink hover:text-sage">F.A.Q.</a>
             <a href="{{ route('contact') }}" class="text-ink hover:text-sage">Contact</a>

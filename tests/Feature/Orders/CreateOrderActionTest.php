@@ -17,7 +17,7 @@ beforeEach(function () {
     $settings->production_lead_days = 1;
     $settings->shipping_vat_rate = 20.0;
     $settings->save();
-    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ttc' => 590]);
+    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ht' => 500]);
 });
 
 function customerPayload(): array
@@ -73,8 +73,8 @@ test('les totaux sont toujours recalculés côté serveur, jamais depuis une val
 
     // 3 x 10,00 € = 30,00 € + 5,90 € de port = 35,90 €, indépendamment de toute valeur externe.
     expect($order->subtotal_ttc)->toBe(3000)
-        ->and($order->shipping_ttc)->toBe(590)
-        ->and($order->total_ttc)->toBe(3590);
+        ->and($order->shipping_ttc)->toBe(600)
+        ->and($order->total_ttc)->toBe(3600);
 });
 
 test('un panier vide ne peut pas créer de commande', function () {

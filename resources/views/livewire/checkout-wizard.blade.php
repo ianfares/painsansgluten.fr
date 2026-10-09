@@ -94,7 +94,7 @@
                     @if ($totals['shipping_error'])
                         <x-ui.alert variant="danger">Livraison momentanément indisponible pour votre commande. Contactez-nous pour la finaliser.</x-ui.alert>
                     @else
-                        <div class="flex justify-between"><span>Frais de port</span><span>{{ $totals['shipping_ttc'] === 0 ? 'Offerts' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
+                        <div class="flex justify-between gap-4"><span>{{ app(\App\Settings\ShippingSettings::class)->carrier_label ?: 'Frais de port' }}</span><span class="whitespace-nowrap">{{ $totals['shipping_ttc'] === 0 ? 'Offerts' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
                         <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
                         @if ($totals['planned_ship_date'])
                             <p class="text-xs text-ink-muted">📦 Expédition prévue le {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>

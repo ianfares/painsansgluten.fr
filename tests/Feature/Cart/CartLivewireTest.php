@@ -16,7 +16,7 @@ beforeEach(function () {
     $settings->order_cutoff_time = '15:00';
     $settings->production_lead_days = 1;
     $settings->save();
-    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ttc' => 590]);
+    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ht' => 500]);
 });
 
 test('cliquer sur ajouter au panier ajoute le produit et met à jour le bouton', function () {

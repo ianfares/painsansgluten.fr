@@ -35,6 +35,9 @@ class HomepageSettings extends Settings
 
     public ?string $presentation_text;
 
+    /** Slogan officiel affiché sur l'accueil (T26 A9). */
+    public ?string $slogan;
+
     public static function group(): string
     {
         return 'homepage';

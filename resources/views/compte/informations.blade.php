@@ -85,7 +85,7 @@
                 <p class="mb-4 text-sm text-red-700">Cette demande sera traitée manuellement par notre équipe (vos commandes et factures sont conservées pour obligation comptable).</p>
                 <form method="POST" action="{{ route('compte.deletion.request') }}">
                     @csrf
-                    <x-ui.button type="submit" variant="outline" class="border-red-300 text-red-700 hover:bg-red-100">
+                    <x-ui.button type="submit" variant="outline" class="border-red-300 text-red-700 hover:border-transparent hover:text-white">
                         Demander la suppression de mon compte
                     </x-ui.button>
                 </form>

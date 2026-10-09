@@ -20,14 +20,14 @@
         @endif
 
         <div class="mb-8 flex flex-wrap gap-2">
-            <x-ui.button variant="{{ $activeCategory ? 'outline' : 'primary' }}" :href="route('boutique.index')" class="px-4 py-2 text-xs">
+            <x-ui.button variant="{{ $activeCategory ? 'outline' : 'primary' }}" :href="route('boutique.index')" class="btn-sm">
                 Tous les produits
             </x-ui.button>
             @foreach ($categories as $category)
                 <x-ui.button
                     variant="{{ $activeCategory?->is($category) ? 'primary' : 'outline' }}"
                     :href="route('content.show', $category)"
-                    class="px-4 py-2 text-xs"
+                    class="btn-sm"
                 >
                     {{ $category->name }}
                 </x-ui.button>

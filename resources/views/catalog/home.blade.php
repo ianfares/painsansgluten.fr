@@ -1,6 +1,6 @@
 @php($homepage = $homepageSettings)
 
-<x-layouts.app :schema="[app(\App\Services\Seo\StructuredData::class)->bakery()]">
+<x-layouts.app :schema="[app(\App\Services\Seo\StructuredData::class)->organization()]">
     {{-- Bannière --}}
     <div class="relative bg-cream-alt">
         <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -75,10 +75,15 @@
         </div>
     </div>
 
-    {{-- Texte de présentation --}}
-    @if ($homepage->presentation_text)
-        <div class="mx-auto max-w-3xl px-4 py-12 text-center text-ink-muted">
-            {{ $homepage->presentation_text }}
+    {{-- Slogan (T26 A9) et texte de présentation --}}
+    @if ($homepage->slogan || $homepage->presentation_text)
+        <div class="mx-auto max-w-3xl px-4 py-12 text-center">
+            @if ($homepage->slogan)
+                <p class="text-2xl font-semibold italic text-sage">« {{ $homepage->slogan }} »</p>
+            @endif
+            @if ($homepage->presentation_text)
+                <p class="mt-4 text-ink-muted">{{ $homepage->presentation_text }}</p>
+            @endif
         </div>
     @endif
 
