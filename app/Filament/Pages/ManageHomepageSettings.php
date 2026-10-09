@@ -31,8 +31,8 @@ class ManageHomepageSettings extends SettingsPage
             Section::make('Identité visuelle')
                 ->description('Couleurs et polices restent figées dans le code en V1 (PLAN.md §16.3).')
                 ->schema([
-                    FileUpload::make('logo_path')->label('Logo')->image()->directory('branding'),
-                    FileUpload::make('favicon_path')->label('Favicon')->image()->directory('branding'),
+                    FileUpload::make('logo_path')->label('Logo')->image()->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])->maxSize(5120)->directory('branding'),
+                    FileUpload::make('favicon_path')->label('Favicon')->image()->acceptedFileTypes(['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/webp'])->maxSize(1024)->directory('branding'),
                 ])
                 ->columns(2),
 
@@ -45,7 +45,7 @@ class ManageHomepageSettings extends SettingsPage
 
             Section::make('Bannière d\'accueil')
                 ->schema([
-                    FileUpload::make('banner_image_path')->label('Image')->image()->directory('branding'),
+                    FileUpload::make('banner_image_path')->label('Image')->image()->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])->maxSize(5120)->directory('branding'),
                     TextInput::make('banner_title')->label('Titre')->maxLength(255),
                     TextInput::make('banner_subtitle')->label('Sous-titre')->maxLength(255),
                     TextInput::make('banner_button_text')->label('Texte du bouton')->maxLength(100),

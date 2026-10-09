@@ -30,7 +30,7 @@ class ManageSeoSettings extends SettingsPage
                 ->schema([
                     TextInput::make('default_title')->label('Title par défaut')->maxLength(255),
                     Textarea::make('default_description')->label('Description par défaut')->rows(2)->maxLength(300),
-                    FileUpload::make('default_og_image_path')->label('Image Open Graph par défaut')->image()->directory('branding'),
+                    FileUpload::make('default_og_image_path')->label('Image Open Graph par défaut')->image()->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])->maxSize(5120)->directory('branding'),
                 ]),
         ]);
     }

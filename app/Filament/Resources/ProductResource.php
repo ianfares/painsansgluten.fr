@@ -173,11 +173,13 @@ class ProductResource extends Resource
                                 ->label('Image principale')
                                 ->collection('main')
                                 ->image()
+                                ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])->maxSize(10240)
                                 ->required($requiredToPublish),
                             SpatieMediaLibraryFileUpload::make('gallery')
                                 ->label('Galerie')
                                 ->collection('gallery')
                                 ->image()
+                                ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])->maxSize(10240)
                                 ->multiple()
                                 ->reorderable()
                                 ->appendFiles(),

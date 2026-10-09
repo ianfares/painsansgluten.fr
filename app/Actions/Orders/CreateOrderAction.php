@@ -38,6 +38,10 @@ class CreateOrderAction
     public function execute(Cart $cart, array $customer, array $billing, array $relay, PaymentMethod $paymentMethod, ?int $userId = null): Order
     {
         return DB::transaction(function () use ($cart, $customer, $billing, $relay, $paymentMethod, $userId) {
+            // Verrou sur le panier : deux validations simultanées (double clic,
+            // deux onglets) ne créent qu'une commande, la seconde trouve le panier vide.
+            Cart::query()->whereKey($cart->id)->lockForUpdate()->first();
+
             ['items' => $items] = $this->cartService->validItems($cart);
 
             if ($items->isEmpty()) {
@@ -51,6 +55,8 @@ class CreateOrderAction
             }
 
             $number = $this->sequenceGenerator->next('order', 'C');
+            $shippingVatRate = (float) (app(ShippingSettings::class)->shipping_vat_rate ?? 0);
+            $totalHt = $this->computeTotalHt($items, $totals['shipping_ttc'], $shippingVatRate);
 
             $order = Order::query()->create([
                 'number' => $number,
@@ -75,10 +81,10 @@ class CreateOrderAction
                 'relay_snapshot' => $relay['relay_snapshot'],
                 'subtotal_ttc' => $totals['subtotal_ttc'],
                 'shipping_ttc' => $totals['shipping_ttc'],
-                'shipping_vat_rate' => app(ShippingSettings::class)->shipping_vat_rate ?? 0,
+                'shipping_vat_rate' => $shippingVatRate,
                 'total_ttc' => $totals['total_ttc'],
-                'total_ht' => $this->computeTotalHt($totals['total_ttc'], $items),
-                'total_vat' => $totals['total_ttc'] - $this->computeTotalHt($totals['total_ttc'], $items),
+                'total_ht' => $totalHt,
+                'total_vat' => $totals['total_ttc'] - $totalHt,
                 'planned_ship_date' => $totals['planned_ship_date'],
                 'cgv_accepted_at' => now(),
             ]);
@@ -113,18 +119,17 @@ class CreateOrderAction
     }
 
     /**
+     * Total HT = somme des HT de chaque ligne (à son propre taux) + HT du port
+     * (au taux de TVA du port). Même calcul que les lignes de la facture.
+     *
      * @param  Collection<int, CartItem>  $items
      */
-    private function computeTotalHt(int $totalTtc, Collection $items): int
+    private function computeTotalHt(Collection $items, int $shippingTtc, float $shippingVatRate): int
     {
-        if ($items->isEmpty()) {
-            return $totalTtc;
-        }
+        $linesHt = $items->sum(fn (CartItem $item) => (int) round(
+            ($item->product->price_ttc * $item->quantity) / (1 + (float) ($item->product->vat_rate ?? 0) / 100)
+        ));
 
-        // Taux moyen pondéré des lignes pour répartir le HT (affiné en T16 avec le détail par taux).
-        $weightedRate = $items->sum(fn ($item) => ((float) ($item->product->vat_rate ?? 0)) * $item->product->price_ttc * $item->quantity)
-            / max(1, $items->sum(fn ($item) => $item->product->price_ttc * $item->quantity));
-
-        return (int) round($totalTtc / (1 + $weightedRate / 100));
+        return $linesHt + (int) round($shippingTtc / (1 + $shippingVatRate / 100));
     }
 }

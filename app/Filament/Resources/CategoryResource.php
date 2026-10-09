@@ -56,6 +56,7 @@ class CategoryResource extends Resource
                     ->label('Visuel (méga-menu)')
                     ->collection('cover')
                     ->image()
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])->maxSize(10240)
                     ->columnSpanFull(),
             ])->columns(2),
         ]);

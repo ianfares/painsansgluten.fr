@@ -13,6 +13,11 @@ use RuntimeException;
  */
 class RefundNotAvailable extends RuntimeException
 {
+    public static function notRefundable(): self
+    {
+        return new self('Cette commande ne peut pas être remboursée (déjà remboursée, ou pas encore payée).');
+    }
+
     public static function stripePaymentNotFound(): self
     {
         return new self('Paiement Stripe introuvable pour cette commande : remboursez depuis le tableau de bord Stripe, la commande sera mise à jour automatiquement.');

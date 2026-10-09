@@ -178,7 +178,7 @@ class OrderResource extends Resource
                             $refundOrderAction->execute($record, auth('admin')->id());
 
                             Notification::make()->title('Commande remboursée, avoir généré.')->success()->send();
-                        } catch (RefundNotAvailable $e) {
+                        } catch (RefundNotAvailable|InvalidOrderTransition $e) {
                             Notification::make()->title($e->getMessage())->danger()->send();
                         }
                     }),

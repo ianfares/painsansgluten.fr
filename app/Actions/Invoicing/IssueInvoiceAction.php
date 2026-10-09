@@ -55,11 +55,17 @@ class IssueInvoiceAction
         $billing = app(BillingSettings::class);
         $shop = app(ShopSettings::class);
 
-        $linesByVatRate = $order->items->groupBy(fn ($item) => (string) $item->vat_rate)
+        // Lignes produits + frais de port, regroupés par taux de TVA (le port a son propre taux).
+        $shippingHt = (int) round($order->shipping_ttc / (1 + (float) $order->shipping_vat_rate / 100));
+        $vatLines = $order->items->map(fn ($item) => ['rate' => (float) $item->vat_rate, 'ht' => $item->line_total_ht, 'ttc' => $item->line_total_ttc]);
+        if ($order->shipping_ttc > 0) {
+            $vatLines->push(['rate' => (float) $order->shipping_vat_rate, 'ht' => $shippingHt, 'ttc' => $order->shipping_ttc]);
+        }
+        $linesByVatRate = $vatLines->groupBy(fn (array $line) => (string) $line['rate'])
             ->map(fn ($lines, $rate) => [
                 'rate' => (float) $rate,
-                'base_ht' => $lines->sum('line_total_ht'),
-                'vat' => $lines->sum(fn ($line) => $line->line_total_ttc - $line->line_total_ht),
+                'base_ht' => $lines->sum('ht'),
+                'vat' => $lines->sum(fn (array $line) => $line['ttc'] - $line['ht']),
             ])
             ->values()
             ->all();

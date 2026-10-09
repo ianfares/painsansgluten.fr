@@ -337,3 +337,13 @@
 
 - **Bandeau** (`<x-site.reassurance />`, bas de l'accueil) inspiré de `docs/reference/capture/look.png` fourni par Ian : 4 pastilles de couleur (72 px, réduites à la demande d'Ian) à double cercle et icône blanche au trait (SVG maison, aucune dépendance), mots-clés colorés. Remplace « Fabrication à la commande / Livraison Chronopost Relais / Paiement sécurisé ». Textes limités à ce qui est vérifié : « bio » retiré (demande d'Ian), certification AFDIAG non reprise (non confirmée, cf. décision du 2026-10-06), congélation sans durée (seules 2 fiches citent « jusqu'à 1 mois », la référence disait « 1 à 2 mois »), « planifiez votre livraison » remplacé par « fabriqués à la commande, date d'expédition annoncée » (choix de date client = V2). « Paiement sécurisé » n'y figure plus (4 pastilles comme la référence).
 - **Pages de compte** : `x-layouts.auth` réutilise le gabarit du site (en-tête, menu, pied de page, panier) avec une carte centrée ; les champs des vues `auth/*` sont stylés par `.auth-card` dans `resources/css/app.css`, sans réécrire les vues.
+
+## 2026-10-09 — Corrections de l'audit de sécurité
+
+- Détail et statut de chaque constat : `docs/AUDIT-SECURITE-2026-10-09.md`. Tests : `tests/Feature/Security/AuditFixesTest.php`.
+- **Relance de paiement Stripe** : les sessions encore ouvertes passent en `superseded` puis sont expirées chez Stripe avant d'en créer une nouvelle (leur webhook `expired` n'annule pas la commande) ; si l'une est déjà payée → `PaymentAlreadyCompleted`, retour à la page de confirmation. Paiement reçu sur une commande non payable → paiement `paid_unexpected`, `payment_anomaly`, email admin avec la raison. Pas de remboursement automatique : décision humaine.
+- **Idempotence webhook** : `insertOrIgnore` sur `stripe_events` au lieu d'un `catch` global d'unicité.
+- **HT/TVA** : total HT = Σ HT des lignes (taux du produit) + HT du port (taux du port) ; récapitulatif TVA de la facture avec le port. À valider par le comptable (formule standard, taux toujours « À RENSEIGNER »).
+- **Anti-abus du tunnel** : 3 commandes / 10 min par email (`RateLimiter`, clé = hash de l'email, indépendante de l'IP tant que les proxies Cloudflare ne sont pas configurés).
+- **Uploads** : PNG/JPEG/WebP (+ ICO favicon), 1 Mo (favicon), 5 Mo (paramètres), 10 Mo (photos produits/catégories).
+- **Base** : index unique `invoices(order_id, type)`.

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Checkout;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Exceptions\Payments\PaymentAlreadyCompleted;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Payments\StripeCheckoutService;
@@ -43,6 +44,9 @@ class CheckoutController extends Controller
 
         try {
             return redirect()->away($stripe->createSession($order));
+        } catch (PaymentAlreadyCompleted) {
+            // Paiement déjà fait sur une session précédente : la page de confirmation attend le webhook.
+            return redirect()->route('checkout.confirmation', $order);
         } catch (Throwable $e) {
             Log::error('Stripe : création de la session de paiement impossible.', ['order' => $order->number, 'error' => $e::class]);
 

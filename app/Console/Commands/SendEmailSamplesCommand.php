@@ -121,7 +121,7 @@ class SendEmailSamplesCommand extends Command
             ['Client — mot de passe oublié', (new ResetPassword('exemple-de-jeton'))->toMail($user)],
             ['Admin — nouvelle commande payée', new NewPaidOrderMail($card)],
             ['Admin — nouveau virement en attente', new NewBankTransferOrderMail($transfer)],
-            ['Admin — anomalie de paiement Stripe', new StripePaymentAnomalyMail($card)],
+            ['Admin — anomalie de paiement Stripe', new StripePaymentAnomalyMail($card, 'Un paiement de 25,80 € a été encaissé alors que la commande était déjà « Payée » (paiement en double ou commande annulée). Remboursez-le depuis le tableau de bord Stripe.')],
             ['Admin — demande de suppression de compte', new AccountDeletionRequestedMail($user)],
             ['Admin — message du formulaire de contact', new ContactMessageMail(['name' => 'Marie Exemple', 'email' => 'marie.exemple@example.com', 'phone' => '06 12 34 56 78', 'message' => "Bonjour,\nlivrez-vous à Granville ? Je voudrais commander pour samedi.\nMerci !"])],
         ];

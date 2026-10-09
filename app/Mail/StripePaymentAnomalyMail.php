@@ -19,7 +19,7 @@ class StripePaymentAnomalyMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public readonly Order $order) {}
+    public function __construct(public readonly Order $order, public readonly string $reason = '') {}
 
     public function envelope(): Envelope
     {
