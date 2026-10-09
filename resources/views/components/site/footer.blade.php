@@ -4,16 +4,16 @@
 @endphp
 
 <footer class="border-t-4 border-sage bg-cream-alt">
-    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
             @if ($homepageSettings->logo_path)
                 <img
                     src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($homepageSettings->logo_path) }}"
                     alt="{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}"
-                    class="mb-3 h-16 w-16 rounded-full object-cover shadow-button"
+                    class="mb-2 h-12 w-12 rounded-full object-cover shadow-button"
                 >
             @endif
-            <p class="font-semibold text-ink">{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}</p>
+            <p class="text-sm font-semibold text-ink">{{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}</p>
             <p class="mt-2 text-sm text-ink-muted">
                 {{ $shopSettings->address_line1 }}
                 @if ($shopSettings->postal_code || $shopSettings->city)
@@ -65,13 +65,13 @@
 
         <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-sage-dark">Cookies</p>
-            <button type="button" class="mt-3 rounded-button border border-line bg-white px-3 py-2 text-sm text-ink-muted transition hover:border-sage hover:text-sage" data-tarteaucitron-manager>
+            <button type="button" class="mt-3 rounded-button border border-line bg-white px-3 py-1.5 text-sm text-ink-muted transition hover:border-sage hover:text-sage" data-tarteaucitron-manager>
                 Gérer mes préférences
             </button>
         </div>
     </div>
 
-    <div class="bg-sage-dark px-4 py-4 text-center text-xs text-white/80">
+    <div class="bg-sage-dark px-4 py-3 text-center text-xs text-white/80">
         &copy; {{ now()->year }} {{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}. Tous droits réservés.
     </div>
 </footer>
