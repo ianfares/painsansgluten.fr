@@ -58,6 +58,7 @@ Route::get('/{slug}', [SlugController::class, 'show'])
 Route::middleware(['auth', 'verified'])->prefix('mon-compte')->name('compte.')->group(function () {
     Route::get('/', [AccountController::class, 'dashboard'])->name('dashboard');
     Route::get('/commandes', [AccountController::class, 'orders'])->name('orders');
+    Route::get('/commandes/{number}', [AccountController::class, 'order'])->name('orders.show');
     Route::get('/factures', [AccountController::class, 'invoices'])->name('invoices');
     Route::get('/informations', [AccountController::class, 'informations'])->name('informations');
     Route::put('/adresse', [AccountController::class, 'updateAddress'])->name('address.update');

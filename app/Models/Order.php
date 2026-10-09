@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Settings\ShippingSettings;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -103,5 +104,18 @@ class Order extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * Lien de suivi Chronopost (modèle paramétré en BO, jeton {tracking}),
+     * ou null si pas de numéro ou pas de modèle.
+     */
+    public function trackingUrl(): ?string
+    {
+        $template = app(ShippingSettings::class)->tracking_url_template;
+
+        return $template && $this->tracking_number
+            ? str_replace('{tracking}', rawurlencode($this->tracking_number), $template)
+            : null;
     }
 }

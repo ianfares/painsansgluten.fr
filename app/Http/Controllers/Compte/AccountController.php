@@ -37,6 +37,17 @@ class AccountController extends Controller
         ]);
     }
 
+    /**
+     * Détail d'une commande : recherchée parmi celles du client connecté
+     * uniquement (jamais par identifiant global), sinon 404.
+     */
+    public function order(string $number): View
+    {
+        $order = Auth::user()->orders()->where('number', $number)->with(['items', 'invoices'])->firstOrFail();
+
+        return view('compte.order', ['order' => $order]);
+    }
+
     public function invoices(): View
     {
         $orderIds = Auth::user()->orders()->pluck('id');
