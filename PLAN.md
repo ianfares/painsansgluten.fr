@@ -441,6 +441,7 @@ Déconnexion
 
 ```
 Tableau de bord   CA TTC du mois, nb de commandes du mois, virements en attente, commandes à expédier (aujourd'hui / en retard)
+Comptabilité      (T26, validé par Ian) Recettes : chiffres clés + graphiques (évolution, catégories, moyens de paiement, top 10 produits) sur aujourd'hui / 7 j / 30 j / 3 / 6 / 12 mois ; Factures & avoirs ; Export comptable
 Commandes         liste, recherche (n°, nom, email), filtres (statut, paiement, date d'expédition), détail, actions
 Expéditions       vue des commandes paid/preparing triées par date d'expédition prévue
 Produits          onglets (§6.2), dupliquer, bascule dispo, images

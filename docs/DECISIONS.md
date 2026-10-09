@@ -398,3 +398,10 @@
 - **Produits d'intérêt** : stockés par libellé (JSON) : catégories actives au moment de la demande + « Pâte à pizza crue » + « Autre ».
 - **Statut** : enum `ProRequestStatus`, jamais assignable en masse ; seul `ProcessProAccountRequestAction` le modifie (transaction + verrou, un seul traitement et un seul email même en cas de double clic).
 - **Conservation** : durée des demandes refusées `À CONFIRMER` (proposition 12 mois, à reporter dans la politique de confidentialité). Pas de purge automatique en V1 (noté au BACKLOG). Rien de personnel dans les logs.
+
+## 2026-10-09 — T26 — Page « Recettes » et rubrique « Comptabilité » (demande d'Ian)
+- **Hors V1 initiale, validé par Ian le 09/10** (le PLAN §14 ne prévoyait que le CA du mois au tableau de bord).
+- Rubrique « Comptabilité » du BO : Recettes, Factures & avoirs, Export comptable (déplacés depuis « Commandes »).
+- **Source des montants : factures émises moins avoirs** (avoirs stockés en négatif) = argent réellement encaissé, cohérent avec l'export comptable. Commandes non payées/annulées exclues (pas de facture). Catégories et top produits : lignes des commandes facturées, signées par le type de pièce.
+- Périodes : aujourd'hui, 7 j, 30 j, 3, 6, 12 mois ; découpage du graphique par heure / jour / semaine / mois. Fuseau `Europe/Paris`.
+- Implémentation : service `App\Services\Reporting\RevenueReport` (testé) + seconde page tableau de bord Filament avec filtre (`HasFiltersForm`) et widgets `ChartWidget` (Chart.js déjà embarqué par Filament) : **aucune dépendance ajoutée**. Widgets rangés dans `app/Filament/Revenue/Widgets` pour ne pas apparaître sur le tableau de bord principal (découverte automatique de `app/Filament/Widgets`).

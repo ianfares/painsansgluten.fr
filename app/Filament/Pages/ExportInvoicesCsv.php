@@ -27,7 +27,7 @@ class ExportInvoicesCsv extends Page implements HasForms
 
     protected static ?string $navigationIcon = 'heroicon-o-document-arrow-down';
 
-    protected static ?string $navigationGroup = 'Commandes';
+    protected static ?string $navigationGroup = 'Comptabilité';
 
     protected static ?string $navigationLabel = 'Export comptable';
 
