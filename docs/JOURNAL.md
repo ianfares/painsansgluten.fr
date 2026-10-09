@@ -760,3 +760,21 @@ DOCUMENTATION : ce journal.
 POINTS À RELIRE PAR UN HUMAIN : vérifier qu'il ne reste aucune règle 80/443 vers `0.0.0.0/0` ou `::/0` dans les autres groupes de l'instance.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T18 (rattachement des commandes invité), T21 (SEO), T22 (GTM/cookies) ; T01/T11 dès les identifiants Web Services Chronopost.
+
+---
+
+## [2026-10-09 16:15] — Claude Opus 5.5 — T18 (fin) — Détail de commande + rattachement des commandes invité
+STATUT : **T18 terminée**.
+CONTEXTE POUR LA PROCHAINE IA : complète la T18 « anticipée, partielle » du 2026-10-06. Ian a fourni pour T22 l'ID de mesure GA4 de la production : `G-XF6EHRRV48` (flux `painsansgluten.fr`, ID de flux 16094927804) — **pas de gtag en dur** (CLAUDE.md §4) : il faut un conteneur GTM (ID `GTM-…` demandé à Ian), GA4 configuré dans GTM, actif uniquement en production.
+RÉSUMÉ : (1) page `/mon-compte/commandes/{numéro}` : statut, moyen de paiement, relais, date d'expédition, n° et lien de suivi, factures/avoirs (PDF), lignes et totaux, bouton « Payer ma commande » si paiement carte non finalisé ; la commande est cherchée parmi celles du client connecté uniquement (404 sinon). Lien depuis la liste. (2) Écouteur `AttachGuestOrdersOnVerified` sur l'événement `Verified` : rattache les commandes invité de même email **uniquement après vérification** (inscription ou changement d'email revérifié). (3) Lien de suivi factorisé dans `Order::trackingUrl()` (réutilisé par l'email d'expédition). Le changement d'email → revérification existait déjà (Fortify, `UpdateUserProfileInformation`).
+FICHIERS : `app/Listeners/Auth/AttachGuestOrdersOnVerified.php` (nouveau), `app/Http/Controllers/Compte/AccountController.php`, `routes/web.php`, `resources/views/compte/order.blade.php` (nouveau), `resources/views/compte/orders.blade.php`, `app/Models/Order.php`, `app/Mail/OrderShippedMail.php`, `tests/Feature/Compte/OrderDetailAndGuestOrdersTest.php` (nouveau), `docs/JOURNAL.md`.
+ANALYSE D'IMPACT : espace client (nouvelle page), vérification d'email (rattachement), email d'expédition (même lien, code déplacé).
+SÉCURITÉ : pas d'IDOR (requête bornée aux commandes du client) ; rattachement uniquement après preuve de possession de l'email ; commande d'un autre client ou d'un invité → 404.
+PERFORMANCE : une requête de mise à jour par vérification d'email ; page de détail avec chargement groupé des lignes et factures.
+TESTS : 6 nouveaux tests. Suite complète : 250 passés / 0 échec.
+QUALITÉ : pint OK, phpstan niveau 5 : 0 erreur.
+DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : ID GTM (T22).
+POINTS À RELIRE PAR UN HUMAIN : rendu de la page de détail sur la préprod.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T21 (SEO, orienté moteurs IA à la demande d'Ian), T22 dès l'ID GTM ; T01/T11 dès les identifiants WS Chronopost.

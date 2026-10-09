@@ -18,7 +18,7 @@
                 <tbody>
                     @foreach ($orders as $order)
                         <tr class="border-b border-line last:border-0">
-                            <td class="p-3 font-medium">{{ $order->number }}</td>
+                            <td class="p-3 font-medium"><a href="{{ route('compte.orders.show', $order->number) }}" class="text-sage-dark underline hover:text-sage">{{ $order->number }}</a></td>
                             <td class="p-3">{{ $order->created_at->format('d/m/Y') }}</td>
                             <td class="p-3">{{ number_format($order->total_ttc / 100, 2, ',', ' ') }} €</td>
                             <td class="p-3"><x-ui.badge>{{ $order->status->label() }}</x-ui.badge></td>

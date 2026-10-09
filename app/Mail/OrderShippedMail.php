@@ -26,15 +26,6 @@ class OrderShippedMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(markdown: 'emails.order-shipped', with: ['trackingUrl' => $this->trackingUrl(), 'pickupMessage' => app(ShippingSettings::class)->relay_pickup_message]);
-    }
-
-    private function trackingUrl(): ?string
-    {
-        $template = app(ShippingSettings::class)->tracking_url_template;
-
-        return $template && $this->order->tracking_number
-            ? str_replace('{tracking}', rawurlencode($this->order->tracking_number), $template)
-            : null;
+        return new Content(markdown: 'emails.order-shipped', with: ['trackingUrl' => $this->order->trackingUrl(), 'pickupMessage' => app(ShippingSettings::class)->relay_pickup_message]);
     }
 }
