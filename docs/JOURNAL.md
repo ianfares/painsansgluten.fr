@@ -744,3 +744,19 @@ QUALITÉ : pint/phpstan au vert. DOCUMENTATION : ce journal.
 POINTS À RELIRE PAR UN HUMAIN : leçon : toute modification des paramètres envoyés à Stripe doit être vérifiée par un appel réel en mode test, pas seulement par les tests simulés.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : vérifier l'acheminement des webhooks Stripe à travers les règles pays de Cloudflare.
+
+---
+
+## [2026-10-09 15:30] — Claude Opus 5.5 — (infra, guidée) — Pare-feu Infomaniak : web uniquement depuis Cloudflare
+STATUT : terminée (configuration faite par Ian dans l'interface web Infomaniak, vérifiée par moi).
+CONTEXTE POUR LA PROCHAINE IA : les logs Apache montraient des scans (WordPress, webshells) arrivant **directement sur l'IP du serveur**, donc en contournant Cloudflare et son blocage par pays (règle Cloudflare d'Ian : défi pour tous les pays sauf France + robots SEO connus). Le serveur est derrière le pare-feu OpenStack d'Infomaniak (groupes de sécurité) : pas d'`ufw`.
+RÉSUMÉ : groupe de sécurité `cloudflare-web` attaché à l'instance : 15 règles entrée TCP 80-443, une par plage IPv4 Cloudflare (pas d'IPv6 : pas d'enregistrement AAAA). Vérifié : site, logo, webhook Stripe signé → OK via Cloudflare ; webhook réel envoyé par les serveurs Stripe reçu (`checkout.session.expired`, IP Stripe 54.187.x) ; SSH (port 54000) OK ; IP directe 83.228.227.172 en 80/443 → plus de réponse. Expression d'exception Cloudflare conseillée pour le webhook : `(http.request.uri.path eq "/webhooks/stripe" and http.request.method eq "POST")`.
+FICHIERS : `docs/JOURNAL.md` (configuration hors dépôt : Infomaniak, Cloudflare).
+ANALYSE D'IMPACT : tout accès web qui ne passe pas par Cloudflare est refusé. ⚠️ Le PC de dev a `83.228.227.172 preprod.painsansgluten.fr` dans `/etc/hosts` : les outils en ligne de commande de ce poste contournent Cloudflare et sont donc bloqués (utiliser `--resolve preprod.painsansgluten.fr:443:104.21.73.229` pour tester via Cloudflare, ou retirer la ligne).
+SÉCURITÉ : surface d'attaque directe fermée ; règles pays/WAF Cloudflare désormais incontournables.
+PERFORMANCE / TESTS / QUALITÉ : sans objet / vérifications réelles ci-dessus / sans objet.
+DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : pour la production (T25) : même groupe de sécurité ; les plages Cloudflare changent rarement mais doivent être revues périodiquement (groupe Infomaniak + `cloudflare-remoteip.conf` Apache).
+POINTS À RELIRE PAR UN HUMAIN : vérifier qu'il ne reste aucune règle 80/443 vers `0.0.0.0/0` ou `::/0` dans les autres groupes de l'instance.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T18 (rattachement des commandes invité), T21 (SEO), T22 (GTM/cookies) ; T01/T11 dès les identifiants Web Services Chronopost.
