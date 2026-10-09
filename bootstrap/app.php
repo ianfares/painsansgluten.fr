@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\HandleLegacyRedirects;
+use App\Http\Middleware\VerifyTurnstile;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // la résolution de route pour couvrir les anciennes URLs qui ne
         // correspondent à aucune route actuelle.
         $middleware->web(prepend: [HandleLegacyRedirects::class]);
+        // Anti-robot sur la création de compte et le mot de passe oublié.
+        $middleware->web(append: [VerifyTurnstile::class]);
 
         // Stripe signe ses webhooks : pas de jeton CSRF possible (T14).
         $middleware->validateCsrfTokens(except: ['webhooks/stripe']);

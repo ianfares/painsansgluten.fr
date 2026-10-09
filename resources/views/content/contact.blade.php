@@ -36,7 +36,7 @@
                 </x-ui.field>
 
                 <x-ui.field name="cf-turnstile-response">
-                    <div class="cf-turnstile" data-sitekey="{{ $siteKey }}" data-language="fr"></div>
+                    <x-ui.turnstile />
                 </x-ui.field>
 
                 <p class="text-xs text-ink-muted">
@@ -48,6 +48,4 @@
             </form>
         </section>
     </div>
-
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </x-layouts.app>

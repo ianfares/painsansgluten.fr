@@ -8,6 +8,9 @@
         <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus>
         @error('email') <p class="error">{{ $message }}</p> @enderror
 
+        <x-ui.turnstile />
+        @error('cf-turnstile-response') <p class="error">{{ $message }}</p> @enderror
+
         <button type="submit">Envoyer le lien de réinitialisation</button>
     </form>
 </x-layouts.auth>
