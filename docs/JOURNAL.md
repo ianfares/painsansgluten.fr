@@ -877,3 +877,15 @@ QUALITÉ : chaque lot relu par le pilote avant merge.
 DOCUMENTATION : `tasks/T27-*.md`, DECISIONS (section T27 vague 1), PLAN (redirections marquées supprimées).
 POINTS À RELIRE PAR UN HUMAIN : renommer « Notre histoire » en « Mon histoire » dans Admin → Pages (titre) ; vérifier que la politique de confidentialité en base ne cite pas 12 mois pour les demandes pro.
 PROCHAINE TÂCHE SUGGÉRÉE : vague 2 — T27-L5 comptes clients (Sonnet 5.5) en parallèle de T27-L7a points de retrait (Sonnet 5.5).
+
+## [2026-10-10 21:30] — Claude Opus 5.5 (pilote) + Sonnet 5.5 (lots) — T27 vague 2 (L5, L7a)
+
+TÂCHE : T27-L5 comptes clients (Sonnet, relu par Opus) et T27-L7a points de retrait (Sonnet).
+RÉSUMÉ : inscription particulier/pro (raison sociale + SIRET obligatoires pour un pro, en attente de validation), validation pro par l'admin avec email, désactivation/réactivation, création manuelle d'un client avec email de choix du mot de passe, case « retrait au labo autorisé ». Points de retrait commerçants dans l'admin, géocodés (BAN), réglages distance max (50 km) et instructions labo.
+FICHIERS : commits `T27-L5` (610b493) et `T27-L7a` (d58f90b).
+ANALYSE D'IMPACT : connexion Fortify, middleware web, admin Clients (désormais éditable), espace client « Mes informations ». Aucun impact paiement/commande à ce stade (L7b).
+SÉCURITÉ : relecture Opus de l'authentification : mass assignment fermé, pas d'énumération de comptes, limitation de débit conservée, sessions coupées à la désactivation. Géocodage : seules les adresses des commerçants sont envoyées à la BAN.
+PERFORMANCE : middleware sans requête supplémentaire (utilisateur déjà chargé) ; géocodage seulement à l'enregistrement d'un point.
+TESTS : 378/378 après merge (conflit trivial résolu dans LivewireRoundTripTest) ; pint OK ; phpstan 0 erreur.
+POINTS À RELIRE PAR UN HUMAIN : aspect visuel du choix particulier/pro à l'inscription ; texte d'instructions du retrait au labo à saisir (Admin → Paramètres → Expédition → Retraits).
+PROCHAINE TÂCHE SUGGÉRÉE : T27-L6 remise client (Opus 5.5).
