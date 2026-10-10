@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Content;
 
-use App\Models\ProAccountRequest;
 use App\Rules\Siret;
 use App\Rules\Turnstile;
 use App\Settings\ShopSettings;
@@ -45,7 +44,7 @@ class StoreProAccountRequest extends FormRequest
             'company_name' => ['nullable', 'string', 'max:255'],
             'siret' => ['nullable', new Siret],
             'activity_type' => ['nullable', 'string', Rule::in($activityTypes)],
-            'activity_other' => [Rule::requiredIf($this->input('activity_type') === ProAccountRequest::OTHER), 'nullable', 'string', 'max:150'],
+            'activity_other' => ['nullable', 'string', 'max:150'],
             'contact_last_name' => ['required', 'string', 'max:100'],
             'contact_first_name' => ['required', 'string', 'max:100'],
             'job_title' => ['nullable', 'string', 'max:100'],
@@ -67,7 +66,6 @@ class StoreProAccountRequest extends FormRequest
     {
         return [
             'activity_type.in' => 'Ce type d\'activité n\'est pas proposé.',
-            'activity_other.required' => 'Merci de préciser votre activité.',
             'contact_last_name.required' => 'Merci d\'indiquer votre nom.',
             'contact_first_name.required' => 'Merci d\'indiquer votre prénom.',
             'email.required' => 'Merci d\'indiquer votre adresse email.',

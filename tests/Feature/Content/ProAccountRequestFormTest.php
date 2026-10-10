@@ -108,8 +108,8 @@ test('sans consentement, la demande est refusée', function () {
     expect(ProAccountRequest::query()->count())->toBe(0);
 });
 
-test('« Autre » exige une précision, et un type inconnu est refusé', function () {
-    $this->post('/professionnels', proPayload(['activity_type' => 'Autre', 'activity_other' => '']))->assertSessionHasErrors('activity_other');
+test('« Autre » sans précision est accepté, un type inconnu est refusé', function () {
+    $this->post('/professionnels', proPayload(['activity_type' => 'Autre', 'activity_other' => '']))->assertSessionHasNoErrors();
     $this->post('/professionnels', proPayload(['activity_type' => 'Autre', 'activity_other' => 'Traiteur']))->assertSessionHasNoErrors();
     $this->post('/professionnels', proPayload(['activity_type' => 'Inconnu']))->assertSessionHasErrors('activity_type');
 });
