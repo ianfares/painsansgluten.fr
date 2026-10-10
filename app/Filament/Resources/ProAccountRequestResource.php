@@ -48,8 +48,8 @@ class ProAccountRequestResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('created_at')->label('Reçue le')->dateTime('d/m/Y H:i')->sortable(),
-                TextColumn::make('company_name')->label('Société')->searchable(),
-                TextColumn::make('activity_type')->label('Activité'),
+                TextColumn::make('company_name')->label('Société')->searchable()->placeholder('—'),
+                TextColumn::make('activity_type')->label('Activité')->placeholder('—'),
                 TextColumn::make('email')->label('Email')->searchable(),
                 TextColumn::make('status')
                     ->label('Statut')
@@ -86,14 +86,13 @@ class ProAccountRequestResource extends Resource
             InfolistSection::make('Entreprise')
                 ->columns(2)
                 ->schema([
-                    TextEntry::make('company_name')->label('Raison sociale'),
-                    TextEntry::make('siret')->label('SIRET'),
-                    TextEntry::make('vat_number')->label('N° TVA intracommunautaire')->placeholder('—'),
-                    TextEntry::make('activity_type')->label('Type d\'activité'),
+                    TextEntry::make('company_name')->label('Raison sociale')->placeholder('—'),
+                    TextEntry::make('siret')->label('SIRET')->placeholder('—'),
+                    TextEntry::make('activity_type')->label('Type d\'activité')->placeholder('—'),
                     TextEntry::make('activity_other')->label('Activité précisée')->placeholder('—'),
-                    TextEntry::make('address_line1')->label('Adresse'),
-                    TextEntry::make('postal_code')->label('Code postal'),
-                    TextEntry::make('city')->label('Ville'),
+                    TextEntry::make('address_line1')->label('Adresse')->placeholder('—'),
+                    TextEntry::make('postal_code')->label('Code postal')->placeholder('—'),
+                    TextEntry::make('city')->label('Ville')->placeholder('—'),
                 ]),
             InfolistSection::make('Contact')
                 ->columns(2)
@@ -107,9 +106,7 @@ class ProAccountRequestResource extends Resource
                 ]),
             InfolistSection::make('Besoin')
                 ->schema([
-                    TextEntry::make('products_of_interest')->label('Produits qui intéressent')->badge()->placeholder('—'),
-                    TextEntry::make('volumes')->label('Volumes / fréquence estimés')->placeholder('—'),
-                    TextEntry::make('description')->label('Description du besoin')->prose(),
+                    TextEntry::make('description')->label('Description du besoin')->prose()->placeholder('—'),
                 ]),
         ]);
     }

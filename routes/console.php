@@ -13,6 +13,9 @@ Artisan::command('inspire', function () {
 // Purge des paniers invités > 30 jours (PLAN.md §7, T08).
 Schedule::command('cart:purge-old-guests')->daily();
 
+// Purge RGPD des demandes de compte pro refusées depuis plus de 3 mois (T27-L3).
+Schedule::command('pro-requests:purge-rejected')->daily();
+
 // Relance/annulation des virements en attente (PLAN.md §11, T15).
 Schedule::command('orders:process-bank-transfer-deadlines')->hourly();
 

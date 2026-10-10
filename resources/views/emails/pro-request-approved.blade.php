@@ -3,7 +3,7 @@
 
 Bonjour {{ $proRequest->contact_first_name }},
 
-Bonne nouvelle : la demande de compte professionnel de **{{ $proRequest->company_name }}** a été acceptée. Nous revenons vers vous très rapidement pour la suite.
+Bonne nouvelle : votre demande de compte professionnel{{ filled($proRequest->company_name) ? ' pour **'.$proRequest->company_name.'**' : '' }} a été acceptée. Nous revenons vers vous très rapidement pour la suite.
 
 @if ($proRequest->admin_comment)
 @component('mail::panel')
