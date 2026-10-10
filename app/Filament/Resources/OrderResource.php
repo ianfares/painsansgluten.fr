@@ -14,6 +14,7 @@ use App\Enums\PaymentMethod;
 use App\Exceptions\Orders\BankTransferValidationNotAllowed;
 use App\Exceptions\Orders\InvalidOrderTransition;
 use App\Exceptions\Orders\RefundNotAvailable;
+use App\Filament\Resources\OrderResource\DeliveryNoteActions;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Models\Order;
 use App\Services\Orders\OrderStateMachine;
@@ -99,6 +100,7 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                DeliveryNoteActions::row(),
                 Tables\Actions\Action::make('validateBankTransfer')
                     ->label('Valider le virement reçu')
                     ->icon('heroicon-o-banknotes')
@@ -209,7 +211,8 @@ class OrderResource extends Resource
                             Notification::make()->title($e->getMessage())->danger()->send();
                         }
                     }),
-            ]);
+            ])
+            ->bulkActions([DeliveryNoteActions::bulk()]);
     }
 
     private static function transitionWithNotification(callable $transition, string $successMessage): void
