@@ -17,7 +17,13 @@
     <div class="mb-6 grid gap-4 sm:grid-cols-2">
         <section class="rounded-card border border-line bg-white p-4 text-sm">
             <h2 class="mb-2 font-semibold text-ink">Livraison</h2>
-            <p>Point relais Chronopost : <strong>{{ $order->relay_name }}</strong></p>
+            @if ($order->delivery_method->isPickup())
+                <p>{{ $order->delivery_method->label() }} : <strong>{{ $order->relay_name }}</strong>
+                    @if (! empty($order->relay_snapshot['address_line1']))<br>{{ $order->relay_snapshot['address_line1'] }}, {{ $order->relay_snapshot['postal_code'] ?? '' }} {{ $order->relay_snapshot['city'] ?? '' }}@endif
+                </p>
+            @else
+                <p>Point relais Chronopost : <strong>{{ $order->relay_name }}</strong></p>
+            @endif
             @if ($order->planned_ship_date)
                 <p class="mt-1">Expédition prévue le <strong>{{ $order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM') }}</strong></p>
             @endif
@@ -64,7 +70,7 @@
                 @endif
                 <tr class="border-b border-line">
                     <td class="p-3" colspan="2">Livraison</td>
-                    <td class="p-3 text-right">{{ number_format($order->shipping_ttc / 100, 2, ',', ' ') }} €</td>
+                    <td class="p-3 text-right">{{ $order->delivery_method->isPickup() ? 'Gratuit' : number_format($order->shipping_ttc / 100, 2, ',', ' ').' €' }}</td>
                 </tr>
                 <tr class="font-semibold">
                     <td class="p-3" colspan="2">Total TTC</td>

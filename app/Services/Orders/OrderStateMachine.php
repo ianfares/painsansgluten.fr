@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Orders;
 
+use App\Enums\DeliveryMethod;
 use App\Enums\OrderStatus;
 use App\Events\Orders\OrderCancelled;
 use App\Events\Orders\OrderPaid;
+use App\Events\Orders\OrderReadyForPickup;
 use App\Events\Orders\OrderRefunded;
 use App\Events\Orders\OrderShipped;
 use App\Exceptions\Orders\InvalidOrderTransition;
@@ -31,7 +33,7 @@ class OrderStateMachine
             $locked = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
             $from = $locked->status;
 
-            if (! $from->canTransitionTo($to)) {
+            if (! $from->canTransitionTo($to) || ! self::fitsDeliveryMethod($locked->delivery_method, $to)) {
                 throw InvalidOrderTransition::from($from, $to);
             }
 
@@ -39,7 +41,7 @@ class OrderStateMachine
             match ($to) {
                 OrderStatus::Paid => $locked->paid_at = now(),
                 OrderStatus::Shipped => $locked->shipped_at = now(),
-                OrderStatus::Delivered => $locked->delivered_at = now(),
+                OrderStatus::Delivered, OrderStatus::PickedUp => $locked->delivered_at = now(),
                 OrderStatus::Cancelled => $locked->cancelled_at = now(),
                 default => null,
             };
@@ -57,6 +59,7 @@ class OrderStateMachine
             match ($to) {
                 OrderStatus::Paid => OrderPaid::dispatch($locked),
                 OrderStatus::Shipped => OrderShipped::dispatch($locked),
+                OrderStatus::ReadyForPickup => OrderReadyForPickup::dispatch($locked),
                 OrderStatus::Cancelled => OrderCancelled::dispatch($locked),
                 OrderStatus::Refunded => OrderRefunded::dispatch($locked),
                 default => null,
@@ -64,5 +67,15 @@ class OrderStateMachine
 
             return $locked;
         });
+    }
+
+    /** Expédiée/Livrée : Chronopost seulement ; Prête au retrait/Retirée : retraits seulement (T27-L7b). */
+    private static function fitsDeliveryMethod(DeliveryMethod $method, OrderStatus $to): bool
+    {
+        return match ($to) {
+            OrderStatus::Shipped, OrderStatus::Delivered => ! $method->isPickup(),
+            OrderStatus::ReadyForPickup, OrderStatus::PickedUp => $method->isPickup(),
+            default => true,
+        };
     }
 }

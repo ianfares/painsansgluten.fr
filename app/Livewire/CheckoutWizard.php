@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Actions\Orders\CreateOrderAction;
+use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
 use App\Mail\Admin\NewBankTransferOrderMail;
 use App\Mail\BankTransferInstructionsMail;
 use App\Services\Cart\CartService;
 use App\Services\Mail\AdminMailer;
+use App\Services\Shipping\DeliveryOptions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -66,6 +68,13 @@ class CheckoutWizard extends Component
     #[Validate('required|string|max:255')]
     public string $relay_name = '';
 
+    /**
+     * Choix de l'étape 2 (T27-L7b) : « chronopost_relay », « lab_pickup » ou
+     * « merchant_pickup:{id} ». Un seul champ pour un seul groupe de boutons
+     * radio ; revalidé côté serveur à chaque étape et au paiement.
+     */
+    public string $deliveryChoice = 'chronopost_relay';
+
     public bool $cgvAccepted = false;
 
     #[Validate('required')]
@@ -101,12 +110,8 @@ class CheckoutWizard extends Component
             $this->validate($this->customerRules());
         }
 
-        if ($step === 3) {
-            $this->validate($this->relayRules());
-
-            if ($this->relayIsInCorsica()) {
-                return;
-            }
+        if ($step === 3 && $this->resolveDelivery() === null) {
+            return;
         }
 
         $this->step = $step;
@@ -146,6 +151,83 @@ class CheckoutWizard extends Component
         return true;
     }
 
+    private function selectedDeliveryMethod(): DeliveryMethod
+    {
+        return DeliveryMethod::tryFrom(explode(':', $this->deliveryChoice)[0]) ?? DeliveryMethod::ChronopostRelay;
+    }
+
+    private function selectedPickupPointId(): ?int
+    {
+        $id = explode(':', $this->deliveryChoice)[1] ?? '';
+
+        return ctype_digit($id) ? (int) $id : null;
+    }
+
+    /**
+     * Valide le mode de livraison choisi et retourne le snapshot à enregistrer
+     * sur la commande ; null (avec message d'erreur) si le choix n'est pas
+     * permis. Tout est recalculé ici : distance du commerçant, droit au
+     * retrait labo — jamais repris du navigateur (T27-L7b).
+     *
+     * @return array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}|null
+     */
+    private function resolveDelivery(): ?array
+    {
+        if (DeliveryMethod::tryFrom(explode(':', $this->deliveryChoice)[0]) === null) {
+            return $this->deliveryError('deliveryChoice', 'Choisissez un mode de livraison.');
+        }
+
+        $options = app(DeliveryOptions::class);
+
+        return match ($this->selectedDeliveryMethod()) {
+            DeliveryMethod::ChronopostRelay => $this->resolveChronopostRelay(),
+            DeliveryMethod::MerchantPickup => $this->resolveMerchantPickup($options),
+            DeliveryMethod::LabPickup => $options->labPickupAllowed(Auth::user())
+                ? $options->labSnapshot()
+                : $this->deliveryError('deliveryChoice', 'Le retrait au laboratoire n\'est pas disponible pour votre compte.'),
+        };
+    }
+
+    /** @return array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}|null */
+    private function resolveChronopostRelay(): ?array
+    {
+        $this->validate($this->relayRules());
+
+        if ($this->relayIsInCorsica()) {
+            return null;
+        }
+
+        return [
+            'relay_id' => 'MANUEL-'.now()->timestamp,
+            'relay_name' => $this->relay_name,
+            'relay_snapshot' => [
+                'name' => $this->relay_name,
+                'postal_code' => $this->relay_postal_code,
+                'note' => 'Saisie manuelle provisoire (T11 non livrée)',
+            ],
+        ];
+    }
+
+    /** @return array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}|null */
+    private function resolveMerchantPickup(DeliveryOptions $options): ?array
+    {
+        $pointId = $this->selectedPickupPointId();
+        $option = $pointId === null
+            ? null
+            : $options->eligibleMerchantPoint($pointId, $this->billing_line1, $this->billing_postal_code, $this->billing_city);
+
+        return $option === null
+            ? $this->deliveryError('deliveryChoice', 'Choisissez un point de retrait proposé pour votre adresse.')
+            : $options->merchantSnapshot($option['point'], $option['distance_km']);
+    }
+
+    private function deliveryError(string $field, string $message): null
+    {
+        $this->addError($field, $message);
+
+        return null;
+    }
+
     public function pay(): void
     {
         if ($this->submitting) {
@@ -163,14 +245,14 @@ class CheckoutWizard extends Component
         }
 
         try {
-            $this->validate($this->relayRules());
+            $relay = $this->resolveDelivery();
         } catch (ValidationException $e) {
             $this->step = 2;
 
             throw $e;
         }
 
-        if ($this->relayIsInCorsica()) {
+        if ($relay === null) {
             $this->step = 2;
 
             return;
@@ -196,7 +278,7 @@ class CheckoutWizard extends Component
 
         $cartService = app(CartService::class);
         $cart = $cartService->currentCart();
-        $totals = $cartService->totals($cart);
+        $totals = $cartService->totals($cart, $this->selectedDeliveryMethod());
 
         if ($totals['shipping_error'] !== null) {
             $this->error = 'Configuration incomplète, impossible de finaliser la commande pour le moment. Contactez-nous.';
@@ -225,17 +307,10 @@ class CheckoutWizard extends Component
                     'postal_code' => $this->billing_postal_code,
                     'city' => $this->billing_city,
                 ],
-                relay: [
-                    'relay_id' => 'MANUEL-'.now()->timestamp,
-                    'relay_name' => $this->relay_name,
-                    'relay_snapshot' => [
-                        'name' => $this->relay_name,
-                        'postal_code' => $this->relay_postal_code,
-                        'note' => 'Saisie manuelle provisoire (T11 non livrée)',
-                    ],
-                ],
+                relay: $relay,
                 paymentMethod: PaymentMethod::from($this->paymentMethod),
                 userId: Auth::id(),
+                deliveryMethod: $this->selectedDeliveryMethod(),
             );
         } catch (RuntimeException) {
             // Panier vidé entre-temps (commande déjà validée dans un autre onglet, double clic).
@@ -267,10 +342,18 @@ class CheckoutWizard extends Component
             return view('livewire.checkout-wizard', ['items' => $items, 'totals' => null, 'empty' => true]);
         }
 
+        $options = app(DeliveryOptions::class);
+
         return view('livewire.checkout-wizard', [
             'items' => $items,
-            'totals' => $cartService->totals($cart),
+            'totals' => $cartService->totals($cart, $this->selectedDeliveryMethod()),
             'empty' => false,
+            'deliveryMethodValue' => $this->selectedDeliveryMethod(),
+            'merchantOptions' => $this->step === 2
+                ? $options->merchantPointsNear($this->billing_line1, $this->billing_postal_code, $this->billing_city)
+                : collect(),
+            'labPickupAllowed' => $options->labPickupAllowed(Auth::user()),
+            'labSnapshot' => $options->labSnapshot()['relay_snapshot'],
         ]);
     }
 }

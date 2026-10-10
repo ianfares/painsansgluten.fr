@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\DeliveryMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Settings\ShippingSettings;
@@ -18,6 +19,8 @@ use Illuminate\Support\Carbon;
 /**
  * @property OrderStatus $status
  * @property PaymentMethod $payment_method
+ * @property DeliveryMethod $delivery_method
+ * @property array<string, mixed>|null $relay_snapshot
  * @property Carbon|null $paid_at
  * @property Carbon|null $shipped_at
  * @property Carbon|null $delivered_at
@@ -26,7 +29,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $planned_ship_date
  */
 #[Fillable([
-    'number', 'token', 'user_id', 'status', 'payment_method',
+    'number', 'token', 'user_id', 'status', 'payment_method', 'delivery_method',
     'email', 'first_name', 'last_name', 'phone',
     'billing_first_name', 'billing_last_name', 'billing_company', 'billing_line1', 'billing_line2',
     'billing_postal_code', 'billing_city', 'billing_country',
@@ -39,6 +42,9 @@ class Order extends Model
     /** @use HasFactory<OrderFactory> */
     use HasFactory;
 
+    /** Valeur par défaut aussi côté modèle (comme la colonne) : une commande neuve est en Chronopost Relais. */
+    protected $attributes = ['delivery_method' => 'chronopost_relay'];
+
     /**
      * @return array<string, string>
      */
@@ -47,6 +53,7 @@ class Order extends Model
         return [
             'status' => OrderStatus::class,
             'payment_method' => PaymentMethod::class,
+            'delivery_method' => DeliveryMethod::class,
             'relay_snapshot' => 'array',
             'subtotal_ttc' => 'integer',
             'discount_percent' => 'integer',

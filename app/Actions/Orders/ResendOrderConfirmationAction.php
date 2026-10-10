@@ -54,6 +54,6 @@ class ResendOrderConfirmationAction
 
     private static function isPaid(Order $order): bool
     {
-        return in_array($order->status, [OrderStatus::Paid, OrderStatus::Preparing, OrderStatus::Shipped, OrderStatus::Delivered], true);
+        return $order->status->isPaidState();
     }
 }

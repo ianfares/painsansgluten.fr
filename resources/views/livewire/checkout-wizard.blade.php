@@ -5,7 +5,7 @@
         </x-ui.alert>
     @else
         <ol class="mb-8 flex items-center gap-2 text-xs font-medium text-ink-muted">
-            @foreach (['Coordonnées', 'Relais', 'Récapitulatif', 'Paiement'] as $i => $label)
+            @foreach (['Coordonnées', 'Livraison', 'Récapitulatif', 'Paiement'] as $i => $label)
                 <li class="flex flex-1 items-center gap-2">
                     <span @class([
                         'flex h-6 w-6 shrink-0 items-center justify-center rounded-full',
@@ -59,16 +59,52 @@
 
         @if ($step === 2)
             <div class="flex flex-col gap-4">
-                <x-ui.alert variant="warning">
-                    La recherche de points relais est en cours de finalisation. Indiquez ci-dessous le relais Chronopost de votre choix (nom et ville) : nous vous confirmerons sa disponibilité par email avant expédition.
-                </x-ui.alert>
+                <fieldset class="flex flex-col gap-3">
+                    <legend class="mb-2 text-sm font-semibold text-ink">Mode de livraison</legend>
 
-                <x-ui.field name="relay_postal_code" label="Code postal du relais">
-                    <x-ui.input name="relay_postal_code" wire:model="relay_postal_code" />
-                </x-ui.field>
-                <x-ui.field name="relay_name" label="Nom et ville du relais souhaité">
-                    <x-ui.input name="relay_name" wire:model="relay_name" />
-                </x-ui.field>
+                    <label class="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-white p-3 has-[:checked]:border-sage">
+                        <input type="radio" name="delivery_choice" wire:model.live="deliveryChoice" value="chronopost_relay" class="mt-1 text-sage focus:ring-sage">
+                        <span class="text-sm"><strong>Chronopost Relais</strong><br><span class="text-ink-muted">Expédition en point relais, partout en France métropolitaine (hors Corse).</span></span>
+                    </label>
+
+                    @foreach ($merchantOptions as $option)
+                        <label class="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-white p-3 has-[:checked]:border-sage" wire:key="pickup-{{ $option['point']->id }}">
+                            <input type="radio" name="delivery_choice" wire:model.live="deliveryChoice" value="merchant_pickup:{{ $option['point']->id }}" class="mt-1 text-sage focus:ring-sage">
+                            <span class="text-sm">
+                                <strong>Retrait gratuit chez {{ $option['point']->name }}</strong>
+                                <span class="text-ink-muted">· {{ number_format($option['distance_km'], 1, ',', ' ') }} km</span><br>
+                                <span class="text-ink-muted">{{ $option['point']->address_line1 }}, {{ $option['point']->postal_code }} {{ $option['point']->city }}</span>
+                                @if ($option['point']->opening_hours)<br><span class="text-ink-muted">Horaires : {{ $option['point']->opening_hours }}</span>@endif
+                            </span>
+                        </label>
+                    @endforeach
+
+                    @if ($labPickupAllowed)
+                        <label class="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-white p-3 has-[:checked]:border-sage">
+                            <input type="radio" name="delivery_choice" wire:model.live="deliveryChoice" value="lab_pickup" class="mt-1 text-sage focus:ring-sage">
+                            <span class="text-sm">
+                                <strong>Retrait gratuit au laboratoire</strong> <span class="text-ink-muted">(compte professionnel)</span><br>
+                                <span class="text-ink-muted">{{ $labSnapshot['address_line1'] }}, {{ $labSnapshot['postal_code'] }} {{ $labSnapshot['city'] }}</span>
+                                @if ($labSnapshot['instructions'])<br><span class="text-ink-muted">{{ $labSnapshot['instructions'] }}</span>@endif
+                            </span>
+                        </label>
+                    @endif
+
+                    @error('deliveryChoice')<p class="text-sm text-red-700">{{ $message }}</p>@enderror
+                </fieldset>
+
+                @if ($deliveryMethodValue->value === 'chronopost_relay')
+                    <x-ui.alert variant="warning">
+                        La recherche de points relais est en cours de finalisation. Indiquez ci-dessous le relais Chronopost de votre choix (nom et ville) : nous vous confirmerons sa disponibilité par email avant expédition.
+                    </x-ui.alert>
+
+                    <x-ui.field name="relay_postal_code" label="Code postal du relais">
+                        <x-ui.input name="relay_postal_code" wire:model="relay_postal_code" />
+                    </x-ui.field>
+                    <x-ui.field name="relay_name" label="Nom et ville du relais souhaité">
+                        <x-ui.input name="relay_name" wire:model="relay_name" />
+                    </x-ui.field>
+                @endif
 
                 <div class="mt-2 flex gap-3">
                     <x-ui.button type="button" variant="outline" wire:click="goToStep(1)" class="flex-1 justify-center">Précédent</x-ui.button>
@@ -97,10 +133,14 @@
                     @if ($totals['shipping_error'])
                         <x-ui.alert variant="danger">Livraison momentanément indisponible pour votre commande. Contactez-nous pour la finaliser.</x-ui.alert>
                     @else
-                        <div class="flex justify-between gap-4"><span>{{ app(\App\Settings\ShippingSettings::class)->carrier_label ?: 'Frais de port' }}</span><span class="whitespace-nowrap">{{ $totals['shipping_ttc'] === 0 ? 'Offerts' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
+                        @if ($deliveryMethodValue->isPickup())
+                            <div class="flex justify-between gap-4"><span>{{ $deliveryMethodValue->label() }}</span><span class="whitespace-nowrap">Gratuit</span></div>
+                        @else
+                            <div class="flex justify-between gap-4"><span>{{ app(\App\Settings\ShippingSettings::class)->carrier_label ?: 'Frais de port' }}</span><span class="whitespace-nowrap">{{ $totals['shipping_ttc'] === 0 ? 'Offerts' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
+                        @endif
                         <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
                         @if ($totals['planned_ship_date'])
-                            <p class="text-xs text-ink-muted">📦 Expédition prévue le {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
+                            <p class="text-xs text-ink-muted">{{ $deliveryMethodValue->isPickup() ? '🧺 Prête à retirer à partir du' : '📦 Expédition prévue le' }} {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
                         @endif
                     @endif
                 </div>
