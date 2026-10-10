@@ -29,7 +29,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $planned_ship_date
  */
 #[Fillable([
-    'number', 'token', 'user_id', 'status', 'payment_method', 'delivery_method',
+    'number', 'token', 'user_id', 'status', 'payment_method', 'settlement_reference', 'delivery_method',
     'email', 'first_name', 'last_name', 'phone',
     'billing_first_name', 'billing_last_name', 'billing_company', 'billing_line1', 'billing_line2',
     'billing_postal_code', 'billing_city', 'billing_country',

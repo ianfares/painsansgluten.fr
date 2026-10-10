@@ -110,6 +110,9 @@
         — payé le {{ \Illuminate\Support\Carbon::parse($s['paid_at'])->format('d/m/Y') }}
     @endif
 </p>
+@if ($s['settlement_reference'] ?? null)
+    <p>Réglé par avoir : {{ $s['settlement_reference'] }}</p>
+@endif
 
 <div class="footer">
     {{ $s['seller']['footer_mentions'] ?? '[Mentions légales de pied de facture à renseigner]' }}
