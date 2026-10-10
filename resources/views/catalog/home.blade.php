@@ -10,10 +10,6 @@
 
         <div class="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-8 sm:py-10 lg:grid-cols-2 lg:py-14">
             <div class="text-center lg:text-left">
-                <span class="inline-flex items-center gap-2 rounded-full bg-sage/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-sage-dark">
-                    🌾 100&nbsp;% sans gluten · fait main à Avranches
-                </span>
-
                 <h1 class="mt-4 text-3xl font-semibold leading-tight text-ink sm:text-4xl">
                     {{ $homepage->banner_title ?: 'Boulangerie & créations artisanales 100 % sans gluten' }}
                 </h1>
@@ -68,9 +64,11 @@
                     </div>
                 @endif
 
-                <span class="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-card bg-sage px-3 py-2 text-xs font-medium text-white shadow-button lg:left-auto lg:right-4 lg:translate-x-0">
-                    📦 Expédié frais, à retirer en relais
-                </span>
+                @if ($homepage->banner_badge_text)
+                    <span class="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-card bg-sage px-3 py-2 text-xs font-medium text-white shadow-button lg:left-auto lg:right-4 lg:translate-x-0">
+                        {{ $homepage->banner_badge_text }}
+                    </span>
+                @endif
             </div>
         </div>
     </div>

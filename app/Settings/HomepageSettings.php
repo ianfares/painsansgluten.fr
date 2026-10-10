@@ -30,6 +30,9 @@ class HomepageSettings extends Settings
 
     public ?string $banner_button_url;
 
+    /** Étiquette sur l'image de la bannière ; vide = étiquette masquée (retours 10/10/2026). */
+    public ?string $banner_badge_text;
+
     /** @var list<int> IDs des produits mis en avant (voir App\Models\Product) */
     public array $featured_product_ids;
 

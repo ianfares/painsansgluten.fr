@@ -50,6 +50,7 @@ class ManageHomepageSettings extends SettingsPage
                     TextInput::make('banner_subtitle')->label('Sous-titre')->maxLength(255),
                     TextInput::make('banner_button_text')->label('Texte du bouton')->maxLength(100),
                     TextInput::make('banner_button_url')->label('Lien du bouton')->url()->maxLength(255),
+                    TextInput::make('banner_badge_text')->label('Étiquette sur l\'image')->helperText('Laisser vide pour masquer l\'étiquette.')->maxLength(60),
                 ])
                 ->columns(2),
 
