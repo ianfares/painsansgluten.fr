@@ -103,13 +103,15 @@
                 @if ($product->description)
                     @if ($product->short_description)
                         <details class="group text-ink">
-                            <summary class="inline-flex cursor-pointer list-none items-center gap-1 text-sm font-medium text-sage transition hover:text-ochre focus-visible:text-ochre [&::-webkit-details-marker]:hidden">
-                                Lire la suite
-                                <svg class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            {{-- Bouton bien visible (retour de Ian) : « Lire la suite » fermé, « Réduire » ouvert. --}}
+                            <summary class="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-sage bg-sage/10 px-4 py-2 text-base font-semibold text-sage-dark transition hover:bg-sage hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage [&::-webkit-details-marker]:hidden">
+                                <span class="group-open:hidden">Lire la suite</span>
+                                <span class="hidden group-open:inline">Réduire</span>
+                                <svg class="h-5 w-5 shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                                     <path d="M5 8l5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </summary>
-                            <div class="prose prose-sm max-w-none pt-2">{!! $product->description !!}</div>
+                            <div class="prose max-w-none pt-3 text-ink">{!! $product->description !!}</div>
                         </details>
                     @else
                         <div class="prose prose-sm max-w-none">{!! $product->description !!}</div>
