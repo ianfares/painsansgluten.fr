@@ -901,3 +901,15 @@ PERFORMANCE : aucun appel supplémentaire (utilisateur déjà chargé, calcul ar
 TESTS : 9 tests (arrondi, taux par type de compte, panier connecté/invité, commande figée, TVA après remise, Stripe = total, facture + PDF, catalogue barré, borne admin, falsification) ; suite complète 387/387 ; pint OK ; phpstan 0 erreur.
 POINTS À RELIRE PAR UN HUMAIN : présentation de la remise sur la facture → comptable de la cliente ; écart assumé avec la fiche (remise par unité au lieu de par ligne, pour que Stripe et la facture tombent juste au centime).
 PROCHAINE TÂCHE SUGGÉRÉE : T27-L7b modes de retrait dans la commande (Opus 5.5).
+
+## [2026-10-10 23:30] — Claude Opus 5.5 — T27-L7b modes de retrait
+
+TÂCHE : T27-L7b — choix du mode de livraison dans la commande (point 15 + retrait labo pro).
+RÉSUMÉ : étape « Livraison » du tunnel : Chronopost Relais, retrait gratuit chez un commerçant partenaire à 50 km max de l'adresse du client, retrait gratuit au labo pour les pros autorisés. Nouveaux statuts « Prête au retrait » (email au client) et « Retirée », actions admin, filtre et colonne « Livraison », affichage dans l'espace client et les emails.
+FICHIERS : `app/Enums/DeliveryMethod.php`, `app/Services/Shipping/DeliveryOptions.php`, event/mail/vue « prête au retrait », migration `2026_10_10_230000_add_delivery_method_to_orders_table`, OrderStatus, OrderStateMachine, CartService, CreateOrderAction, CheckoutWizard (+ vue), OrderResource, SendOrderStatusEmails, ResendOrderConfirmationAction, vues compte/emails, tests `tests/Feature/Checkout/DeliveryMethodsTest.php`.
+ANALYSE D'IMPACT : tunnel, création de commande, statuts (transitions gardées par mode), admin commandes, emails. Chronopost inchangé (tous les tests existants verts).
+SÉCURITÉ : mode et point revalidés côté serveur au paiement ; pas d'adresse client en clair dans le cache ; pas de requête BAN dans les tests (`preventStrayRequests`).
+PERFORMANCE : géocodage seulement s'il existe au moins un commerçant proposable, et mis en cache 24 h.
+TESTS : 11 tests (proposition selon distance/actif/géocodé, BAN en échec, commande retrait gratuite + snapshot, 4 falsifications, labo refusé/autorisé, transitions + email, Chronopost refusé en « prête », actions admin) ; suite complète 398/398 ; pint OK ; phpstan 0 erreur.
+POINTS À RELIRE PAR UN HUMAIN : saisir les commerçants (Admin → Paramètres → Points de retrait) et le texte d'instructions du labo ; décider si les produits « non expédiables » deviennent commandables en retrait.
+PROCHAINE TÂCHE SUGGÉRÉE : T27-L8 bon de livraison et T27-L9 tableau « À produire » (Sonnet 5.5, en parallèle), puis T27-L10 (Opus).
