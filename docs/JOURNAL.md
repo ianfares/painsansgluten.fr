@@ -913,3 +913,15 @@ PERFORMANCE : géocodage seulement s'il existe au moins un commerçant proposabl
 TESTS : 11 tests (proposition selon distance/actif/géocodé, BAN en échec, commande retrait gratuite + snapshot, 4 falsifications, labo refusé/autorisé, transitions + email, Chronopost refusé en « prête », actions admin) ; suite complète 398/398 ; pint OK ; phpstan 0 erreur.
 POINTS À RELIRE PAR UN HUMAIN : saisir les commerçants (Admin → Paramètres → Points de retrait) et le texte d'instructions du labo ; décider si les produits « non expédiables » deviennent commandables en retrait.
 PROCHAINE TÂCHE SUGGÉRÉE : T27-L8 bon de livraison et T27-L9 tableau « À produire » (Sonnet 5.5, en parallèle), puis T27-L10 (Opus).
+
+## [2026-10-11 00:30] — Claude Opus 5.5 (pilote, L10) + Sonnet 5.5 (L8, L9) — T27 vague 4
+
+TÂCHE : T27-L8 bon de livraison PDF + QR (Sonnet), T27-L9 tableau « À produire » + PDF (Sonnet), T27-L10 commande manuelle + validation par avoir (Opus).
+RÉSUMÉ : BL sans prix avec QR depuis la fiche, la liste ou en masse ; page « À produire » filtrable (date d'expédition prévue, catégorie, produit, mode de livraison) avec total par produit, détail et export PDF, widget au tableau de bord ; « Nouvelle commande » dans l'admin pour un client existant (lien de paiement carte ou virement envoyé par email) et action « Valider sans paiement (avoir) ».
+FICHIERS : commits `T27-L8`, `T27-L9`, `T27-L10` ; migration `2026_10_10_240000_add_manual_order_columns_to_orders_table` ; `composer.json` (bacon/bacon-qr-code en dépendance directe).
+ANALYSE D'IMPACT : OrderResource (actions, création), facture (mention avoir), remboursement (moyens non Stripe = manuel), emails de confirmation. Deux conflits triviaux de fusion (imports, liste du test d'aller-retour) résolus.
+SÉCURITÉ : tout est sous le guard admin ; aucun montant saisi ; moyen « avoir » refusé à la création et absent du tunnel ; BL et PDF de production non stockés.
+PERFORMANCE : plan de production en une requête ; BL de masse en mémoire (quelques dizaines de commandes).
+TESTS : suite complète 430/430 ; pint OK ; phpstan 0 erreur ; composer audit propre.
+POINTS À RELIRE PAR UN HUMAIN : lire un QR de BL avec un téléphone en recette ; mention « Réglé par avoir » → comptable ; saisir les commerçants partenaires et les instructions de retrait labo.
+PROCHAINE TÂCHE SUGGÉRÉE : recette par Ian de tout le lot T27 sur la préprod, puis GTM/GA4.
