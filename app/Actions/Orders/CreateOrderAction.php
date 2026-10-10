@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Orders;
 
+use App\Enums\DeliveryMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Models\Cart;
@@ -36,9 +37,9 @@ class CreateOrderAction
      * @param  array{first_name: string, last_name: string, company?: ?string, line1: string, line2?: ?string, postal_code: string, city: string}  $billing
      * @param  array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}  $relay
      */
-    public function execute(Cart $cart, array $customer, array $billing, array $relay, PaymentMethod $paymentMethod, ?int $userId = null): Order
+    public function execute(Cart $cart, array $customer, array $billing, array $relay, PaymentMethod $paymentMethod, ?int $userId = null, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay): Order
     {
-        return DB::transaction(function () use ($cart, $customer, $billing, $relay, $paymentMethod, $userId) {
+        return DB::transaction(function () use ($cart, $customer, $billing, $relay, $paymentMethod, $userId, $deliveryMethod) {
             // Verrou sur le panier : deux validations simultanées (double clic,
             // deux onglets) ne créent qu'une commande, la seconde trouve le panier vide.
             Cart::query()->whereKey($cart->id)->lockForUpdate()->first();
@@ -49,7 +50,7 @@ class CreateOrderAction
                 throw new RuntimeException('Impossible de créer une commande avec un panier vide.');
             }
 
-            $totals = $this->cartService->totals($cart);
+            $totals = $this->cartService->totals($cart, $deliveryMethod);
 
             if ($totals['shipping_error'] !== null) {
                 throw new RuntimeException($totals['shipping_error']);
@@ -66,6 +67,7 @@ class CreateOrderAction
                 'user_id' => $userId,
                 'status' => OrderStatus::PendingPayment,
                 'payment_method' => $paymentMethod,
+                'delivery_method' => $deliveryMethod,
                 'email' => $customer['email'],
                 'first_name' => $customer['first_name'],
                 'last_name' => $customer['last_name'],

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Listeners\Orders;
 
 use App\Events\Orders\OrderPaid;
+use App\Events\Orders\OrderReadyForPickup;
 use App\Events\Orders\OrderShipped;
 use App\Mail\Admin\NewPaidOrderMail;
+use App\Mail\OrderReadyForPickupMail;
 use App\Mail\OrderShippedMail;
 use App\Services\Mail\AdminMailer;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
@@ -29,5 +31,10 @@ class SendOrderStatusEmails implements ShouldHandleEventsAfterCommit
     public function handleOrderShipped(OrderShipped $event): void
     {
         Mail::to($event->order->email)->queue(new OrderShippedMail($event->order));
+    }
+
+    public function handleOrderReadyForPickup(OrderReadyForPickup $event): void
+    {
+        Mail::to($event->order->email)->queue(new OrderReadyForPickupMail($event->order));
     }
 }

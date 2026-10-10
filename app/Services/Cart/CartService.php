@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Cart;
 
+use App\Enums\DeliveryMethod;
 use App\Exceptions\Shipping\ShippingNotConfigured;
 use App\Exceptions\Shipping\WeightOutOfRange;
 use App\Models\Cart;
@@ -155,11 +156,12 @@ class CartService
      * `subtotal_ttc` = produits après remise client (T27-L6) : c'est ce qui est
      * payé ; `discount_ttc` = remise totale ; le seuil de port offert porte sur
      * le montant remisé. La remise vient du compte du panier, jamais du navigateur.
+     * Retrait (commerçant, labo — T27-L7b) : frais de port à 0, même date de préparation.
      *
      * @return array{count: int, subtotal_ttc: int, discount_percent: int, discount_ttc: int, shipping_ttc: int|null,
      *     total_ttc: int|null, planned_ship_date: ?CarbonImmutable, shipping_error: ?string}
      */
-    public function totals(Cart $cart): array
+    public function totals(Cart $cart, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay): array
     {
         ['items' => $items] = $this->validItems($cart);
 
@@ -175,7 +177,7 @@ class CartService
 
         if ($count > 0) {
             try {
-                $shipping = $this->shippingCostCalculator->forWeight($weight, $subtotal);
+                $shipping = $deliveryMethod->isPickup() ? 0 : $this->shippingCostCalculator->forWeight($weight, $subtotal);
                 $plannedShipDate = $this->shippingDateCalculator->forInstant(CarbonImmutable::now());
             } catch (ShippingNotConfigured|WeightOutOfRange $e) {
                 $shippingError = $e->getMessage();

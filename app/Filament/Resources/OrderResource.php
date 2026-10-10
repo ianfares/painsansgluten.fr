@@ -8,6 +8,7 @@ use App\Actions\Orders\RefundOrderAction;
 use App\Actions\Orders\ResendOrderConfirmationAction;
 use App\Actions\Orders\ShipOrderAction;
 use App\Actions\Orders\ValidateBankTransferPaymentAction;
+use App\Enums\DeliveryMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Exceptions\Orders\BankTransferValidationNotAllowed;
@@ -67,7 +68,10 @@ class OrderResource extends Resource
                 TextColumn::make('planned_ship_date')
                     ->label('Expédition prévue')
                     ->date('d/m/Y'),
-                TextColumn::make('relay_name')->label('Relais')->toggleable(),
+                TextColumn::make('delivery_method')
+                    ->label('Livraison')
+                    ->formatStateUsing(fn (DeliveryMethod $state): string => $state->label()),
+                TextColumn::make('relay_name')->label('Relais / point de retrait')->toggleable(),
                 TextColumn::make('created_at')->label('Créée le')->dateTime('d/m/Y H:i'),
             ])
             ->filters([
@@ -83,6 +87,9 @@ class OrderResource extends Resource
                         array_map(fn (PaymentMethod $p) => $p->value, PaymentMethod::cases()),
                         array_map(fn (PaymentMethod $p) => $p->label(), PaymentMethod::cases()),
                     )),
+                SelectFilter::make('delivery_method')
+                    ->label('Livraison')
+                    ->options(collect(DeliveryMethod::cases())->mapWithKeys(fn (DeliveryMethod $m) => [$m->value => $m->label()])->all()),
                 Filter::make('bank_transfer_pending')
                     ->label('Virements en attente')
                     ->toggle()
@@ -144,7 +151,7 @@ class OrderResource extends Resource
                 Tables\Actions\Action::make('ship')
                     ->label('Expédier')
                     ->icon('heroicon-o-truck')
-                    ->visible(fn (Order $record): bool => $record->status === OrderStatus::Preparing)
+                    ->visible(fn (Order $record): bool => $record->status === OrderStatus::Preparing && ! $record->delivery_method->isPickup())
                     ->form([
                         TextInput::make('tracking_number')->label('N° de suivi Chronopost')->required(),
                     ])
@@ -155,6 +162,26 @@ class OrderResource extends Resource
                             'Commande expédiée.',
                         );
                     }),
+                Tables\Actions\Action::make('readyForPickup')
+                    ->label('Prête au retrait')
+                    ->icon('heroicon-o-shopping-bag')
+                    ->visible(fn (Order $record): bool => $record->delivery_method->isPickup()
+                        && in_array($record->status, [OrderStatus::Paid, OrderStatus::Preparing], true))
+                    ->requiresConfirmation()
+                    ->modalDescription(fn (Order $record): string => "Le client recevra un email avec l'adresse et les horaires de retrait ({$record->relay_name}).")
+                    ->action(fn (Order $record, OrderStateMachine $orderStateMachine) => self::transitionWithNotification(
+                        fn () => $orderStateMachine->transition($record, OrderStatus::ReadyForPickup, 'admin', auth('admin')->id()),
+                        'Commande prête au retrait, client prévenu.',
+                    )),
+                Tables\Actions\Action::make('pickedUp')
+                    ->label('Marquer retirée')
+                    ->icon('heroicon-o-check-circle')
+                    ->visible(fn (Order $record): bool => $record->status === OrderStatus::ReadyForPickup)
+                    ->requiresConfirmation()
+                    ->action(fn (Order $record, OrderStateMachine $orderStateMachine) => self::transitionWithNotification(
+                        fn () => $orderStateMachine->transition($record, OrderStatus::PickedUp, 'admin', auth('admin')->id()),
+                        'Commande marquée retirée.',
+                    )),
                 Tables\Actions\Action::make('deliver')
                     ->label('Marquer livrée')
                     ->icon('heroicon-o-check-circle')
@@ -168,7 +195,7 @@ class OrderResource extends Resource
                     ->label('Rembourser')
                     ->icon('heroicon-o-arrow-uturn-left')
                     ->color('danger')
-                    ->visible(fn (Order $record): bool => in_array($record->status, [OrderStatus::Paid, OrderStatus::Preparing, OrderStatus::Shipped, OrderStatus::Delivered], true))
+                    ->visible(fn (Order $record): bool => $record->status->isPaidState())
                     ->requiresConfirmation()
                     ->modalDescription(fn (Order $record): string => $record->payment_method === PaymentMethod::Stripe
                         ? 'Le montant total sera remboursé sur la carte du client via Stripe, et l\'avoir sera généré.'
@@ -224,10 +251,14 @@ class OrderResource extends Resource
                     TextEntry::make('billing_postal_code')->label('Code postal'),
                     TextEntry::make('billing_city')->label('Ville'),
                 ]),
-            InfolistSection::make('Relais')
+            InfolistSection::make('Livraison')
                 ->columns(2)
                 ->schema([
-                    TextEntry::make('relay_name')->label('Nom du relais'),
+                    TextEntry::make('delivery_method')->label('Mode')->formatStateUsing(fn (DeliveryMethod $state): string => $state->label()),
+                    TextEntry::make('relay_name')->label('Relais / point de retrait'),
+                    TextEntry::make('relay_snapshot')->label('Adresse du point de retrait')
+                        ->visible(fn (Order $record): bool => $record->delivery_method->isPickup())
+                        ->state(fn (Order $record): string => trim(($record->relay_snapshot['address_line1'] ?? '').', '.($record->relay_snapshot['postal_code'] ?? '').' '.($record->relay_snapshot['city'] ?? ''), ', ')),
                     TextEntry::make('relay_id')->label('Identifiant')
                         ->helperText(fn (Order $record): ?string => str_starts_with((string) $record->relay_id, 'MANUEL-')
                             ? 'Saisie manuelle provisoire (T11 non livrée) — à confirmer avant expédition.'
