@@ -34,7 +34,6 @@ class ProAccountRequestController extends Controller
             // Texte riche saisi en BO : purifié (liste blanche) avant affichage (QUALITE.md §2.3).
             'introHtml' => Purifier::clean((string) $shop->pro_intro_html),
             'activityTypes' => $shop->pro_activity_types,
-            'productOptions' => ProAccountRequest::productOptions(),
         ]);
     }
 
@@ -48,7 +47,6 @@ class ProAccountRequestController extends Controller
 
         $proRequest = ProAccountRequest::query()->create([
             ...$request->safe()->except(['consent', 'cf-turnstile-response']),
-            'products_of_interest' => $request->validated('products_of_interest') ?? [],
             'consent_at' => now(),
         ]);
 

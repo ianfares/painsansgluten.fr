@@ -3,7 +3,7 @@
 
 Bonjour {{ $proRequest->contact_first_name }},
 
-Merci de l'intérêt que vous portez à nos produits. Nous ne sommes malheureusement pas en mesure de donner suite à la demande de compte professionnel de **{{ $proRequest->company_name }}** pour le moment.
+Merci de l'intérêt que vous portez à nos produits. Nous ne sommes malheureusement pas en mesure de donner suite à votre demande de compte professionnel{{ filled($proRequest->company_name) ? ' pour **'.$proRequest->company_name.'**' : '' }} pour le moment.
 
 @if ($proRequest->admin_comment)
 @component('mail::panel')

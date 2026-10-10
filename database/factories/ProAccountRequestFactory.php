@@ -18,7 +18,6 @@ class ProAccountRequestFactory extends Factory
         return [
             'company_name' => fake()->company(),
             'siret' => '73282932000074',
-            'vat_number' => null,
             'activity_type' => 'Restaurant',
             'activity_other' => null,
             'contact_first_name' => fake()->firstName(),
@@ -29,8 +28,6 @@ class ProAccountRequestFactory extends Factory
             'address_line1' => fake()->streetAddress(),
             'postal_code' => '50300',
             'city' => 'Avranches',
-            'products_of_interest' => ['Pains'],
-            'volumes' => null,
             'description' => fake()->paragraph(),
             'consent_at' => now(),
             'status' => ProRequestStatus::Pending,

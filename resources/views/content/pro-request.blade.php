@@ -16,25 +16,22 @@
                 <x-ui.alert variant="warning" class="mb-4">{{ session('pro_error') }}</x-ui.alert>
             @endif
 
+            <p class="mb-4 text-sm text-ink-muted">Seuls les champs marqués d'un astérisque (*) sont obligatoires.</p>
+
             <form method="POST" action="{{ route('pro.request.store') }}" class="flex flex-col gap-4">
                 @csrf
 
-                <x-ui.field name="company_name" label="Raison sociale">
-                    <x-ui.input name="company_name" autocomplete="organization" required maxlength="255" />
+                <x-ui.field name="company_name" label="Raison sociale (facultatif)">
+                    <x-ui.input name="company_name" autocomplete="organization" maxlength="255" />
+                </x-ui.field>
+
+                <x-ui.field name="siret" label="N° SIRET (facultatif)" hint="14 chiffres">
+                    <x-ui.input name="siret" inputmode="numeric" maxlength="20" />
                 </x-ui.field>
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <x-ui.field name="siret" label="N° SIRET" hint="14 chiffres">
-                        <x-ui.input name="siret" inputmode="numeric" required maxlength="20" />
-                    </x-ui.field>
-                    <x-ui.field name="vat_number" label="N° de TVA intracommunautaire (facultatif)" hint="Ex. FR12345678901">
-                        <x-ui.input name="vat_number" maxlength="20" />
-                    </x-ui.field>
-                </div>
-
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <x-ui.field name="activity_type" label="Type d'activité">
-                        <select name="activity_type" id="activity_type" required
+                    <x-ui.field name="activity_type" label="Type d'activité (facultatif)">
+                        <select name="activity_type" id="activity_type"
                             class="w-full rounded-field border bg-white px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-sage {{ $errors->has('activity_type') ? 'border-red-400' : 'border-line' }}">
                             <option value="">Choisir…</option>
                             @foreach ($activityTypes as $type)
@@ -48,10 +45,10 @@
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <x-ui.field name="contact_last_name" label="Nom du contact">
+                    <x-ui.field name="contact_last_name" label="Nom du contact *">
                         <x-ui.input name="contact_last_name" autocomplete="family-name" required maxlength="100" />
                     </x-ui.field>
-                    <x-ui.field name="contact_first_name" label="Prénom du contact">
+                    <x-ui.field name="contact_first_name" label="Prénom du contact *">
                         <x-ui.input name="contact_first_name" autocomplete="given-name" required maxlength="100" />
                     </x-ui.field>
                 </div>
@@ -61,47 +58,28 @@
                 </x-ui.field>
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <x-ui.field name="email" label="Email professionnel">
+                    <x-ui.field name="email" label="Email professionnel *">
                         <x-ui.input name="email" type="email" autocomplete="email" required maxlength="150" />
                     </x-ui.field>
-                    <x-ui.field name="phone" label="Téléphone">
+                    <x-ui.field name="phone" label="Téléphone *">
                         <x-ui.input name="phone" type="tel" autocomplete="tel" required maxlength="30" />
                     </x-ui.field>
                 </div>
 
-                <x-ui.field name="address_line1" label="Adresse de l'établissement">
-                    <x-ui.input name="address_line1" autocomplete="street-address" required maxlength="255" />
+                <x-ui.field name="address_line1" label="Adresse de l'établissement (facultatif)">
+                    <x-ui.input name="address_line1" autocomplete="street-address" maxlength="255" />
                 </x-ui.field>
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <x-ui.field name="postal_code" label="Code postal">
-                        <x-ui.input name="postal_code" autocomplete="postal-code" inputmode="numeric" required maxlength="5" />
+                    <x-ui.field name="postal_code" label="Code postal (facultatif)">
+                        <x-ui.input name="postal_code" autocomplete="postal-code" inputmode="numeric" maxlength="5" />
                     </x-ui.field>
-                    <x-ui.field name="city" label="Ville">
-                        <x-ui.input name="city" autocomplete="address-level2" required maxlength="100" />
+                    <x-ui.field name="city" label="Ville (facultatif)">
+                        <x-ui.input name="city" autocomplete="address-level2" maxlength="100" />
                     </x-ui.field>
                 </div>
 
-                <fieldset class="flex flex-col gap-2">
-                    <legend class="mb-1 text-sm font-medium text-ink">Produits qui vous intéressent</legend>
-                    @foreach ($productOptions as $i => $option)
-                        <label class="flex items-center gap-2 text-sm text-ink">
-                            <input type="checkbox" name="products_of_interest[]" value="{{ $option }}" id="product_{{ $i }}"
-                                class="rounded border-line text-sage focus:ring-sage" @checked(in_array($option, old('products_of_interest', []), true))>
-                            {{ $option }}
-                        </label>
-                    @endforeach
-                    @error('products_of_interest.*')
-                        <p class="text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                </fieldset>
-
-                <x-ui.field name="volumes" label="Volumes / fréquence estimés (facultatif)">
-                    <textarea name="volumes" id="volumes" rows="2" maxlength="1000"
-                        class="w-full rounded-field border px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-sage {{ $errors->has('volumes') ? 'border-red-400' : 'border-line' }}">{{ old('volumes') }}</textarea>
-                </x-ui.field>
-
-                <x-ui.field name="description" label="Description de votre besoin" hint="2 000 caractères maximum">
-                    <textarea name="description" id="description" rows="6" required maxlength="2000"
+                <x-ui.field name="description" label="Description de votre besoin (facultatif)" hint="2 000 caractères maximum">
+                    <textarea name="description" id="description" rows="6" maxlength="2000"
                         class="w-full rounded-field border px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-sage {{ $errors->has('description') ? 'border-red-400' : 'border-line' }}">{{ old('description') }}</textarea>
                 </x-ui.field>
 
