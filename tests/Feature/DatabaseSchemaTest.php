@@ -17,12 +17,12 @@ use App\Models\OrderStatusHistory;
 use App\Models\Page;
 use App\Models\Payment;
 use App\Models\Product;
-use App\Models\Redirect;
 use App\Models\ShippingRate;
 use App\Models\StripeEvent;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 test('toutes les factories créent un enregistrement valide', function () {
     expect(Category::factory()->create())->toBeInstanceOf(Category::class)
@@ -40,7 +40,6 @@ test('toutes les factories créent un enregistrement valide', function () {
         ->and(ClosedDate::factory()->create())->toBeInstanceOf(ClosedDate::class)
         ->and(Page::factory()->create())->toBeInstanceOf(Page::class)
         ->and(FaqItem::factory()->create())->toBeInstanceOf(FaqItem::class)
-        ->and(Redirect::factory()->create())->toBeInstanceOf(Redirect::class)
         ->and(Address::factory()->create())->toBeInstanceOf(Address::class);
 });
 
@@ -106,4 +105,8 @@ test('migrate:fresh --seed s\'exécute sans erreur', function () {
     $exitCode = Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
 
     expect($exitCode)->toBe(0);
+});
+
+test('la table redirects a été supprimée (T27-L4)', function () {
+    expect(Schema::hasTable('redirects'))->toBeFalse();
 });

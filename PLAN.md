@@ -501,7 +501,8 @@ Page publique `/professionnels` (lien « Professionnels » dans le pied de page,
 ⚠️ Données personnelles : conservation des demandes refusées `À CONFIRMER` (proposition : 12 mois), à reporter dans la politique de confidentialité ; pas de purge automatique en V1.
 
 ### 16.4 Redirections
-Table `redirects` (source, cible, code 301, actif) + middleware ; CRUD simple dans le BO. Seed : voir §23.
+~~Table `redirects` (source, cible, code 301, actif) + middleware ; CRUD simple dans le BO. Seed : voir §23.~~
+Supprimé le 10/10/2026 (T27-L4) : l'ancien site n'avait pas de référencement. Plus de table, de middleware, de CRUD ni de seed.
 
 ---
 
@@ -608,7 +609,7 @@ shipping_rates    id, min_weight_g, max_weight_g, price_ttc
 closed_dates      id, start_date, end_date, label
 pages             id, title, slug(unique), content, is_published, seo_title, seo_description
 faq_items         id, question, answer, group, position, is_published
-redirects         id, source(unique), target, status_code, is_active
+redirects         id, source(unique), target, status_code, is_active — supprimée le 10/10/2026 (T27-L4) : l'ancien site n'avait pas de référencement.
 settings          (spatie/laravel-settings)
 ```
 Montants en **centimes** (`int`). Taux de TVA en `decimal(5,2)`.
@@ -620,7 +621,7 @@ Montants en **centimes** (`int`). Taux de TVA en `decimal(5,2)`.
 1. **Assets** : logo HD, bannière, photos produits — fournis par Ian.
 2. **Produits** : les 7 produits existants sont ressaisis (ou seedés) comme modèles ; les autres sont saisis par la cliente.
 3. **Clients / commandes** : a priori aucun (site en pré-lancement, prix à 0 €) — `À CONFIRMER`. Si clients existants : import sans mot de passe + email de réinitialisation.
-4. **Redirections 301** (seed de la table `redirects`) :
+4. **Redirections 301** (seed de la table `redirects`) — Supprimé le 10/10/2026 (T27-L4) : l'ancien site n'avait pas de référencement. Tableau conservé pour mémoire :
 
 | Ancienne URL Shopify | Nouvelle URL |
 |---|---|
