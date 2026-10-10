@@ -889,3 +889,15 @@ PERFORMANCE : middleware sans requête supplémentaire (utilisateur déjà charg
 TESTS : 378/378 après merge (conflit trivial résolu dans LivewireRoundTripTest) ; pint OK ; phpstan 0 erreur.
 POINTS À RELIRE PAR UN HUMAIN : aspect visuel du choix particulier/pro à l'inscription ; texte d'instructions du retrait au labo à saisir (Admin → Paramètres → Expédition → Retraits).
 PROCHAINE TÂCHE SUGGÉRÉE : T27-L6 remise client (Opus 5.5).
+
+## [2026-10-10 22:30] — Claude Opus 5.5 — T27-L6 remise client
+
+TÂCHE : T27-L6 — remise client en % (point 6 du compte rendu du 10/10).
+RÉSUMÉ : taux réglable par client dans l'admin (0–90 %), appliqué aux produits uniquement, affiché partout pour le client connecté (prix barré + remisé), figé sur la commande et ses lignes, envoyé à Stripe au prix unitaire remisé, présenté sur la facture (colonne Remise + mention).
+FICHIERS : `app/Services/Pricing/CustomerPricing.php`, `resources/views/components/ui/price.blade.php`, migration `2026_10_10_220000_add_customer_discount_columns`, CartService, CreateOrderAction, StripeCheckoutService, IssueInvoiceAction, vues panier/tunnel/confirmation/compte/emails/PDF facture, UserResource, OrderResource, ManageCustomerAccount, tests `tests/Feature/Pricing/CustomerDiscountTest.php`.
+ANALYSE D'IMPACT : tout le chemin du prix. `line_total_ttc`/`subtotal_ttc` gardent leur sens « montant payé », donc rapports de recettes, export comptable, contrôle du montant Stripe et avoirs inchangés.
+SÉCURITÉ : taux uniquement depuis la base (profil et inscription ignorent un champ de remise, testé) ; borne 0–90 côté formulaire et service ; pro en attente et compte désactivé sans remise.
+PERFORMANCE : aucun appel supplémentaire (utilisateur déjà chargé, calcul arithmétique).
+TESTS : 9 tests (arrondi, taux par type de compte, panier connecté/invité, commande figée, TVA après remise, Stripe = total, facture + PDF, catalogue barré, borne admin, falsification) ; suite complète 387/387 ; pint OK ; phpstan 0 erreur.
+POINTS À RELIRE PAR UN HUMAIN : présentation de la remise sur la facture → comptable de la cliente ; écart assumé avec la fiche (remise par unité au lieu de par ligne, pour que Stripe et la facture tombent juste au centime).
+PROCHAINE TÂCHE SUGGÉRÉE : T27-L7b modes de retrait dans la commande (Opus 5.5).
