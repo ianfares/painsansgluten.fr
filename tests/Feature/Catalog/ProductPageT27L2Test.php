@@ -48,6 +48,7 @@ test('la description longue se déplie sous la description courte, fermée par d
 
     expect($html)->toMatch('/Courte.*<details class="group text-ink">.*<summary.*Lire la suite.*<p>Longue<\/p>/s')
         ->and($html)->not->toContain('<details open class="group text-ink">')
+        ->and($html)->toContain('group-open:inline">Réduire</span>')
         ->and($html)->not->toContain('<h2>Description</h2>');
 });
 
