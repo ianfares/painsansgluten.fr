@@ -925,3 +925,11 @@ PERFORMANCE : plan de production en une requête ; BL de masse en mémoire (quel
 TESTS : suite complète 430/430 ; pint OK ; phpstan 0 erreur ; composer audit propre.
 POINTS À RELIRE PAR UN HUMAIN : lire un QR de BL avec un téléphone en recette ; mention « Réglé par avoir » → comptable ; saisir les commerçants partenaires et les instructions de retrait labo.
 PROCHAINE TÂCHE SUGGÉRÉE : recette par Ian de tout le lot T27 sur la préprod, puis GTM/GA4.
+
+## [2026-10-11 01:00] — Claude Opus 5.5 — fix panier sans accès à la commande
+
+TÂCHE : correctif signalé par Ian — le panier n'offrait aucun moyen d'aller payer (seulement « Voir mon panier »), le tunnel `/commande` n'était lié nulle part.
+RÉSUMÉ : bouton « Passer commande » (vers `checkout`) dans le tiroir et sur la page panier, masqué si la livraison n'est pas paramétrée ; « Voir mon panier » seulement dans le tiroir (propriété verrouillée `onCartPage`) ; pour un visiteur : « Commande possible sans compte. Se connecter ou créer un compte. »
+FICHIERS : `resources/views/livewire/cart-widget.blade.php`, `app/Livewire/CartWidget.php`, `resources/views/catalog/panier.blade.php`, `tests/Feature/Cart/CartLivewireTest.php`.
+TESTS : 431/431 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : recette T27 par Ian.
