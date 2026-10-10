@@ -113,3 +113,9 @@ test('aucun lien mailto sur l\'accueil : contact par formulaire, Professionnels 
 
     $this->get('/')->assertDontSee('mailto:', false);
 });
+
+test('les 5 catégories de l\'accueil tiennent sur une seule ligne à partir de la tablette', function () {
+    Category::factory()->count(5)->create(['is_active' => true]);
+
+    $this->get('/')->assertOk()->assertSee('md:grid-cols-5', false);
+});

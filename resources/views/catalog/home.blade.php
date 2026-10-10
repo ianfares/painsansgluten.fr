@@ -89,9 +89,11 @@
     @if ($categories->isNotEmpty())
         <div class="mx-auto max-w-6xl px-4 py-12">
             <h2 class="mb-6 text-xl font-semibold text-ink">Nos catégories</h2>
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {{-- Toutes les catégories sur une seule ligne à partir de la tablette (5 avec Épicerie). --}}
+            @php($categoryColumns = match (min($categories->count(), 6)) { 1, 2 => 'sm:grid-cols-2', 3 => 'sm:grid-cols-3', 4 => 'sm:grid-cols-4', 5 => 'sm:grid-cols-3 md:grid-cols-5', default => 'sm:grid-cols-3 md:grid-cols-6' })
+            <div class="grid grid-cols-2 gap-4 {{ $categoryColumns }}">
                 @foreach ($categories as $category)
-                    <a href="{{ route('content.show', $category) }}" class="group flex flex-col items-center gap-3 rounded-card border border-line bg-white p-6 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-sage hover:shadow-drawer">
+                    <a href="{{ route('content.show', $category) }}" class="group flex flex-col items-center gap-3 rounded-card border border-line bg-white p-4 text-center lg:p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-sage hover:shadow-drawer">
                         <span class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-cream-alt to-sage/15 text-3xl transition group-hover:scale-105">
                             @if ($url = $category->getFirstMediaUrl('cover', 'menu'))
                                 <img src="{{ $url }}" alt="" width="200" height="200" loading="lazy" class="h-full w-full object-cover">
