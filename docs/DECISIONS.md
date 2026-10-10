@@ -405,3 +405,13 @@
 - **Source des montants : factures émises moins avoirs** (avoirs stockés en négatif) = argent réellement encaissé, cohérent avec l'export comptable. Commandes non payées/annulées exclues (pas de facture). Catégories et top produits : lignes des commandes facturées, signées par le type de pièce.
 - Périodes : aujourd'hui, 7 j, 30 j, 3, 6, 12 mois ; découpage du graphique par heure / jour / semaine / mois. Fuseau `Europe/Paris`.
 - Implémentation : service `App\Services\Reporting\RevenueReport` (testé) + seconde page tableau de bord Filament avec filtre (`HasFiltersForm`) et widgets `ChartWidget` (Chart.js déjà embarqué par Filament) : **aucune dépendance ajoutée**. Widgets rangés dans `app/Filament/Revenue/Widgets` pour ne pas apparaître sur le tableau de bord principal (découverte automatique de `app/Filament/Widgets`).
+
+## T27 — Retours client du 10/10/2026, vague 1 (L1 à L4)
+
+- **Découpage** : 10 lots décrits dans `tasks/T27-README.md` (décisions validées par Ian + règles communes) et `tasks/T27-Lx-*.md`. Lots simples confiés à Haiku 5.5 / Sonnet 5.5 en worktrees isolés, lots critiques (argent, commandes) à Opus 5.5 ; chaque lot relu, retesté et mergé par le pilote.
+- **Worktrees** : `vendor` copié en liens physiques (`cp -al`), pas en lien symbolique (sinon l'autoload Composer charge le code du dépôt principal et Pest ne démarre pas).
+- **L1** : étiquette de la bannière d'accueil réglable (`homepage.banner_badge_text`, défaut « Création à venir », vide = masquée). Menu du haut réduit aux catégories : FAQ, Contact, Notre histoire, Où nous trouver restent dans le pied de page. Boutons en 19 px gras : blanc sur ocre (3,6:1) atteint le seuil WCAG « grand texte » (décision de Ian, plutôt que changer les couleurs).
+- **L2** : prix au kilo **calculé** (`Product::pricePerKgTtc()`, arrondi au centime), jamais saisi ; description longue dépliable sous la courte (`<details>`, sans JS).
+- **L3** : formulaire pro — seuls nom, prénom, téléphone, email (+ consentement, Turnstile) obligatoires ; produits, volumes et TVA intracom supprimés (colonnes supprimées, 0 demande en préprod) ; règle `FrenchVatNumber` supprimée (plus aucun usage). Demandes refusées purgées après **3 mois** (`pro-requests:purge-rejected`, quotidienne, log du seul nombre).
+- **L4** : système de redirections Shopify supprimé (ancien site sans référencement) : ressource, modèle, middleware, seeder, table (migration `drop_redirects_table`). Les anciennes URL `/products/...` répondent 404.
+- **Prix de livraison** : montants exacts conservés (pas d'arrondi). **Plan du site** : gabarit maison validé par Ian (la librairie spatie/laravel-sitemap n'a jamais été installée).
