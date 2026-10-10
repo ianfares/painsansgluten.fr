@@ -22,7 +22,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CategorySeeder::class,
             PageSeeder::class,
-            RedirectSeeder::class,
             ChronoRelais13RatesSeeder::class,
             T26ContentSeeder::class,
         ]);

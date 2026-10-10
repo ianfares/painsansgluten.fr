@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Http\Middleware\HandleLegacyRedirects;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\VerifyTurnstile;
 use Illuminate\Foundation\Application;
@@ -17,10 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Redirections 301 Shopify (PLAN.md §23, T20) : doit s'exécuter avant
-        // la résolution de route pour couvrir les anciennes URLs qui ne
-        // correspondent à aucune route actuelle.
-        $middleware->web(prepend: [HandleLegacyRedirects::class]);
         // Anti-robot sur la création de compte et le mot de passe oublié.
         $middleware->web(append: [VerifyTurnstile::class]);
 

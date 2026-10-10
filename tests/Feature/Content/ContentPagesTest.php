@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Models\Category;
 use App\Models\FaqItem;
 use App\Models\Page;
-use App\Models\Redirect;
 
 test('une page publiée répond 200 et affiche son titre', function () {
     $page = Page::factory()->create(['is_published' => true, 'title' => 'Mentions légales', 'slug' => 'mentions-legales']);
@@ -53,20 +52,4 @@ test('la page FAQ répond 200, groupe les questions et masque les non publiées'
         ->assertSee('Livrez-vous en Corse ?')
         ->assertSee('Livraison')
         ->assertDontSee('Question cachée');
-});
-
-test('une redirection 301 active fonctionne', function () {
-    Redirect::factory()->create(['source' => '/collections/all', 'target' => '/boutique', 'status_code' => 301, 'is_active' => true]);
-
-    $this->get('/collections/all')->assertRedirect('/boutique')->assertStatus(301);
-});
-
-test('une redirection désactivée ne redirige plus', function () {
-    Redirect::factory()->create(['source' => '/ancienne-page', 'target' => '/boutique', 'is_active' => false]);
-
-    $this->get('/ancienne-page')->assertNotFound();
-});
-
-test('la règle générique /products/{slug} redirige vers /produit/{slug}', function () {
-    $this->get('/products/pain-nordique?variant=123')->assertRedirect('/produit/pain-nordique')->assertStatus(301);
 });
