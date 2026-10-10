@@ -31,7 +31,7 @@ use Illuminate\Support\Carbon;
     'billing_first_name', 'billing_last_name', 'billing_company', 'billing_line1', 'billing_line2',
     'billing_postal_code', 'billing_city', 'billing_country',
     'relay_id', 'relay_name', 'relay_snapshot',
-    'subtotal_ttc', 'shipping_ttc', 'shipping_vat_rate', 'total_ttc', 'total_ht', 'total_vat',
+    'subtotal_ttc', 'discount_percent', 'discount_total_ttc', 'shipping_ttc', 'shipping_vat_rate', 'total_ttc', 'total_ht', 'total_vat',
     'planned_ship_date', 'tracking_number', 'cgv_accepted_at',
 ])]
 class Order extends Model
@@ -49,6 +49,8 @@ class Order extends Model
             'payment_method' => PaymentMethod::class,
             'relay_snapshot' => 'array',
             'subtotal_ttc' => 'integer',
+            'discount_percent' => 'integer',
+            'discount_total_ttc' => 'integer',
             'shipping_ttc' => 'integer',
             'shipping_vat_rate' => 'decimal:2',
             'total_ttc' => 'integer',

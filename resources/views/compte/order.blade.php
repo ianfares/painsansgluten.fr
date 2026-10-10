@@ -56,6 +56,12 @@
                         <td class="p-3 text-right">{{ number_format($item->line_total_ttc / 100, 2, ',', ' ') }} €</td>
                     </tr>
                 @endforeach
+                @if ($order->discount_total_ttc > 0)
+                    <tr class="border-b border-line text-sage-dark">
+                        <td class="p-3" colspan="2">Votre remise -{{ $order->discount_percent }} % (déjà déduite)</td>
+                        <td class="p-3 text-right">-{{ number_format($order->discount_total_ttc / 100, 2, ',', ' ') }} €</td>
+                    </tr>
+                @endif
                 <tr class="border-b border-line">
                     <td class="p-3" colspan="2">Livraison</td>
                     <td class="p-3 text-right">{{ number_format($order->shipping_ttc / 100, 2, ',', ' ') }} €</td>

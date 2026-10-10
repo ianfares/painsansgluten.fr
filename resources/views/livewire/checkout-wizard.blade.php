@@ -83,13 +83,16 @@
                     @foreach ($items as $item)
                         <div class="flex items-center justify-between p-3 text-sm" wire:key="recap-item-{{ $item->id }}">
                             <span>{{ $item->product->name }} × {{ $item->quantity }}</span>
-                            <span>{{ number_format($item->product->price_ttc * $item->quantity / 100, 2, ',', ' ') }} €</span>
+                            <span>{{ number_format(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']) * $item->quantity / 100, 2, ',', ' ') }} €</span>
                         </div>
                     @endforeach
                 </div>
 
                 <div class="flex flex-col gap-1 text-sm">
-                    <div class="flex justify-between"><span>Sous-total TTC</span><span>{{ number_format($totals['subtotal_ttc'] / 100, 2, ',', ' ') }} €</span></div>
+                    <div class="flex justify-between"><span>Sous-total TTC</span><span>{{ number_format(($totals['subtotal_ttc'] + $totals['discount_ttc']) / 100, 2, ',', ' ') }} €</span></div>
+                    @if ($totals['discount_ttc'] > 0)
+                        <div class="flex justify-between text-sage-dark"><span>Votre remise -{{ $totals['discount_percent'] }} %</span><span>-{{ number_format($totals['discount_ttc'] / 100, 2, ',', ' ') }} €</span></div>
+                    @endif
 
                     @if ($totals['shipping_error'])
                         <x-ui.alert variant="danger">Livraison momentanément indisponible pour votre commande. Contactez-nous pour la finaliser.</x-ui.alert>

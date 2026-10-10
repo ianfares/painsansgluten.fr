@@ -249,6 +249,9 @@ class OrderResource extends Resource
                 ->columns(3)
                 ->schema([
                     TextEntry::make('subtotal_ttc')->label('Sous-total TTC')->formatStateUsing(fn (int $state): string => number_format($state / 100, 2, ',', ' ').' €'),
+                    TextEntry::make('discount_total_ttc')->label('Remise client (déduite)')
+                        ->visible(fn (Order $record): bool => $record->discount_total_ttc > 0)
+                        ->formatStateUsing(fn (int $state, Order $record): string => '-'.number_format($state / 100, 2, ',', ' ')." € ({$record->discount_percent} %)"),
                     TextEntry::make('shipping_ttc')->label('Frais de port')->formatStateUsing(fn (int $state): string => number_format($state / 100, 2, ',', ' ').' €'),
                     TextEntry::make('total_ttc')->label('Total TTC')->formatStateUsing(fn (int $state): string => number_format($state / 100, 2, ',', ' ').' €'),
                 ]),

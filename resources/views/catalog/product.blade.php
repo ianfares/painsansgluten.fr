@@ -117,7 +117,7 @@
                 @endif
 
                 <div>
-                    <div class="text-2xl font-semibold text-ink">{{ number_format($product->price_ttc / 100, 2, ',', ' ') }} € <span class="text-sm font-normal text-ink-muted">TTC</span></div>
+                    <x-ui.price :amount="$product->price_ttc" suffix="TTC" class="block text-2xl font-semibold text-ink" />
                     @if ($product->formattedNetWeight())
                         @php
                             $pricePerKg = $product->pricePerKgTtc();

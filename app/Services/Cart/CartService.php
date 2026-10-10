@@ -10,6 +10,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Pricing\CustomerPricing;
 use App\Services\Shipping\ShippingCostCalculator;
 use App\Services\Shipping\ShippingDateCalculator;
 use App\Settings\ShippingSettings;
@@ -151,14 +152,20 @@ class CartService
     }
 
     /**
-     * @return array{count: int, subtotal_ttc: int, shipping_ttc: int|null, total_ttc: int|null,
-     *     planned_ship_date: ?CarbonImmutable, shipping_error: ?string}
+     * `subtotal_ttc` = produits après remise client (T27-L6) : c'est ce qui est
+     * payé ; `discount_ttc` = remise totale ; le seuil de port offert porte sur
+     * le montant remisé. La remise vient du compte du panier, jamais du navigateur.
+     *
+     * @return array{count: int, subtotal_ttc: int, discount_percent: int, discount_ttc: int, shipping_ttc: int|null,
+     *     total_ttc: int|null, planned_ship_date: ?CarbonImmutable, shipping_error: ?string}
      */
     public function totals(Cart $cart): array
     {
         ['items' => $items] = $this->validItems($cart);
 
-        $subtotal = $items->sum(fn (CartItem $item) => $item->product->price_ttc * $item->quantity);
+        $percent = $this->discountPercent($cart);
+        $subtotal = $items->sum(fn (CartItem $item) => CustomerPricing::unitNet($item->product->price_ttc, $percent) * $item->quantity);
+        $discount = $items->sum(fn (CartItem $item) => CustomerPricing::unitDiscount($item->product->price_ttc, $percent) * $item->quantity);
         $weight = $items->sum(fn (CartItem $item) => $item->product->shipping_weight_g * $item->quantity);
         $count = $items->sum('quantity');
 
@@ -178,10 +185,18 @@ class CartService
         return [
             'count' => $count,
             'subtotal_ttc' => $subtotal,
+            'discount_percent' => $percent,
+            'discount_ttc' => $discount,
             'shipping_ttc' => $shipping,
             'total_ttc' => $shipping !== null ? $subtotal + $shipping : null,
             'planned_ship_date' => $plannedShipDate,
             'shipping_error' => $shippingError,
         ];
+    }
+
+    /** Remise du compte rattaché au panier ; 0 pour un panier invité. */
+    public function discountPercent(Cart $cart): int
+    {
+        return CustomerPricing::percentFor($cart->user_id !== null ? $cart->user : null);
     }
 }

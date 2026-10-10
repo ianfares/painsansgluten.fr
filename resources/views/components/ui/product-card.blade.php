@@ -29,7 +29,7 @@
         <a href="{{ $url }}" class="font-medium text-ink hover:text-sage">{{ $product->name }}</a>
 
         <div class="mt-auto flex flex-wrap items-center justify-between gap-2">
-            <span class="font-semibold text-ink">{{ number_format($product->price_ttc / 100, 2, ',', ' ') }} €</span>
+            <x-ui.price :amount="$product->price_ttc" class="font-semibold text-ink" />
 
             @if ($orderable)
                 <livewire:add-to-cart-button :product="$product" :key="'add-'.$product->id" />
