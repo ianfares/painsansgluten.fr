@@ -71,6 +71,18 @@ class ManageShippingSettings extends SettingsPage
                     TextInput::make('shipping_vat_rate')->label('Taux de TVA sur les frais de port (%)')->numeric()->step(0.01),
                 ]),
 
+            Section::make('Retraits')
+                ->schema([
+                    TextInput::make('pickup_max_distance_km')
+                        ->label('Distance maximale des points de retrait (km, à vol d\'oiseau)')
+                        ->helperText('Seuls les commerçants situés à cette distance maximale de l\'adresse du client sont proposés.')
+                        ->numeric()->minValue(1)->required(),
+                    Textarea::make('lab_pickup_instructions')
+                        ->label('Instructions de retrait au laboratoire')
+                        ->helperText('Affichées au client pro autorisé au retrait au laboratoire.')
+                        ->rows(4),
+                ]),
+
             Section::make('Textes éditables')
                 ->schema([
                     Textarea::make('shipping_block_text')->label('Bloc « Expédition et livraison » (fiche produit)')->helperText('Une ligne vide sépare deux paragraphes.')->rows(8),

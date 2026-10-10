@@ -43,6 +43,12 @@ class ShippingSettings extends Settings
 
     public ?float $shipping_vat_rate;
 
+    /** Instructions de retrait au laboratoire (pros, T27-L7b). */
+    public ?string $lab_pickup_instructions;
+
+    /** Distance maximale (km, à vol d'oiseau) des points de retrait proposés. */
+    public int $pickup_max_distance_km;
+
     public static function group(): string
     {
         return 'shipping';
