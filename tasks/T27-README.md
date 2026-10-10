@@ -43,8 +43,8 @@ Une fiche par lot : `tasks/T27-Lx-*.md`. Chaque fiche se suffit à elle-même.
 2. **Ne lancer aucun sous-agent.**
 3. Branche `feature/T27-Lx-nom` créée depuis `develop`. Ne toucher qu'aux fichiers du périmètre. Ne jamais modifier une migration existante : en créer une nouvelle.
 4. Travail dans un worktree git : avant toute commande PHP, depuis la racine du worktree :
-   `ln -s /home/ia/projets/boulangerie-gluten/vendor vendor; ln -s /home/ia/projets/boulangerie-gluten/node_modules node_modules; cp /home/ia/projets/boulangerie-gluten/.env .env; mkdir -p public && ln -s /home/ia/projets/boulangerie-gluten/public/build public/build`
-   (ne jamais committer ces liens ni `.env` — ils sont dans `.gitignore`, vérifier avec `git status`).
+   `git checkout -b feature/T27-Lx-nom develop` (vérifier que la base est bien `develop`), puis `cp -al /home/ia/projets/boulangerie-gluten/vendor vendor; ln -s /home/ia/projets/boulangerie-gluten/node_modules node_modules; cp /home/ia/projets/boulangerie-gluten/.env .env; mkdir -p public && ln -s /home/ia/projets/boulangerie-gluten/public/build public/build`
+   (`vendor` doit être une copie en liens physiques, pas un lien symbolique : sinon l'autoload pointe vers le code du dépôt principal ; ne jamais committer `vendor`, ces liens ni `.env` — ils sont dans `.gitignore`, vérifier avec `git status`).
 5. Tests : **toujours** `flock /tmp/claude-1000/boulangerie-testdb.lock php artisan test --compact` (base de test partagée, jamais `--parallel`). Puis `./vendor/bin/pint --test` et `./vendor/bin/phpstan analyse --memory-limit=1G`. Les trois doivent passer.
 6. Ne pas toucher à `docs/JOURNAL.md` ni `docs/DECISIONS.md` (le pilote les met à jour) : mettre le compte rendu (format `QUALITE.md` §10) dans la réponse finale.
 7. Commit(s) `T27-Lx: description`. **Ne pas merger, ne pas pousser, ne pas déployer.**
