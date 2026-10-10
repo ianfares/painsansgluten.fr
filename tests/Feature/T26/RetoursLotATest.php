@@ -148,15 +148,15 @@ test('l\'accueil renvoie « Professionnels » vers le formulaire de demande de c
     expect($this->get('/')->getContent())->toContain('href="'.route('pro.request.create').'"');
 });
 
-test('FAQ et Contact sont dans le menu principal ; le lien Facebook apparaît dans le pied de page', function () {
+test('FAQ et Contact sont dans le pied de page (plus dans l\'en-tête) ; le lien Facebook apparaît dans le pied de page', function () {
     $shop = app(ShopSettings::class);
     $shop->facebook_url = 'https://www.facebook.com/profile.php?id=61594767200246';
     $shop->save();
 
     $html = $this->get('/')->getContent();
-    $nav = substr($html, strpos($html, route('boutique.index').'"'), 3000);
+    $footer = substr($html, strpos($html, '<footer'));
 
-    expect($nav)->toContain('href="'.route('faq').'"')->toContain('href="'.route('contact').'"')
+    expect($footer)->toContain('href="'.route('faq').'"')->toContain('href="'.route('contact').'"')
         ->and($html)->not->toContain('F.A.Q.')
         ->toContain('href="https://www.facebook.com/profile.php?id=61594767200246"');
 });

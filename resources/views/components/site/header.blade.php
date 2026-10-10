@@ -34,7 +34,6 @@
                     <span class="hidden text-base font-semibold text-ink sm:block sm:text-lg">
                         {{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}
                     </span>
-                    <span class="hidden text-xs uppercase tracking-wide text-sage-dark sm:block">100&nbsp;% sans gluten</span>
                 @else
                     <span class="text-lg font-semibold text-ink">
                         {{ $shopSettings->shop_name ?? 'Mon Sans Gluten by Angélique' }}
@@ -94,11 +93,6 @@
                     {{ $category->name }}
                 </a>
             @endforeach
-            @foreach ($menuPages as $menuPage)
-                <a href="{{ route('content.show', $menuPage) }}" class="text-sm font-medium text-ink hover:text-sage">{{ $menuPage->title }}</a>
-            @endforeach
-            <a href="{{ route('faq') }}" class="text-sm font-medium text-ink hover:text-sage">FAQ</a>
-            <a href="{{ route('contact') }}" class="text-sm font-medium text-ink hover:text-sage">Contact</a>
         </div>
     </div>
 
@@ -122,11 +116,6 @@
                     {{ $category->name }}
                 </a>
             @endforeach
-            @foreach ($menuPages as $menuPage)
-                <a href="{{ route('content.show', $menuPage) }}" class="text-ink hover:text-sage">{{ $menuPage->title }}</a>
-            @endforeach
-            <a href="{{ route('faq') }}" class="text-ink hover:text-sage">FAQ</a>
-            <a href="{{ route('contact') }}" class="text-ink hover:text-sage">Contact</a>
         </nav>
     </div>
 </header>

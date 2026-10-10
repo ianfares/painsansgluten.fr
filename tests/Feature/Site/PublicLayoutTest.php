@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Category;
+use App\Models\Page;
 use App\Settings\HomepageSettings;
 use App\Settings\ShopSettings;
 
@@ -54,10 +55,47 @@ test('une page inconnue affiche la 404 personnalisée avec des liens de catégor
     $response->assertSee('Viennoiseries sans gluten');
 });
 
-test('le lien Contact de l\'en-tête pointe vers la vraie page de contact', function () {
-    $response = $this->get('/');
+test('le lien Contact du pied de page pointe vers la vraie page de contact', function () {
+    $html = $this->get('/')->getContent();
 
-    $response->assertSee(route('contact'), false);
+    expect(substr($html, strpos($html, '<footer')))->toContain(route('contact'));
+});
+
+test('l\'en-tête ne contient plus FAQ, Contact ni les pages « Notre histoire » / « Où nous trouver » ; le pied de page les garde', function () {
+    Page::query()->create(['slug' => 'notre-histoire', 'title' => 'Notre histoire', 'content' => '<p>x</p>', 'is_published' => true]);
+    Page::query()->create(['slug' => 'ou-nous-trouver', 'title' => 'Où nous trouver', 'content' => '<p>x</p>', 'is_published' => true]);
+
+    $html = $this->get('/')->getContent();
+    $header = substr($html, strpos($html, '<header'), strpos($html, '</header>') - strpos($html, '<header'));
+    $footer = substr($html, strpos($html, '<footer'));
+
+    expect($header)->not->toContain(route('faq'))
+        ->not->toContain(route('contact'))
+        ->not->toContain(route('content.show', 'notre-histoire'))
+        ->not->toContain(route('content.show', 'ou-nous-trouver'))
+        ->and($footer)->toContain(route('faq'))
+        ->toContain(route('contact'))
+        ->toContain(route('content.show', 'notre-histoire'))
+        ->toContain(route('content.show', 'ou-nous-trouver'));
+});
+
+test('l\'étiquette de la bannière est réglable : texte affiché, vide = masquée', function () {
+    $homepage = app(HomepageSettings::class);
+    expect($homepage->banner_badge_text)->toBe('Création à venir');
+
+    $this->get('/')->assertSee('Création à venir')->assertDontSee('Expédié frais');
+
+    $homepage->banner_badge_text = 'Nouveauté';
+    $homepage->save();
+    $this->get('/')->assertSee('Nouveauté');
+
+    $homepage->banner_badge_text = '';
+    $homepage->save();
+    $this->get('/')->assertDontSee('Création à venir')->assertDontSee('Nouveauté');
+});
+
+test('la bannière n\'affiche plus le badge « fait main à Avranches » sous le titre', function () {
+    $this->get('/')->assertDontSee('fait main à Avranches');
 });
 
 test('la bannière d\'accueil affiche les 3 canaux de vente', function () {
