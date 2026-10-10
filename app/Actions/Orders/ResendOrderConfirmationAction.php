@@ -46,7 +46,7 @@ class ResendOrderConfirmationAction
 
         return match (true) {
             $order->payment_method === PaymentMethod::BankTransfer && $order->status === OrderStatus::PendingPayment => new BankTransferInstructionsMail($order),
-            $paid && $order->payment_method === PaymentMethod::Stripe => new OrderConfirmedMail($order, $invoice),
+            $paid && $order->payment_method !== PaymentMethod::BankTransfer => new OrderConfirmedMail($order, $invoice),
             $paid => new BankTransferPaidMail($order, $invoice),
             default => null,
         };

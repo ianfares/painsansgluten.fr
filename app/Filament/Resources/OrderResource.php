@@ -6,6 +6,7 @@ namespace App\Filament\Resources;
 
 use App\Actions\Orders\RefundOrderAction;
 use App\Actions\Orders\ResendOrderConfirmationAction;
+use App\Actions\Orders\SettleOrderByCreditAction;
 use App\Actions\Orders\ShipOrderAction;
 use App\Actions\Orders\ValidateBankTransferPaymentAction;
 use App\Enums\DeliveryMethod;
@@ -13,11 +14,14 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Exceptions\Orders\BankTransferValidationNotAllowed;
 use App\Exceptions\Orders\InvalidOrderTransition;
+use App\Exceptions\Orders\ManualOrderNotAllowed;
 use App\Exceptions\Orders\RefundNotAvailable;
+use App\Filament\Resources\OrderResource\ManualOrderForm;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Models\Order;
 use App\Services\Orders\OrderStateMachine;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Infolists\Components\TextEntry;
@@ -127,6 +131,22 @@ class OrderResource extends Resource
                                 ->title($e->getMessage())
                                 ->danger()
                                 ->send();
+                        }
+                    }),
+                Tables\Actions\Action::make('settleByCredit')
+                    ->label('Valider sans paiement (avoir)')
+                    ->icon('heroicon-o-receipt-refund')
+                    ->color('warning')
+                    ->visible(fn (Order $record): bool => in_array($record->status, [OrderStatus::PendingPayment, OrderStatus::PaymentFailed], true))
+                    ->form([TextInput::make('reference')->label('Référence ou motif de l\'avoir')->helperText('Figurera sur la facture : « Réglé par avoir : … ».')->required()->maxLength(150)])
+                    ->requiresConfirmation()
+                    ->modalDescription('La commande passera payée sans encaissement et la facture sera émise.')
+                    ->action(function (Order $record, array $data, SettleOrderByCreditAction $settle): void {
+                        try {
+                            $settle->execute($record, $data['reference'], (int) auth('admin')->id());
+                            Notification::make()->title('Commande validée par avoir, facture émise.')->success()->send();
+                        } catch (ManualOrderNotAllowed|InvalidOrderTransition $e) {
+                            Notification::make()->title($e->getMessage())->danger()->send();
                         }
                     }),
                 Tables\Actions\Action::make('resendConfirmation')
@@ -311,12 +331,19 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
+            'create' => Pages\CreateOrder::route('/create'),
             'view' => Pages\ViewOrder::route('/{record}'),
         ];
     }
 
+    /** Commande manuelle (T27-L10) : formulaire dédié, aucun montant saisi. */
     public static function canCreate(): bool
     {
-        return false;
+        return true;
+    }
+
+    public static function form(Form $form): Form
+    {
+        return $form->schema(ManualOrderForm::schema());
     }
 }

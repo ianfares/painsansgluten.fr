@@ -37,13 +37,15 @@ class RefundOrderAction
             throw RefundNotAvailable::notRefundable();
         }
 
-        if ($order->payment_method === PaymentMethod::BankTransfer) {
+        if ($order->payment_method !== PaymentMethod::Stripe) {
             return $this->orderStateMachine->transition(
                 $order,
                 OrderStatus::Refunded,
                 actorType: 'admin',
                 actorId: $adminId,
-                comment: 'Remboursement du virement effectué manuellement par l\'admin.',
+                comment: $order->payment_method === PaymentMethod::BankTransfer
+                    ? 'Remboursement du virement effectué manuellement par l\'admin.'
+                    : 'Annulation d\'une commande réglée par avoir (aucun encaissement à rembourser).',
             );
         }
 

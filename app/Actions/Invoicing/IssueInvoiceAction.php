@@ -114,6 +114,7 @@ class IssueInvoiceAction
             'total_vat' => $order->total_vat,
             'total_ttc' => $order->total_ttc,
             'payment_method' => $order->payment_method->label(),
+            'settlement_reference' => $order->settlement_reference,
             'paid_at' => $order->paid_at?->toIso8601String(),
         ];
     }

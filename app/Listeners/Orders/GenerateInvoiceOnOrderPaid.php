@@ -30,7 +30,7 @@ class GenerateInvoiceOnOrderPaid implements ShouldQueue
 
         // Email de confirmation client envoyé ici, une fois la facture émise,
         // pour qu'il contienne son lien (PLAN.md §15, T19).
-        $mail = $event->order->payment_method === PaymentMethod::Stripe
+        $mail = $event->order->payment_method !== PaymentMethod::BankTransfer
             ? new OrderConfirmedMail($event->order, $invoice)
             : new BankTransferPaidMail($event->order, $invoice);
         Mail::to($event->order->email)->queue($mail);
