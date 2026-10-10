@@ -6,6 +6,7 @@ namespace App\Livewire;
 
 use App\Models\CartItem;
 use App\Services\Cart\CartService;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -15,6 +16,10 @@ use Livewire\Component;
  */
 class CartWidget extends Component
 {
+    /** Affiché sur la page /panier (pas dans le tiroir) : pas de lien « Voir mon panier ». */
+    #[Locked]
+    public bool $onCartPage = false;
+
     public bool $removedNotice = false;
 
     /** @var list<string> */
