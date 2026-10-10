@@ -4,24 +4,30 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Enums\DeliveryMethod;
 use App\Enums\InvoiceType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Mail\AccountCreatedByAdminMail;
 use App\Mail\Admin\AccountDeletionRequestedMail;
 use App\Mail\Admin\NewBankTransferOrderMail;
 use App\Mail\Admin\NewPaidOrderMail;
 use App\Mail\Admin\NewProAccountRequestMail;
+use App\Mail\Admin\NewProAccountToValidateMail;
 use App\Mail\BankTransferCancelledMail;
 use App\Mail\BankTransferInstructionsMail;
 use App\Mail\BankTransferPaidMail;
 use App\Mail\BankTransferReminderMail;
 use App\Mail\ContactMessageMail;
+use App\Mail\ManualOrderPaymentRequestMail;
 use App\Mail\OrderConfirmedMail;
+use App\Mail\OrderReadyForPickupMail;
 use App\Mail\OrderRefundedMail;
 use App\Mail\OrderShippedMail;
 use App\Mail\ProAccountRequestApprovedMail;
 use App\Mail\ProAccountRequestReceivedMail;
 use App\Mail\ProAccountRequestRejectedMail;
+use App\Mail\ProAccountValidatedMail;
 use App\Mail\StripePaymentAnomalyMail;
 use App\Models\Invoice;
 use App\Models\Order;
@@ -65,7 +71,7 @@ class SendEmailSamplesCommand extends Command
                 if ($message instanceof Mailable) {
                     // Préfixe ajouté au dernier moment : le sujet défini par l'email est conservé.
                     $message->withSymfonyMessage(fn ($m) => $m->subject($subject.' — '.$m->getSubject()));
-                    Mail::to($to)->send($message);
+                    Mail::to($to)->sendNow($message); // immédiat, même pour un email prévu en file d'attente
                 } else {
                     Mail::html((string) $message->render(), fn ($m) => $m->to($to)->subject($subject.' — '.$message->subject));
                 }
@@ -112,7 +118,27 @@ class SendEmailSamplesCommand extends Command
             $variant->setRelation('items', $order->items);
         }
 
+        // Retrait chez un commerçant partenaire (T27-L7b) et commande manuelle remisée (T27-L6, L10).
+        $pickup = $order->replicate()->fill([
+            'payment_method' => PaymentMethod::Stripe,
+            'status' => OrderStatus::ReadyForPickup,
+            'delivery_method' => DeliveryMethod::MerchantPickup,
+            'relay_name' => 'Épicerie du Port',
+            'relay_snapshot' => ['name' => 'Épicerie du Port', 'address_line1' => '3 quai du Port', 'postal_code' => '50400', 'city' => 'Granville', 'opening_hours' => 'Du mardi au samedi, 9 h – 19 h', 'instructions' => 'Demandez la commande « Mon Sans Gluten » au comptoir.'],
+            'shipping_ttc' => 0,
+            'total_ttc' => 1990,
+        ]);
+        $pickup->id = $order->id;
+        $pickup->setRelation('items', $order->items);
+
+        $manual = $order->replicate()->fill(['payment_method' => PaymentMethod::Stripe, 'status' => OrderStatus::PendingPayment, 'discount_percent' => 10, 'discount_total_ttc' => 199, 'subtotal_ttc' => 1791, 'total_ttc' => 2381]);
+        $manual->id = $order->id;
+        $manual->token = $order->token;
+        $manual->setRelation('items', $order->items);
+
         $user = User::factory()->make(['id' => 1, 'first_name' => 'Marie', 'last_name' => 'Exemple', 'email' => 'marie.exemple@example.com']);
+
+        $proUser = User::factory()->make(['id' => 2, 'first_name' => 'Marie', 'last_name' => 'Exemple', 'email' => 'pizzeria@example.com', 'account_type' => 'pro', 'company_name' => 'Pizzeria Exemple', 'siret' => '73282932000074', 'pro_status' => 'pending']);
 
         $proRequest = ProAccountRequest::factory()->make([
             'id' => 1,
@@ -141,6 +167,11 @@ class SendEmailSamplesCommand extends Command
             ['Client pro — demande approuvée', new ProAccountRequestApprovedMail($proRequest)],
             ['Client pro — demande refusée', new ProAccountRequestRejectedMail($proRequest)],
             ['Admin — nouvelle demande de compte pro', new NewProAccountRequestMail($proRequest)],
+            ['Client — commande prête au retrait (commerçant)', new OrderReadyForPickupMail($pickup)],
+            ['Client — commande créée par la boutique : lien de paiement (avec remise)', new ManualOrderPaymentRequestMail($manual)],
+            ['Client — compte créé par la boutique : choisir son mot de passe', new AccountCreatedByAdminMail($user, 'exemple-de-jeton')],
+            ['Client pro — compte professionnel validé', new ProAccountValidatedMail($proUser)],
+            ['Admin — nouveau compte pro à valider', new NewProAccountToValidateMail($proUser)],
             ['Admin — message du formulaire de contact', new ContactMessageMail(['name' => 'Marie Exemple', 'email' => 'marie.exemple@example.com', 'phone' => '06 12 34 56 78', 'message' => "Bonjour,\nlivrez-vous à Granville ? Je voudrais commander pour samedi.\nMerci !"])],
         ];
     }
