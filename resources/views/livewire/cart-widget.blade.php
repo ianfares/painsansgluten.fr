@@ -50,9 +50,27 @@
                 @endif
             @endif
 
-            <x-ui.button variant="primary" href="{{ route('panier') }}" class="mt-3 w-full justify-center">
-                Voir mon panier
-            </x-ui.button>
+            {{-- Accès au tunnel de commande (oubli corrigé le 10/10/2026). L'invité peut
+                 commander sans compte ; la connexion / création de compte est proposée. --}}
+            @unless ($totals['shipping_error'])
+                <x-ui.button variant="primary" href="{{ route('checkout') }}" class="mt-3 w-full justify-center">
+                    Passer commande
+                </x-ui.button>
+            @endunless
+
+            @unless ($onCartPage)
+                <x-ui.button variant="outline" href="{{ route('panier') }}" class="w-full justify-center">
+                    Voir mon panier
+                </x-ui.button>
+            @endunless
+
+            @guest('web')
+                <p class="text-center text-xs text-ink-muted">
+                    Commande possible sans compte.
+                    <a href="{{ route('login') }}" class="underline hover:text-sage">Se connecter</a>
+                    ou <a href="{{ route('register') }}" class="underline hover:text-sage">créer un compte</a>.
+                </p>
+            @endguest
         </div>
     @endif
 </div>

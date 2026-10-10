@@ -70,3 +70,17 @@ test('paramètres d\'expédition incomplets : le client voit un message simple, 
         ->assertSee('Livraison momentanément indisponible')
         ->assertDontSee('paramètres de date d');
 });
+
+test('le panier mène au tunnel de commande et propose connexion ou création de compte à un visiteur', function () {
+    app(CartService::class)->add(Product::factory()->create(), 1);
+
+    $this->get('/panier')
+        ->assertOk()
+        ->assertSee(route('checkout'), false)
+        ->assertSee('Passer commande')
+        ->assertSee(route('login'), false)
+        ->assertSee(route('register'), false);
+
+    Livewire::test(CartWidget::class)->assertSee('Passer commande')->assertSee('Voir mon panier');
+    Livewire::test(CartWidget::class, ['onCartPage' => true])->assertDontSee('Voir mon panier');
+});
