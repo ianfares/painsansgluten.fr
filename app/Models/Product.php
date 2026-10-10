@@ -163,4 +163,36 @@ class Product extends Model implements HasMedia
     {
         return $this->orderItems()->exists();
     }
+
+    /**
+     * Prix au kilo TTC, en centimes, arrondi au centime (T27-L2).
+     * Calculé : prix TTC ÷ poids net, jamais saisi. Null sans poids net.
+     */
+    public function pricePerKgTtc(): ?int
+    {
+        if ($this->net_weight_g === null || $this->net_weight_g <= 0) {
+            return null;
+        }
+
+        return intdiv($this->price_ttc * 1000 + intdiv($this->net_weight_g, 2), $this->net_weight_g);
+    }
+
+    /**
+     * Poids net affiché : « 500 g » sous 1 kg, « 1,2 kg » à partir de 1 kg.
+     * Null sans poids net.
+     */
+    public function formattedNetWeight(): ?string
+    {
+        if ($this->net_weight_g === null || $this->net_weight_g <= 0) {
+            return null;
+        }
+
+        if ($this->net_weight_g < 1000) {
+            return $this->net_weight_g.' g';
+        }
+
+        $kg = $this->net_weight_g / 1000;
+
+        return (fmod($kg, 1.0) === 0.0 ? (string) (int) $kg : number_format($kg, 1, ',', '')).' kg';
+    }
 }

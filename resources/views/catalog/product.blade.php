@@ -100,7 +100,33 @@
                     <p class="text-ink-muted">{{ $product->short_description }}</p>
                 @endif
 
-                <div class="text-2xl font-semibold text-ink">{{ number_format($product->price_ttc / 100, 2, ',', ' ') }} €</div>
+                @if ($product->description)
+                    @if ($product->short_description)
+                        <details class="group text-ink">
+                            <summary class="inline-flex cursor-pointer list-none items-center gap-1 text-sm font-medium text-sage transition hover:text-ochre focus-visible:text-ochre [&::-webkit-details-marker]:hidden">
+                                Lire la suite
+                                <svg class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M5 8l5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </summary>
+                            <div class="prose prose-sm max-w-none pt-2">{!! $product->description !!}</div>
+                        </details>
+                    @else
+                        <div class="prose prose-sm max-w-none">{!! $product->description !!}</div>
+                    @endif
+                @endif
+
+                <div>
+                    <div class="text-2xl font-semibold text-ink">{{ number_format($product->price_ttc / 100, 2, ',', ' ') }} € <span class="text-sm font-normal text-ink-muted">TTC</span></div>
+                    @if ($product->formattedNetWeight())
+                        @php
+                            $pricePerKg = $product->pricePerKgTtc();
+                            $netWeightLine = 'Poids net : '.$product->formattedNetWeight()
+                                .($pricePerKg !== null ? ' - '.number_format($pricePerKg / 100, 2, ',', ' ').' €/kg' : '');
+                        @endphp
+                        <p class="text-sm text-ink-muted">{{ $netWeightLine }}</p>
+                    @endif
+                </div>
 
                 @if ($product->isOrderable())
                     <livewire:add-to-cart-button :product="$product" :with-quantity="true" />
@@ -115,12 +141,6 @@
                 @endif
 
                 <div class="mt-4 divide-y divide-line border-y border-line">
-                    @if ($product->description)
-                        <x-ui.accordion title="Description">
-                            <div class="prose prose-sm max-w-none">{!! $product->description !!}</div>
-                        </x-ui.accordion>
-                    @endif
-
                     @if ($product->ingredients)
                         <x-ui.accordion title="Ingrédients" :open="true">
                             <div class="prose prose-sm max-w-none">{!! $product->ingredients !!}</div>
@@ -155,9 +175,8 @@
                         </x-ui.accordion>
                     @endif
 
-                    @if ($product->packaging || $product->net_weight_g)
+                    @if ($product->packaging || $product->sale_unit)
                         <x-ui.accordion title="Conditionnement">
-                            @if ($product->net_weight_g)<p>Poids net : {{ $product->net_weight_g }} g</p>@endif
                             @if ($product->packaging)<p>{{ $product->packaging }}</p>@endif
                             @if ($product->sale_unit)<p>{{ $product->sale_unit }}</p>@endif
                         </x-ui.accordion>

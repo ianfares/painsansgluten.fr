@@ -11,6 +11,7 @@ use App\Models\Product;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -149,6 +150,13 @@ class ProductResource extends Resource
                     Tab::make('Conditionnement')
                         ->schema([
                             TextInput::make('net_weight_g')->label('Poids net (g)')->numeric()->required($requiredToPublish),
+                            Placeholder::make('price_per_kg')
+                                ->label('Prix au kilo (calculé)')
+                                ->content(function (?Product $record): string {
+                                    $perKg = $record?->pricePerKgTtc();
+
+                                    return $perKg === null ? '—' : number_format($perKg / 100, 2, ',', ' ').' €/kg';
+                                }),
                             TextInput::make('shipping_weight_g')->label('Poids d\'expédition (g)')->numeric()->required($requiredToPublish),
                             TextInput::make('packaging')->label('Conditionnement')->maxLength(255),
                             TextInput::make('sale_unit')->label('Vendu à l\'unité / par lot')->maxLength(255),
