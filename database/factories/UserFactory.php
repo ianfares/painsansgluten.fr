@@ -37,6 +37,23 @@ class UserFactory extends Factory
         ];
     }
 
+    /** Compte professionnel ; validé par défaut, `pro(false)` pour « en attente ». */
+    public function pro(bool $approved = true): static
+    {
+        return $this->state(fn () => [
+            'account_type' => 'pro',
+            'company_name' => fake()->company(),
+            'siret' => '73282932000074',
+            'pro_status' => $approved ? 'approved' : 'pending',
+            'pro_approved_at' => $approved ? now() : null,
+        ]);
+    }
+
+    public function deactivated(): static
+    {
+        return $this->state(fn () => ['deactivated_at' => now()]);
+    }
+
     /**
      * Indicate that the model's email address should be unverified.
      */
