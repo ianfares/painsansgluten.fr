@@ -3,7 +3,7 @@
 Branche : `feature/T27-L6-remise-client`. Dépend de L5. Lire `tasks/T27-README.md`. **Partie critique (prix, TVA, paiement, factures).**
 
 ## Règles métier (validées)
-- Champ `discount_percent` sur `users` (entier 0–100… en pratique borné 0–50 dans l'admin, à confirmer : utiliser 0–100 mais validation `between:0,90`), défaut 0. Réglé dans la fiche client admin (L5). Tout type de compte. Pour un pro en attente, la remise ne s'applique pas tant que le compte n'est pas validé.
+- Champ `discount_percent` sur `users` (entier, défaut 0, validation admin `between:0,90`). Réglé dans la fiche client admin (L5). Tout type de compte. Pour un pro en attente, la remise ne s'applique pas tant que le compte n'est pas validé.
 - S'applique **aux produits uniquement**, jamais aux frais de port.
 - **Affichage partout quand le client est connecté** : catalogue, fiches, panier, tunnel → prix public barré + prix remisé + mention « Votre remise : -10 % ». Visiteur non connecté : prix public. ⚠ Cache de pages publiques éventuel : vérifier qu'aucune page avec prix remisé n'est mise en cache partagé.
 - Le serveur recalcule tout (CLAUDE.md §3.8) : la remise vient **toujours** du compte en base, jamais du navigateur.
@@ -18,4 +18,4 @@ Branche : `feature/T27-L6-remise-client`. Dépend de L5. Lire `tasks/T27-README.
 - Toutes les vues prix passent par un composant Blade `<x-ui.price :product :user>`.
 
 ## Tests
-Calcul (arrondis, 0 %, 100 % interdit, cumul plusieurs lignes), livraison non remisée, pro en attente sans remise, catalogue connecté/non connecté, Stripe line items = total, facture avec remise, snapshot figé après changement du %, falsification (paramètre `discount` envoyé par le navigateur ignoré).
+Calcul (arrondis, 0 %, > 90 % refusé, cumul plusieurs lignes), livraison non remisée, pro en attente sans remise, catalogue connecté/non connecté, Stripe line items = total, facture avec remise, snapshot figé après changement du %, falsification (paramètre `discount` envoyé par le navigateur ignoré).
