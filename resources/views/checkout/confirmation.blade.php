@@ -35,6 +35,12 @@
                     <span>{{ number_format($item->line_total_ttc / 100, 2, ',', ' ') }} €</span>
                 </div>
             @endforeach
+            @if ($order->discount_total_ttc > 0)
+                <div class="flex items-center justify-between p-3 text-sm text-sage-dark">
+                    <span>Votre remise -{{ $order->discount_percent }} % (déjà déduite)</span>
+                    <span>-{{ number_format($order->discount_total_ttc / 100, 2, ',', ' ') }} €</span>
+                </div>
+            @endif
         </div>
         <div class="mb-6 flex justify-between text-base font-semibold text-ink">
             <span>Total</span><span>{{ number_format($order->total_ttc / 100, 2, ',', ' ') }} €</span>

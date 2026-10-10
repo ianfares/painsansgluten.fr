@@ -96,9 +96,15 @@ class IssueInvoiceAction
                 'reference' => $item->product_reference,
                 'quantity' => $item->quantity,
                 'unit_price_ht' => (int) round($item->unit_price_ttc / (1 + (float) $item->vat_rate / 100)),
+                'discount_percent' => $item->unit_discount_ttc > 0 ? $order->discount_percent : 0,
                 'vat_rate' => (float) $item->vat_rate,
                 'total_ht' => $item->line_total_ht,
             ])->all(),
+            // Remise client (T27-L6) : produits seulement, totaux déjà après remise.
+            'discount' => [
+                'percent' => $order->discount_percent,
+                'total_ttc' => $order->discount_total_ttc,
+            ],
             'shipping' => [
                 'total_ttc' => $order->shipping_ttc,
                 'vat_rate' => (float) $order->shipping_vat_rate,

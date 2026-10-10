@@ -9,6 +9,7 @@ use App\Enums\ProStatus;
 use App\Mail\AccountCreatedByAdminMail;
 use App\Mail\ProAccountValidatedMail;
 use App\Models\User;
+use App\Services\Pricing\CustomerPricing;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -28,7 +29,7 @@ class ManageCustomerAccount
      * aléatoire inutilisable + email de choix du mot de passe (lien de
      * réinitialisation Fortify). Un pro créé par l'admin est validé d'office.
      *
-     * @param  array{account_type: string, first_name: string, last_name: string, phone: string, email: string, company_name?: ?string, siret?: ?string}  $data
+     * @param  array{account_type: string, first_name: string, last_name: string, phone: string, email: string, company_name?: ?string, siret?: ?string, discount_percent?: int|string|null}  $data
      */
     public function create(array $data): User
     {
@@ -47,6 +48,7 @@ class ManageCustomerAccount
             'siret' => $isPro ? ($data['siret'] ?? null) : null,
             'pro_status' => $isPro ? ProStatus::Approved : null,
             'pro_approved_at' => $isPro ? now() : null,
+            'discount_percent' => self::discount($data['discount_percent'] ?? 0),
         ])->save();
 
         Password::broker()->sendResetLink(
@@ -75,6 +77,7 @@ class ManageCustomerAccount
             'account_type' => $isPro ? AccountType::Pro : AccountType::Individual,
             'company_name' => $isPro ? ($data['company_name'] ?? null) : null,
             'siret' => $isPro ? ($data['siret'] ?? null) : null,
+            'discount_percent' => self::discount($data['discount_percent'] ?? $user->discount_percent),
         ]);
 
         if (! $isPro) {
@@ -122,5 +125,11 @@ class ManageCustomerAccount
     public function reactivate(User $user): void
     {
         $user->forceFill(['deactivated_at' => null])->save();
+    }
+
+    /** Taux de remise borné (T27-L6) : jamais négatif ni au-delà du plafond. */
+    private static function discount(mixed $value): int
+    {
+        return max(0, min(CustomerPricing::MAX_PERCENT, (int) $value));
     }
 }

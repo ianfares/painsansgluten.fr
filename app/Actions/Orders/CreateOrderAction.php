@@ -11,6 +11,7 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Services\Cart\CartService;
+use App\Services\Pricing\CustomerPricing;
 use App\Services\Sequencing\SequenceGenerator;
 use App\Settings\ShippingSettings;
 use Illuminate\Support\Collection;
@@ -56,7 +57,8 @@ class CreateOrderAction
 
             $number = $this->sequenceGenerator->next('order', 'C');
             $shippingVatRate = (float) (app(ShippingSettings::class)->shipping_vat_rate ?? 0);
-            $totalHt = $this->computeTotalHt($items, $totals['shipping_ttc'], $shippingVatRate);
+            $percent = $totals['discount_percent'];
+            $totalHt = $this->computeTotalHt($items, $percent, $totals['shipping_ttc'], $shippingVatRate);
 
             $order = Order::query()->create([
                 'number' => $number,
@@ -80,6 +82,8 @@ class CreateOrderAction
                 'relay_name' => $relay['relay_name'],
                 'relay_snapshot' => $relay['relay_snapshot'],
                 'subtotal_ttc' => $totals['subtotal_ttc'],
+                'discount_percent' => $percent,
+                'discount_total_ttc' => $totals['discount_ttc'],
                 'shipping_ttc' => $totals['shipping_ttc'],
                 'shipping_vat_rate' => $shippingVatRate,
                 'total_ttc' => $totals['total_ttc'],
@@ -90,16 +94,18 @@ class CreateOrderAction
             ]);
 
             foreach ($items as $item) {
+                $lineTtc = CustomerPricing::unitNet($item->product->price_ttc, $percent) * $item->quantity;
                 $order->items()->create([
                     'product_id' => $item->product->id,
                     'product_name' => $item->product->name,
                     'product_reference' => $item->product->reference,
                     'unit_price_ttc' => $item->product->price_ttc,
+                    'unit_discount_ttc' => CustomerPricing::unitDiscount($item->product->price_ttc, $percent),
                     'vat_rate' => $item->product->vat_rate ?? 0,
                     'quantity' => $item->quantity,
                     'weight_g' => $item->product->shipping_weight_g,
-                    'line_total_ttc' => $item->product->price_ttc * $item->quantity,
-                    'line_total_ht' => (int) round(($item->product->price_ttc * $item->quantity) / (1 + (float) ($item->product->vat_rate ?? 0) / 100)),
+                    'line_total_ttc' => $lineTtc,
+                    'line_total_ht' => (int) round($lineTtc / (1 + (float) ($item->product->vat_rate ?? 0) / 100)),
                 ]);
             }
 
@@ -120,14 +126,15 @@ class CreateOrderAction
 
     /**
      * Total HT = somme des HT de chaque ligne (à son propre taux) + HT du port
-     * (au taux de TVA du port). Même calcul que les lignes de la facture.
+     * (au taux de TVA du port). Même calcul que les lignes de la facture ; les
+     * lignes sont prises après remise client (T27-L6).
      *
      * @param  Collection<int, CartItem>  $items
      */
-    private function computeTotalHt(Collection $items, int $shippingTtc, float $shippingVatRate): int
+    private function computeTotalHt(Collection $items, int $percent, int $shippingTtc, float $shippingVatRate): int
     {
         $linesHt = $items->sum(fn (CartItem $item) => (int) round(
-            ($item->product->price_ttc * $item->quantity) / (1 + (float) ($item->product->vat_rate ?? 0) / 100)
+            (CustomerPricing::unitNet($item->product->price_ttc, $percent) * $item->quantity) / (1 + (float) ($item->product->vat_rate ?? 0) / 100)
         ));
 
         return $linesHt + (int) round($shippingTtc / (1 + $shippingVatRate / 100));

@@ -18,7 +18,7 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm font-medium text-ink">{{ $item->product->name }}</p>
-                        <p class="text-xs text-ink-muted">{{ number_format($item->product->price_ttc / 100, 2, ',', ' ') }} € / unité</p>
+                        <p class="text-xs text-ink-muted">@if ($totals['discount_percent'] > 0)<s>{{ number_format($item->product->price_ttc / 100, 2, ',', ' ') }} €</s> @endif{{ number_format(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']) / 100, 2, ',', ' ') }} € / unité</p>
                         <div class="mt-1 flex items-center gap-2">
                             <button type="button" wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})" class="h-6 w-6 rounded-full border border-line text-xs" aria-label="Diminuer la quantité">−</button>
                             <span class="text-sm">{{ $item->quantity }}</span>
@@ -26,7 +26,7 @@
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-sm font-semibold text-ink">{{ number_format($item->product->price_ttc * $item->quantity / 100, 2, ',', ' ') }} €</p>
+                        <p class="text-sm font-semibold text-ink">{{ number_format(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']) * $item->quantity / 100, 2, ',', ' ') }} €</p>
                         <button type="button" wire:click="removeItem({{ $item->id }})" class="mt-1 text-xs text-ink-muted hover:text-red-600" aria-label="Retirer {{ $item->product->name }}">Retirer</button>
                     </div>
                 </div>
@@ -34,7 +34,10 @@
         </div>
 
         <div class="mt-4 flex flex-col gap-2 border-t border-line pt-4 text-sm">
-            <div class="flex justify-between"><span>Sous-total TTC</span><span>{{ number_format($totals['subtotal_ttc'] / 100, 2, ',', ' ') }} €</span></div>
+            <div class="flex justify-between"><span>Sous-total TTC</span><span>{{ number_format(($totals['subtotal_ttc'] + $totals['discount_ttc']) / 100, 2, ',', ' ') }} €</span></div>
+            @if ($totals['discount_ttc'] > 0)
+                <div class="flex justify-between text-sage-dark"><span>Votre remise -{{ $totals['discount_percent'] }} %</span><span>-{{ number_format($totals['discount_ttc'] / 100, 2, ',', ' ') }} €</span></div>
+            @endif
 
             @if ($totals['shipping_error'])
                 {{-- Message client générique : le détail technique est signalé à l'admin (tableau de bord). --}}

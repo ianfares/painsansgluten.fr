@@ -10,6 +10,7 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers\OrdersRelationManager;
 use App\Models\User;
 use App\Rules\Siret;
+use App\Services\Pricing\CustomerPricing;
 use Closure;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -86,6 +87,15 @@ class UserResource extends Resource
                         ->required(fn (Get $get): bool => $get('account_type') === AccountType::Pro->value)
                         ->dehydrateStateUsing(fn (?string $state): ?string => $state === null ? null : preg_replace('/[\s.]/', '', $state))
                         ->rules([fn (): Closure => fn (string $attribute, mixed $value, Closure $fail) => (new Siret)->validate($attribute, preg_replace('/[\s.]/', '', (string) $value), $fail)]),
+                    TextInput::make('discount_percent')
+                        ->label('Remise client (%)')
+                        ->helperText('Sur les produits uniquement, pas sur la livraison. Appliquée dès que le client est connecté (pro : une fois validé). 0 = aucune remise.')
+                        ->integer()
+                        ->minValue(0)
+                        ->maxValue(CustomerPricing::MAX_PERCENT)
+                        ->default(0)
+                        ->required()
+                        ->suffix('%'),
                     Toggle::make('lab_pickup_allowed')
                         ->label('Retrait au laboratoire autorisé')
                         ->helperText('Réservé aux comptes pro validés.')
@@ -158,6 +168,7 @@ class UserResource extends Resource
                     TextEntry::make('siret')->label('SIRET')->placeholder('—'),
                     TextEntry::make('pro_status')->label('Statut pro')->formatStateUsing(fn (?ProStatus $state): string => $state?->label() ?? '—'),
                     TextEntry::make('pro_approved_at')->label('Pro validé le')->dateTime('d/m/Y H:i')->placeholder('—'),
+                    TextEntry::make('discount_percent')->label('Remise client')->formatStateUsing(fn (int $state): string => $state > 0 ? "{$state} %" : 'Aucune'),
                     TextEntry::make('lab_pickup_allowed')->label('Retrait au laboratoire')->formatStateUsing(fn (bool $state): string => $state ? 'Autorisé' : 'Non autorisé'),
                     TextEntry::make('deactivated_at')->label('Désactivé le')->dateTime('d/m/Y H:i')->placeholder('—'),
                     TextEntry::make('email_verified_at')->label('Email vérifié le')->dateTime('d/m/Y H:i')->placeholder('Non vérifié'),

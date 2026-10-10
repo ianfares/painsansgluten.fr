@@ -42,6 +42,7 @@
     </tr>
 </table>
 
+@php($hasDiscount = ($s['discount']['total_ttc'] ?? 0) > 0)
 <table>
     <thead>
         <tr>
@@ -49,6 +50,7 @@
             <th>Référence</th>
             <th class="text-right">Qté</th>
             <th class="text-right">PU HT</th>
+            @if ($hasDiscount)<th class="text-right">Remise</th>@endif
             <th class="text-right">Taux TVA</th>
             <th class="text-right">Total HT</th>
         </tr>
@@ -60,19 +62,24 @@
                 <td>{{ $line['reference'] }}</td>
                 <td class="text-right">{{ $line['quantity'] }}</td>
                 <td class="text-right">{{ number_format($line['unit_price_ht'] / 100, 2, ',', ' ') }} €</td>
+                @if ($hasDiscount)<td class="text-right">{{ ($line['discount_percent'] ?? 0) > 0 ? '-'.$line['discount_percent'].' %' : '' }}</td>@endif
                 <td class="text-right">{{ $line['vat_rate'] }} %</td>
                 <td class="text-right">{{ number_format($line['total_ht'] / 100, 2, ',', ' ') }} €</td>
             </tr>
         @endforeach
         @if (($s['shipping']['total_ttc'] ?? 0) !== 0)
             <tr>
-                <td colspan="4">Frais de port</td>
+                <td colspan="{{ $hasDiscount ? 5 : 4 }}">Frais de port</td>
                 <td class="text-right">{{ $s['shipping']['vat_rate'] ?? 0 }} %</td>
                 <td class="text-right">{{ number_format(($s['shipping']['total_ttc'] ?? 0) / 100, 2, ',', ' ') }} €</td>
             </tr>
         @endif
     </tbody>
 </table>
+
+@if ($hasDiscount)
+    <p>Remise client de {{ $s['discount']['percent'] }} % appliquée sur les produits (hors frais de port) : -{{ number_format($s['discount']['total_ttc'] / 100, 2, ',', ' ') }} € TTC. Les totaux s'entendent remise déduite.</p>
+@endif
 
 <p><strong>Récapitulatif par taux de TVA</strong></p>
 <table>

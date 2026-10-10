@@ -26,6 +26,7 @@ use Illuminate\Notifications\Notifiable;
  * @property ?string $company_name
  * @property ?string $siret
  * @property bool $lab_pickup_allowed
+ * @property int $discount_percent remise client en % (T27-L6), hors $fillable
  */
 #[Fillable(['first_name', 'last_name', 'email', 'phone', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -48,6 +49,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'pro_status' => ProStatus::class,
             'pro_approved_at' => 'datetime',
             'lab_pickup_allowed' => 'boolean',
+            'discount_percent' => 'integer',
             'deactivated_at' => 'datetime',
             'password' => 'hashed',
         ];

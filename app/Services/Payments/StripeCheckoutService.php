@@ -33,8 +33,12 @@ class StripeCheckoutService
             'quantity' => $item->quantity,
             'price_data' => [
                 'currency' => 'eur',
-                'unit_amount' => $item->unit_price_ttc,
-                'product_data' => ['name' => $item->product_name],
+                // Prix unitaire remisé (T27-L6) : la remise est par unité, donc
+                // quantité × prix unitaire = total de la ligne, au centime près.
+                'unit_amount' => $item->unit_price_ttc - $item->unit_discount_ttc,
+                'product_data' => ['name' => $item->unit_discount_ttc > 0
+                    ? "{$item->product_name} (remise -{$order->discount_percent} %)"
+                    : $item->product_name],
             ],
         ])->all();
 

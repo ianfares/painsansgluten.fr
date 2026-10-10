@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'order_id', 'product_id', 'product_name', 'product_reference',
-    'unit_price_ttc', 'vat_rate', 'quantity', 'weight_g', 'line_total_ttc', 'line_total_ht',
+    'unit_price_ttc', 'unit_discount_ttc', 'vat_rate', 'quantity', 'weight_g', 'line_total_ttc', 'line_total_ht',
 ])]
 class OrderItem extends Model
 {
@@ -26,6 +26,7 @@ class OrderItem extends Model
     {
         return [
             'unit_price_ttc' => 'integer',
+            'unit_discount_ttc' => 'integer',
             'vat_rate' => 'decimal:2',
             'quantity' => 'integer',
             'weight_g' => 'integer',
