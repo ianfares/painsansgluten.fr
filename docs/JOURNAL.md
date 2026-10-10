@@ -863,3 +863,17 @@ SÉCURITÉ : formulaires pro et contact protégés par Turnstile + limites ; con
 - Durée de conservation des demandes pro refusées (12 mois proposés).
 
 PROCHAINE TÂCHE SUGGÉRÉE : relecture par Ian/Angélique sur la préprod (FAQ, textes légaux, Notre histoire, page Professionnels) puis publication ; T22 suite (événements e-commerce GA4) ; T01/T11 Chronopost dès réception des identifiants Web Services ; T24 recette.
+
+## [2026-10-10 20:00] — Claude Opus 5.5 (pilote) + Haiku 5.5 / Sonnet 5.5 (lots) — T27 vague 1 (L1 à L4)
+
+TÂCHE : T27 vague 1 — retouches visuelles (L1, Haiku), fiche produit (L2, Haiku), formulaire pro allégé + purge 3 mois (L3, Sonnet), suppression des redirections (L4, Haiku).
+RÉSUMÉ : badge « 100 % sans gluten · fait main à Avranches » et mention sous le logo retirés ; étiquette de bannière réglable (« Création à venir ») ; menu du haut réduit aux catégories ; boutons 19 px gras. Fiche produit : « TTC », « Poids net : 500 g - 9,00 €/kg » (calculé), description longue dépliable sous la courte. Formulaire pro : 4 champs obligatoires, produits/volumes/TVA retirés, purge des refus à 3 mois. Redirections Shopify supprimées.
+FICHIERS : voir les commits `T27-L1` à `T27-L4` et `T27-L3: « Autre » sans précision accepté` (correction du pilote : la précision « Autre » restait obligatoire, contraire à la fiche).
+ANALYSE D'IMPACT : en-tête/pied de page/accueil, fiche produit, formulaire pro + admin + emails, middleware global retiré. Aucun impact paiement/commande/facture.
+SÉCURITÉ : validation serveur conservée (formulaire pro), consentement + Turnstile intacts, purge limitée au statut refusé sans donnée perso dans les logs.
+PERFORMANCE : un middleware et une requête en moins par page publique (redirections, pages du menu).
+TESTS : suite complète 345/345 après merge ; pint OK ; phpstan 0 erreur.
+QUALITÉ : chaque lot relu par le pilote avant merge.
+DOCUMENTATION : `tasks/T27-*.md`, DECISIONS (section T27 vague 1), PLAN (redirections marquées supprimées).
+POINTS À RELIRE PAR UN HUMAIN : renommer « Notre histoire » en « Mon histoire » dans Admin → Pages (titre) ; vérifier que la politique de confidentialité en base ne cite pas 12 mois pour les demandes pro.
+PROCHAINE TÂCHE SUGGÉRÉE : vague 2 — T27-L5 comptes clients (Sonnet 5.5) en parallèle de T27-L7a points de retrait (Sonnet 5.5).
