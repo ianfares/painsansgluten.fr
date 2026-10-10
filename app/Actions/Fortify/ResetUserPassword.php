@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Fortify;
 
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -23,6 +24,11 @@ class ResetUserPassword implements ResetsUserPasswords
      */
     public function reset(User $user, array $input): void
     {
+        // Un compte désactivé ne se débloque pas via la réinitialisation (T27-L5).
+        if ($user->isDeactivated()) {
+            throw ValidationException::withMessages(['email' => EnsureAccountIsActive::MESSAGE]);
+        }
+
         Validator::make($input, [
             'password' => $this->passwordRules(),
         ])->validate();

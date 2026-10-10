@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\VerifyTurnstile;
 use Illuminate\Foundation\Application;
@@ -17,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Anti-robot sur la création de compte et le mot de passe oublié.
-        $middleware->web(append: [VerifyTurnstile::class]);
+        $middleware->web(append: [VerifyTurnstile::class, EnsureAccountIsActive::class]);
 
         // En-têtes de sécurité sur toutes les réponses (T23). La vraie IP des
         // visiteurs derrière Cloudflare est fournie par Apache (mod_remoteip) :

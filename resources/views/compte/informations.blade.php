@@ -28,6 +28,42 @@
             </form>
         </section>
 
+        {{-- Type de compte (T27-L5) --}}
+        <section class="rounded-card border border-line bg-white p-6">
+            <h2 class="mb-4 font-semibold text-ink">Type de compte</h2>
+            <p class="text-sm text-ink">{{ $user->account_type->label() }}</p>
+            @if ($user->account_type === \App\Enums\AccountType::Pro)
+                @php($isPending = $user->pro_status === \App\Enums\ProStatus::Pending)
+                <p class="mt-2 text-sm text-ink">
+                    Statut : <strong>{{ $isPending ? 'en attente de validation' : 'validé' }}</strong>
+                    @if ($isPending)
+                        — d'ici là, vous commandez comme un particulier.
+                    @endif
+                </p>
+                @if ($isPending)
+                    <form method="POST" action="{{ route('compte.company.update') }}" class="mt-4 flex flex-col gap-4">
+                        @csrf
+                        @method('PUT')
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <x-ui.field name="company_name" label="Raison sociale">
+                                <x-ui.input name="company_name" :value="old('company_name', $user->company_name)" />
+                            </x-ui.field>
+                            <x-ui.field name="siret" label="SIRET">
+                                <x-ui.input name="siret" :value="old('siret', $user->siret)" />
+                            </x-ui.field>
+                        </div>
+                        <div><x-ui.button type="submit">Enregistrer</x-ui.button></div>
+                    </form>
+                @else
+                    <dl class="mt-2 text-sm text-ink">
+                        <div>Raison sociale : {{ $user->company_name }}</div>
+                        <div>SIRET : {{ $user->siret }}</div>
+                    </dl>
+                    <p class="mt-2 text-sm text-ink/70">Pour modifier ces informations, contactez-nous via le formulaire de contact.</p>
+                @endif
+            @endif
+        </section>
+
         {{-- Mot de passe (Fortify, T03) --}}
         <section class="rounded-card border border-line bg-white p-6">
             <h2 class="mb-4 font-semibold text-ink">Mot de passe</h2>

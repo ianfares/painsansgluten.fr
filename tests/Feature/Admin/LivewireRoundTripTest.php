@@ -31,4 +31,6 @@ test('les composants Livewire des pages d\'admin répondent sans erreur 419', fu
     'commandes' => '/admin/orders',
     'produits' => '/admin/products',
     'demandes pro' => '/admin/pro-account-requests',
+    'clients' => '/admin/users',
+    'nouveau client' => '/admin/users/create',
 ]);

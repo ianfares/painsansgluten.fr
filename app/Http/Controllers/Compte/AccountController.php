@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Compte;
 
+use App\Enums\AccountType;
+use App\Enums\ProStatus;
 use App\Http\Controllers\Controller;
 use App\Mail\Admin\AccountDeletionRequestedMail;
 use App\Models\Invoice;
+use App\Rules\Siret;
 use App\Services\Mail\AdminMailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -82,6 +85,27 @@ class AccountController extends Controller
         $user->addresses()->save($address);
 
         return back()->with('status', 'Adresse mise à jour.');
+    }
+
+    /**
+     * Raison sociale / SIRET : modifiables uniquement tant que le compte pro
+     * est en attente ; une fois validé, seul l'admin peut les changer
+     * (sinon contournement de la validation).
+     */
+    public function updateCompany(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        abort_unless($user->account_type === AccountType::Pro && $user->pro_status === ProStatus::Pending, 403);
+
+        $request->merge(['siret' => preg_replace('/[\s.]/', '', (string) $request->input('siret'))]);
+        $validated = $request->validate([
+            'company_name' => ['required', 'string', 'max:255'],
+            'siret' => ['required', new Siret],
+        ]);
+
+        $user->forceFill($validated)->save();
+
+        return back()->with('status', 'Informations de l\'entreprise mises à jour.');
     }
 
     /**
