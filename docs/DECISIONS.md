@@ -468,3 +468,8 @@
 - Contrôle serveur à deux niveaux : le tunnel refuse Chronopost (`deliveryChoice`) et `CreateOrderAction` lève une exception si Chronopost + produit en retrait uniquement (couvre aussi la commande manuelle admin).
 - Tunnel : Chronopost masqué, message listant les produits concernés ; si aucun point de retrait n'est proposé, le client est invité à retirer le produit.
 - Message produit (`shipping.non_shippable_message`, éditable) mis à jour par migration de paramètres seulement s'il valait encore le texte d'origine.
+
+## 2026-10-11 — Base de données renommée `painsansgluten`
+- Demande de Ian : ce serveur deviendra la production ; le nom `painsansgluten_preprod` aurait prêté à confusion avec la future préprod.
+- Nouvelle base `painsansgluten` (créée en root par Ian), données copiées pendant une maintenance, nombre de lignes identique sur les 30 tables, `.env` basculé. L'ancienne base `painsansgluten_preprod` est conservée jusqu'à validation de Ian (retour arrière : remettre l'ancien nom dans `.env` + `php artisan optimize`).
+- Future préprod : sa propre base ET son propre utilisateur SQL (isolation totale des données de prod).

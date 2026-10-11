@@ -969,3 +969,11 @@ RÉALISÉ : clés alignées sur le format du cast (`Product::VAT_RATE_OPTIONS` :
 TESTS : 448/448 (+4 : réaffichage de chaque taux) ; pint OK ; phpstan 0 erreur.
 RISQUES : aucun (affichage admin uniquement ; les calculs utilisaient déjà la bonne valeur).
 PROCHAINE TÂCHE SUGGÉRÉE : recette de Ian.
+
+## [2026-10-11 18:15] — Claude Opus 5.5 — Infra : renommage de la base de données préprod
+OBJECTIF : renommer la base `painsansgluten_preprod` en `painsansgluten` (le serveur deviendra la prod), après sauvegarde complète.
+RÉALISÉ : sauvegarde complète vérifiée (base + site entier avec `.env`, photos, factures) sur le serveur (`/var/www/painsansgluten/backups/`, hors racine web) et sur le PC de Ian (`~/archives/preprod-avant-renommage-bdd/`) ; Ian a créé la base en root ; copie pendant `artisan down`, comparaison des lignes table par table (30 tables, 0 écart) ; `.env` sauvegardé puis basculé ; optimize + queue:restart ; maintenance levée.
+VÉRIFICATIONS : base active = `painsansgluten` (12 produits, 4 commandes, 3 clients) ; aucune migration en attente ; accueil, boutique, panier, connexion, admin, fiche produit, /up → 200 ; aucune erreur SQL dans les logs du jour.
+SÉCURITÉ : mot de passe SQL jamais affiché (fichier d'options temporaire 600, supprimé) ; sauvegardes en 600 dans un dossier 700.
+RISQUES / À FAIRE : supprimer `painsansgluten_preprod` après validation de Ian (en root, retirer aussi son GRANT) ; le dossier personnel de l'utilisateur système est la racine du site : prévoir un dossier de sauvegardes hors du site lors de la mise en place des sauvegardes automatiques.
+PROCHAINE TÂCHE SUGGÉRÉE : validation de Ian puis suppression de l'ancienne base.

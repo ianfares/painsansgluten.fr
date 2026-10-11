@@ -97,10 +97,12 @@ systemctl enable --now mariadb
 # mysql_secure_installation (interactif, voir recap humain pour les réponses)
 
 # Base + user dédié au site (MOT_DE_PASSE_A_RENSEIGNER = généré via `openssl rand -base64 32`, stocké en gestionnaire de mdp, PAS en dur ici)
+# 2026-10-11 : base renommée painsansgluten_preprod -> painsansgluten (ce serveur deviendra la prod).
+# Une future préprod aura SA base (painsansgluten_preprod) ET SON propre utilisateur SQL.
 mysql -u root -p <<'SQL'
-CREATE DATABASE painsansgluten_preprod CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE painsansgluten CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'painsansgluten'@'localhost' IDENTIFIED BY 'MOT_DE_PASSE_A_RENSEIGNER';
-GRANT ALL PRIVILEGES ON painsansgluten_preprod.* TO 'painsansgluten'@'localhost';
+GRANT ALL PRIVILEGES ON painsansgluten.* TO 'painsansgluten'@'localhost';
 FLUSH PRIVILEGES;
 SQL
 
