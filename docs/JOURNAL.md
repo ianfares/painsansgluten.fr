@@ -933,3 +933,12 @@ RÉSUMÉ : bouton « Passer commande » (vers `checkout`) dans le tiroir et sur 
 FICHIERS : `resources/views/livewire/cart-widget.blade.php`, `app/Livewire/CartWidget.php`, `resources/views/catalog/panier.blade.php`, `tests/Feature/Cart/CartLivewireTest.php`.
 TESTS : 431/431 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : recette T27 par Ian.
+
+## [2026-10-11 09:30] — Claude Opus 5.5 — correctif demande pro approuvée sans compte
+
+TÂCHE : correctif signalé lors du test de Ian — approuver une demande pro n'aboutissait à aucun compte client (maillon B1 → L5 jamais relié).
+RÉSUMÉ : l'approbation crée le compte pro validé (ou bascule le compte existant au même email), rattaché à la demande ; email d'approbation adapté ; action de rattrapage « Créer le compte client » ; lien vers la fiche client depuis la demande.
+FICHIERS : `ProcessProAccountRequestAction`, `ManageCustomerAccount::promoteToPro`, `ProAccountRequest::user()`, `ViewProAccountRequest`, `ProAccountRequestResource`, `ProAccountRequestApprovedMail` + vue, migration `2026_10_11_090000_add_user_id_to_pro_account_requests_table`, tests `ProAccountRequestResourceTest` (+3).
+SÉCURITÉ : pas de mot de passe fixé par l'admin (lien de choix Fortify) ; pas de doublon de compte (recherche par email) ; verrou sur la demande pour le rattrapage.
+TESTS : 435/435 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : Ian clique « Créer le compte client » sur sa demande de test approuvée, puis vérifie le parcours (email, mot de passe, connexion, compte pro).
