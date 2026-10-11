@@ -91,10 +91,19 @@
                 <fieldset class="flex flex-col gap-3">
                     <legend class="mb-2 text-sm font-semibold text-ink">Mode de livraison</legend>
 
-                    <label class="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-white p-3 has-[:checked]:border-sage">
-                        <input type="radio" name="delivery_choice" wire:model.live="deliveryChoice" value="chronopost_relay" class="mt-1 text-sage focus:ring-sage">
-                        <span class="text-sm"><strong>Chronopost Relais</strong><br><span class="text-ink-muted">Expédition en point relais, partout en France métropolitaine (hors Corse).</span></span>
-                    </label>
+                    @if ($pickupOnly)
+                        <x-ui.alert variant="info">
+                            {{ $pickupOnlyNames->join(', ', ' et ') }} : disponible uniquement en retrait, pas d'expédition Chronopost.
+                            @if ($merchantOptions->isEmpty() && ! $labPickupAllowed)
+                                Aucun point de retrait n'est proposé près de votre adresse de livraison : retirez ce produit du panier pour être livré en point relais.
+                            @endif
+                        </x-ui.alert>
+                    @else
+                        <label class="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-white p-3 has-[:checked]:border-sage">
+                            <input type="radio" name="delivery_choice" wire:model.live="deliveryChoice" value="chronopost_relay" class="mt-1 text-sage focus:ring-sage">
+                            <span class="text-sm"><strong>Chronopost Relais</strong><br><span class="text-ink-muted">Expédition en point relais, partout en France métropolitaine (hors Corse).</span></span>
+                        </label>
+                    @endif
 
                     @foreach ($merchantOptions as $option)
                         <label class="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-white p-3 has-[:checked]:border-sage" wire:key="pickup-{{ $option['point']->id }}">
@@ -122,7 +131,7 @@
                     @error('deliveryChoice')<p class="text-sm text-red-700">{{ $message }}</p>@enderror
                 </fieldset>
 
-                @if ($deliveryMethodValue->value === 'chronopost_relay')
+                @if ($deliveryMethodValue->value === 'chronopost_relay' && ! $pickupOnly)
                     <x-ui.alert variant="warning">
                         La recherche de points relais est en cours de finalisation. Indiquez ci-dessous le relais Chronopost de votre choix (nom et ville) : nous vous confirmerons sa disponibilité par email avant expédition.
                     </x-ui.alert>

@@ -86,7 +86,7 @@ class ManageShippingSettings extends SettingsPage
             Section::make('Textes éditables')
                 ->schema([
                     Textarea::make('shipping_block_text')->label('Bloc « Expédition et livraison » (fiche produit)')->helperText('Une ligne vide sépare deux paragraphes.')->rows(8),
-                    Textarea::make('non_shippable_message')->label('Message produit non expédiable')->rows(2),
+                    Textarea::make('non_shippable_message')->label('Message produit non expédiable (retrait uniquement)')->rows(2),
                     Textarea::make('relay_pickup_message')->label('Message retrait en relais')->rows(2),
                 ]),
         ]);

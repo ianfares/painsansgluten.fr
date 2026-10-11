@@ -9,6 +9,7 @@ use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
 use App\Mail\Admin\NewBankTransferOrderMail;
 use App\Mail\BankTransferInstructionsMail;
+use App\Models\CartItem;
 use App\Services\Cart\CartService;
 use App\Services\Mail\AdminMailer;
 use App\Services\Shipping\DeliveryOptions;
@@ -101,6 +102,10 @@ class CheckoutWizard extends Component
 
     public function mount(): void
     {
+        if ($this->cartIsPickupOnly()) {
+            $this->deliveryChoice = ''; // Chronopost impossible : le client choisit un retrait
+        }
+
         if (Auth::check()) {
             $user = Auth::user();
             $this->email = $user->email;
@@ -222,6 +227,10 @@ class CheckoutWizard extends Component
 
         $options = app(DeliveryOptions::class);
 
+        if ($this->selectedDeliveryMethod() === DeliveryMethod::ChronopostRelay && $this->cartIsPickupOnly()) {
+            return $this->deliveryError('deliveryChoice', 'Votre panier contient un produit disponible uniquement en retrait : choisissez un point de retrait.');
+        }
+
         return match ($this->selectedDeliveryMethod()) {
             DeliveryMethod::ChronopostRelay => $this->resolveChronopostRelay(),
             DeliveryMethod::MerchantPickup => $this->resolveMerchantPickup($options),
@@ -229,6 +238,15 @@ class CheckoutWizard extends Component
                 ? $options->labSnapshot()
                 : $this->deliveryError('deliveryChoice', 'Le retrait au laboratoire n\'est pas disponible pour votre compte.'),
         };
+    }
+
+    /** Un produit non expédiable dans le panier : Chronopost n'est pas proposé. */
+    private function cartIsPickupOnly(): bool
+    {
+        $cartService = app(CartService::class);
+
+        return $cartService->validItems($cartService->currentCart())['items']
+            ->contains(fn (CartItem $item) => $item->product->isPickupOnly());
     }
 
     /** @return array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}|null */
@@ -393,12 +411,19 @@ class CheckoutWizard extends Component
         }
 
         $options = app(DeliveryOptions::class);
+        $pickupOnly = $items->contains(fn (CartItem $item) => $item->product->isPickupOnly());
+        $deliveryMethod = $this->selectedDeliveryMethod();
+        if ($pickupOnly && $deliveryMethod === DeliveryMethod::ChronopostRelay) {
+            $deliveryMethod = DeliveryMethod::MerchantPickup; // aucun port facturé tant que le retrait n'est pas choisi
+        }
 
         return view('livewire.checkout-wizard', [
             'items' => $items,
-            'totals' => $cartService->totals($cart, $this->selectedDeliveryMethod()),
+            'pickupOnly' => $pickupOnly,
+            'pickupOnlyNames' => $items->filter(fn (CartItem $item) => $item->product->isPickupOnly())->map(fn (CartItem $item) => $item->product->name)->values(),
+            'totals' => $cartService->totals($cart, $deliveryMethod),
             'empty' => false,
-            'deliveryMethodValue' => $this->selectedDeliveryMethod(),
+            'deliveryMethodValue' => $deliveryMethod,
             'merchantOptions' => $this->step === 2
                 ? $options->merchantPointsNear(...array_values($this->deliveryAddress()))
                 : collect(),

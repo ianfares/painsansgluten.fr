@@ -51,6 +51,10 @@ class CreateOrderAction
                 throw new RuntimeException('Impossible de créer une commande avec un panier vide.');
             }
 
+            if ($deliveryMethod === DeliveryMethod::ChronopostRelay && $items->contains(fn ($item) => $item->product->isPickupOnly())) {
+                throw new RuntimeException('Un produit de la commande est disponible uniquement en retrait : choisissez un point de retrait.');
+            }
+
             $totals = $this->cartService->totals($cart, $deliveryMethod);
 
             if ($totals['shipping_error'] !== null) {

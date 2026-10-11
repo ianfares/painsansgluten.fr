@@ -139,7 +139,7 @@ class CartService
                 return false;
             }
 
-            if (! $product->is_published || ! $product->is_available || ! $product->is_shippable) {
+            if (! $product->isOrderable()) {
                 $removedNames[] = $product->name;
                 $item->delete();
 

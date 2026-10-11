@@ -32,9 +32,10 @@
             <x-ui.price :amount="$product->price_ttc" class="font-semibold text-ink" />
 
             @if ($orderable)
+                @if ($product->isPickupOnly())
+                    <x-ui.badge variant="warning">Retrait uniquement</x-ui.badge>
+                @endif
                 <livewire:add-to-cart-button :product="$product" :key="'add-'.$product->id" />
-            @elseif (! $product->is_shippable)
-                <x-ui.badge variant="warning">Non expédiable</x-ui.badge>
             @else
                 <x-ui.badge variant="unavailable">Indisponible</x-ui.badge>
             @endif

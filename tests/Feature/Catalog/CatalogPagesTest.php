@@ -38,13 +38,13 @@ test('un produit indisponible n\'affiche pas de bouton ajouter', function () {
     $response->assertSee('Indisponible');
 });
 
-test('un produit non expédiable affiche son message paramétré au lieu du bouton ajouter', function () {
+test('un produit non expédiable reste commandable et affiche son message « retrait uniquement »', function () {
     $product = Product::factory()->notShippable()->create(['is_published' => true]);
 
     $response = $this->get(route('products.show', $product));
 
-    $response->assertDontSee('Ajouter au panier');
-    $response->assertSee('Disponible uniquement sur nos marchés');
+    $response->assertSee('Ajouter au panier');
+    $response->assertSee('disponible uniquement en retrait');
 });
 
 test('les blocs vides (conseils, conservation) ne sont pas affichés', function () {
