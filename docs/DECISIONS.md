@@ -453,3 +453,11 @@
 - Approuver une demande `/professionnels` crée désormais le **compte client pro validé** (`ManageCustomerAccount::create`, email « choisissez votre mot de passe ») ou, si un client a déjà cet email, **bascule ce compte en pro validé** (`promoteToPro`, raison sociale/SIRET remplacés seulement s'ils sont fournis), le tout dans la même transaction que le changement de statut. La demande garde le lien (`pro_account_requests.user_id`).
 - Email d'approbation réécrit, **un seul email** : « Votre compte professionnel est prêt » + bouton « Choisir mon mot de passe » (jeton Fortify créé à l'approbation, 60 min, puis « Mot de passe oublié ») pour un nouveau compte, ou bouton « Me connecter » pour un compte existant. L'adresse de la demande est recopiée dans le compte s'il n'en a pas.
 - Rattrapage : action admin « Créer le compte client » sur une demande approuvée sans compte (demandes approuvées avant le correctif), une seule fois.
+
+## Adresse de livraison distincte (11/10/2026)
+
+- Demande de Ian : facturation et livraison peuvent différer. `addresses.type` = `billing` / `shipping` (déjà prévu au schéma) ; `User::billingAddress()` / `shippingAddress()` (null = identique à la facturation).
+- **Mon compte** : bloc « Adresse de livraison » avec case « Identique à l'adresse de facturation » (cochée par défaut ; la cocher supprime l'adresse de livraison).
+- **Tunnel** : case identique cochée par défaut, adresse reprise du compte ; l'adresse de livraison (sinon la facturation) sert à chercher les commerçants à 50 km. Enregistrée sur la commande (`orders.shipping_*`, null = identique), affichée dans l'admin.
+- Le colis part toujours en relais / point de retrait : cette adresse n'apparaît pas sur le bon de livraison (qui montre le point de livraison).
+- `User` et `Order` ont des valeurs par défaut côté modèle alignées sur les colonnes (type de compte, remise, mode de livraison).

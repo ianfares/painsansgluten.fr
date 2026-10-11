@@ -942,3 +942,11 @@ FICHIERS : `ProcessProAccountRequestAction`, `ManageCustomerAccount::promoteToPr
 SÉCURITÉ : pas de mot de passe fixé par l'admin (lien de choix Fortify) ; pas de doublon de compte (recherche par email) ; verrou sur la demande pour le rattrapage.
 TESTS : 435/435 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : Ian clique « Créer le compte client » sur sa demande de test approuvée, puis vérifie le parcours (email, mot de passe, connexion, compte pro).
+
+## [2026-10-11 11:00] — Claude Opus 5.5 — adresse de livraison distincte
+
+TÂCHE : demande de Ian — « Mes informations » sans adresse de livraison ; facturation et livraison doivent pouvoir différer.
+RÉSUMÉ : bloc « Adresse de livraison » dans le compte (identique à la facturation par défaut), case dans l'étape 1 du tunnel avec reprise depuis le compte, adresse utilisée pour les points de retrait proches, enregistrée sur la commande et affichée dans l'admin.
+FICHIERS : AccountController (+ route `compte.shipping-address.update`), User, Order, CreateOrderAction, CheckoutWizard (+ vue), vue compte/informations, OrderResource, migration `2026_10_11_100000_add_shipping_address_to_orders_table`, tests `tests/Feature/Compte/ShippingAddressTest.php`.
+TESTS : 440/440 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : recette de Ian.
