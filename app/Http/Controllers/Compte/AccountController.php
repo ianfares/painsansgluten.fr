@@ -62,9 +62,49 @@ class AccountController extends Controller
 
     public function informations(): View
     {
+        $user = Auth::user();
+
         return view('compte.informations', [
-            'address' => Auth::user()->addresses()->first(),
+            'address' => $user->billingAddress(),
+            'shippingAddress' => $user->shippingAddress(),
         ]);
+    }
+
+    /**
+     * Adresse de livraison (11/10/2026) : facultative. Cochée « identique à
+     * la facturation » → supprimée, la facturation sert alors aux deux.
+     * Elle sert à proposer les points de retrait proches et figure sur la commande.
+     */
+    public function updateShippingAddress(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if ($request->boolean('same_as_billing')) {
+            $user->addresses()->where('type', 'shipping')->delete();
+
+            return back()->with('status', 'Adresse de livraison : identique à l\'adresse de facturation.');
+        }
+
+        $validated = $request->validate([
+            'shipping_first_name' => ['required', 'string', 'max:255'],
+            'shipping_last_name' => ['required', 'string', 'max:255'],
+            'shipping_line1' => ['required', 'string', 'max:255'],
+            'shipping_postal_code' => ['required', 'regex:/^\d{5}$/'],
+            'shipping_city' => ['required', 'string', 'max:255'],
+        ]);
+
+        $address = $user->addresses()->firstOrNew(['type' => 'shipping']);
+        $address->fill([
+            'first_name' => $validated['shipping_first_name'],
+            'last_name' => $validated['shipping_last_name'],
+            'line1' => $validated['shipping_line1'],
+            'postal_code' => $validated['shipping_postal_code'],
+            'city' => $validated['shipping_city'],
+            'country' => 'FR',
+        ]);
+        $user->addresses()->save($address);
+
+        return back()->with('status', 'Adresse de livraison mise à jour.');
     }
 
     public function updateAddress(Request $request): RedirectResponse

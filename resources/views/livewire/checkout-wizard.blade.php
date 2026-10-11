@@ -53,6 +53,35 @@
                     </x-ui.field>
                 </div>
 
+                <label class="mt-2 flex items-center gap-2 text-sm">
+                    <input type="checkbox" wire:model.live="shippingSameAsBilling" class="rounded border-line text-sage focus:ring-sage">
+                    Adresse de livraison identique à l'adresse de facturation
+                </label>
+
+                @unless ($shippingSameAsBilling)
+                    <p class="text-sm font-semibold text-ink">Adresse de livraison</p>
+                    <p class="-mt-3 text-xs text-ink-muted">Elle sert à vous proposer les points de retrait proches de chez vous.</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <x-ui.field name="shipping_first_name" label="Prénom">
+                            <x-ui.input name="shipping_first_name" wire:model="shipping_first_name" />
+                        </x-ui.field>
+                        <x-ui.field name="shipping_last_name" label="Nom">
+                            <x-ui.input name="shipping_last_name" wire:model="shipping_last_name" />
+                        </x-ui.field>
+                    </div>
+                    <x-ui.field name="shipping_line1" label="Adresse">
+                        <x-ui.input name="shipping_line1" wire:model="shipping_line1" />
+                    </x-ui.field>
+                    <div class="grid grid-cols-2 gap-4">
+                        <x-ui.field name="shipping_postal_code" label="Code postal">
+                            <x-ui.input name="shipping_postal_code" wire:model="shipping_postal_code" />
+                        </x-ui.field>
+                        <x-ui.field name="shipping_city" label="Ville">
+                            <x-ui.input name="shipping_city" wire:model="shipping_city" />
+                        </x-ui.field>
+                    </div>
+                @endunless
+
                 <x-ui.button type="button" wire:click="goToStep(2)" class="mt-2 w-full justify-center">Suivant</x-ui.button>
             </div>
         @endif

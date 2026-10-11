@@ -72,5 +72,6 @@ Route::middleware(['auth', 'verified'])->prefix('mon-compte')->name('compte.')->
     Route::get('/informations', [AccountController::class, 'informations'])->name('informations');
     Route::put('/entreprise', [AccountController::class, 'updateCompany'])->name('company.update');
     Route::put('/adresse', [AccountController::class, 'updateAddress'])->name('address.update');
+    Route::put('/adresse-livraison', [AccountController::class, 'updateShippingAddress'])->name('shipping-address.update');
     Route::post('/supprimer', [AccountController::class, 'requestDeletion'])->name('deletion.request');
 });

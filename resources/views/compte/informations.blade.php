@@ -112,6 +112,39 @@
             </form>
         </section>
 
+        {{-- Adresse de livraison : identique à la facturation par défaut --}}
+        <section class="rounded-card border border-line bg-white p-6" x-data="{ same: {{ old('same_as_billing', $shippingAddress ? '0' : '1') === '1' ? 'true' : 'false' }} }">
+            <h2 class="mb-2 font-semibold text-ink">Adresse de livraison</h2>
+            <p class="mb-4 text-sm text-ink-muted">Nous livrons en point relais Chronopost ou en point de retrait : cette adresse sert à vous proposer les points de retrait proches de chez vous.</p>
+            <form method="POST" action="{{ route('compte.shipping-address.update') }}" class="flex flex-col gap-4">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="same_as_billing" :value="same ? 1 : 0">
+                <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" x-model="same" class="rounded border-line text-sage focus:ring-sage">
+                    Identique à l'adresse de facturation
+                </label>
+                <div class="grid gap-4 sm:grid-cols-2" x-show="! same" x-cloak>
+                    <x-ui.field name="shipping_first_name" label="Prénom">
+                        <x-ui.input name="shipping_first_name" :value="old('shipping_first_name', $shippingAddress?->first_name ?? $address?->first_name)" />
+                    </x-ui.field>
+                    <x-ui.field name="shipping_last_name" label="Nom">
+                        <x-ui.input name="shipping_last_name" :value="old('shipping_last_name', $shippingAddress?->last_name ?? $address?->last_name)" />
+                    </x-ui.field>
+                    <x-ui.field name="shipping_line1" label="Adresse" class="sm:col-span-2">
+                        <x-ui.input name="shipping_line1" :value="old('shipping_line1', $shippingAddress?->line1)" />
+                    </x-ui.field>
+                    <x-ui.field name="shipping_postal_code" label="Code postal">
+                        <x-ui.input name="shipping_postal_code" :value="old('shipping_postal_code', $shippingAddress?->postal_code)" />
+                    </x-ui.field>
+                    <x-ui.field name="shipping_city" label="Ville">
+                        <x-ui.input name="shipping_city" :value="old('shipping_city', $shippingAddress?->city)" />
+                    </x-ui.field>
+                </div>
+                <div><x-ui.button type="submit">Enregistrer l'adresse de livraison</x-ui.button></div>
+            </form>
+        </section>
+
         {{-- Zone sensible --}}
         <section class="rounded-card border border-red-200 bg-red-50 p-6">
             <h2 class="mb-2 font-semibold text-red-700">Supprimer mon compte</h2>

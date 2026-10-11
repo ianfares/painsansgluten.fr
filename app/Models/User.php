@@ -35,6 +35,9 @@ class User extends Authenticatable implements MustVerifyEmailContract
     /** @use HasFactory<UserFactory> */
     use HasFactory, MustVerifyEmail, Notifiable;
 
+    /** Valeurs par défaut aussi côté modèle (comme les colonnes) : un compte neuf est particulier, sans remise. */
+    protected $attributes = ['account_type' => 'individual', 'discount_percent' => 0, 'lab_pickup_allowed' => false];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -95,5 +98,17 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /** Adresse de facturation (la première adresse si aucune n'est typée). */
+    public function billingAddress(): ?Address
+    {
+        return $this->addresses()->where('type', 'billing')->first() ?? $this->addresses()->where('type', '!=', 'shipping')->first();
+    }
+
+    /** Adresse de livraison distincte ; null = identique à la facturation. */
+    public function shippingAddress(): ?Address
+    {
+        return $this->addresses()->where('type', 'shipping')->first();
     }
 }

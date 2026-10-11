@@ -33,6 +33,7 @@ use Illuminate\Support\Carbon;
     'email', 'first_name', 'last_name', 'phone',
     'billing_first_name', 'billing_last_name', 'billing_company', 'billing_line1', 'billing_line2',
     'billing_postal_code', 'billing_city', 'billing_country',
+    'shipping_first_name', 'shipping_last_name', 'shipping_line1', 'shipping_postal_code', 'shipping_city',
     'relay_id', 'relay_name', 'relay_snapshot',
     'subtotal_ttc', 'discount_percent', 'discount_total_ttc', 'shipping_ttc', 'shipping_vat_rate', 'total_ttc', 'total_ht', 'total_vat',
     'planned_ship_date', 'tracking_number', 'cgv_accepted_at',
@@ -126,5 +127,11 @@ class Order extends Model
         return $template && $this->tracking_number
             ? str_replace('{tracking}', rawurlencode($this->tracking_number), $template)
             : null;
+    }
+
+    /** Adresse de livraison distincte de la facturation (sinon null). */
+    public function hasDistinctShippingAddress(): bool
+    {
+        return filled($this->shipping_line1);
     }
 }
