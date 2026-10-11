@@ -77,7 +77,7 @@ test('l\'accueil affiche les 4 engagements, sans « bio » ni certification non 
     $response->assertSee('Nos engagements')
         ->assertSee('en point relais Chronopost', false)
         ->assertSee('100 % sans gluten', false)
-        ->assertSee('se congèlent tranchés', false)
+        ->assertSee('Congelez, sortez, savourez', false)
         ->assertSee('fabriqués à la commande', false);
 
     $section = str($response->getContent())->between('aria-label="Nos engagements"', '</section>');
