@@ -31,7 +31,7 @@ class ManageCustomerAccount
      *
      * @param  array{account_type: string, first_name: string, last_name: string, phone: string, email: string, company_name?: ?string, siret?: ?string, discount_percent?: int|string|null}  $data
      */
-    public function create(array $data): User
+    public function create(array $data, bool $sendWelcomeEmail = true): User
     {
         $isPro = $data['account_type'] === AccountType::Pro->value;
 
@@ -51,10 +51,13 @@ class ManageCustomerAccount
             'discount_percent' => self::discount($data['discount_percent'] ?? 0),
         ])->save();
 
-        Password::broker()->sendResetLink(
-            ['email' => $user->email],
-            fn (User $u, string $token) => Mail::to($u->email)->queue(new AccountCreatedByAdminMail($u, $token)),
-        );
+        // Sans email ici quand l'appelant envoie le sien (approbation d'une demande pro).
+        if ($sendWelcomeEmail) {
+            Password::broker()->sendResetLink(
+                ['email' => $user->email],
+                fn (User $u, string $token) => Mail::to($u->email)->queue(new AccountCreatedByAdminMail($u, $token)),
+            );
+        }
 
         return $user;
     }

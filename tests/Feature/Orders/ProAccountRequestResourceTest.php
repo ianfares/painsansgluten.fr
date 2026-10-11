@@ -14,6 +14,7 @@ use App\Models\Admin;
 use App\Models\ProAccountRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -114,8 +115,12 @@ test('approuver crée le compte client pro validé, rattaché à la demande, ave
         ->and($user->first_name)->toBe('Paul')
         ->and($request->fresh()->user_id)->toBe($user->id);
 
-    Mail::assertQueued(AccountCreatedByAdminMail::class, fn ($m) => $m->hasTo('nouveau-pro@example.test'));
-    Mail::assertQueued(ProAccountRequestApprovedMail::class, fn ($m) => $m->accountCreated && str_contains($m->render(), 'second email'));
+    // Un seul email : l'approbation, avec le bouton pour choisir le mot de passe.
+    Mail::assertNotQueued(AccountCreatedByAdminMail::class);
+    Mail::assertQueued(ProAccountRequestApprovedMail::class, fn ($m) => $m->hasTo('nouveau-pro@example.test')
+        && $m->passwordToken !== null
+        && str_contains($m->render(), 'Choisir mon mot de passe')
+        && Password::broker()->tokenExists($user, $m->passwordToken));
 });
 
 test('approuver avec l\'email d\'un client existant le passe en pro sans créer de doublon', function () {
@@ -131,7 +136,7 @@ test('approuver avec l\'email d\'un client existant le passe en pro sans créer 
         ->and($request->fresh()->user_id)->toBe($existing->id);
 
     Mail::assertNotQueued(AccountCreatedByAdminMail::class);
-    Mail::assertQueued(ProAccountRequestApprovedMail::class, fn ($m) => ! $m->accountCreated && str_contains($m->render(), 'Me connecter'));
+    Mail::assertQueued(ProAccountRequestApprovedMail::class, fn ($m) => $m->passwordToken === null && str_contains($m->render(), 'Me connecter'));
 });
 
 test('rattrapage : une demande approuvée sans compte propose « Créer le compte client », une seule fois', function () {
@@ -148,4 +153,20 @@ test('rattrapage : une demande approuvée sans compte propose « Créer le compt
 
     Livewire::test(ViewProAccountRequest::class, ['record' => $request->getRouteKey()])->assertActionHidden('createAccount');
     expect(fn () => app(ProcessProAccountRequestAction::class)->createAccountFor($request->fresh()))->toThrow(RuntimeException::class);
+});
+
+test('l\'adresse de la demande est recopiée dans le compte créé', function () {
+    $request = ProAccountRequest::factory()->create([
+        'email' => 'adresse@example.test', 'contact_first_name' => 'Paul', 'contact_last_name' => 'Boulanger',
+        'company_name' => 'Pizzeria du Port', 'address_line1' => '3 quai du Port', 'postal_code' => '50400', 'city' => 'Granville',
+    ]);
+
+    app(ProcessProAccountRequestAction::class)->approve($request);
+
+    $address = User::query()->where('email', 'adresse@example.test')->sole()->addresses()->sole();
+    expect($address->line1)->toBe('3 quai du Port')
+        ->and($address->postal_code)->toBe('50400')
+        ->and($address->city)->toBe('Granville')
+        ->and($address->company)->toBe('Pizzeria du Port')
+        ->and($address->first_name)->toBe('Paul');
 });
