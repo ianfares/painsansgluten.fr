@@ -62,6 +62,19 @@ class CheckoutWizard extends Component
     #[Validate('required|string|max:255')]
     public string $billing_city = '';
 
+    /** Adresse de livraison (11/10/2026) : identique à la facturation par défaut. */
+    public bool $shippingSameAsBilling = true;
+
+    public string $shipping_first_name = '';
+
+    public string $shipping_last_name = '';
+
+    public string $shipping_line1 = '';
+
+    public string $shipping_postal_code = '';
+
+    public string $shipping_city = '';
+
     #[Validate('required|string|max:5|regex:/^[0-9]{5}$/')]
     public string $relay_postal_code = '';
 
@@ -95,11 +108,21 @@ class CheckoutWizard extends Component
             $this->last_name = $user->last_name;
             $this->phone = (string) $user->phone;
 
-            $address = $user->addresses()->first();
+            $address = $user->billingAddress();
             if ($address) {
                 $this->billing_line1 = $address->line1;
                 $this->billing_postal_code = $address->postal_code;
                 $this->billing_city = $address->city;
+            }
+
+            $shipping = $user->shippingAddress();
+            if ($shipping) {
+                $this->shippingSameAsBilling = false;
+                $this->shipping_first_name = $shipping->first_name;
+                $this->shipping_last_name = $shipping->last_name;
+                $this->shipping_line1 = $shipping->line1;
+                $this->shipping_postal_code = $shipping->postal_code;
+                $this->shipping_city = $shipping->city;
             }
         }
     }
@@ -128,7 +151,27 @@ class CheckoutWizard extends Component
             'billing_line1' => 'required|string|max:255',
             'billing_postal_code' => 'required|regex:/^[0-9]{5}$/',
             'billing_city' => 'required|string|max:255',
+            ...($this->shippingSameAsBilling ? [] : [
+                'shipping_first_name' => 'required|string|max:255',
+                'shipping_last_name' => 'required|string|max:255',
+                'shipping_line1' => 'required|string|max:255',
+                'shipping_postal_code' => 'required|regex:/^[0-9]{5}$/',
+                'shipping_city' => 'required|string|max:255',
+            ]),
         ];
+    }
+
+    /**
+     * Adresse qui sert à chercher les points de retrait proches : la livraison
+     * si elle est distincte, sinon la facturation.
+     *
+     * @return array{line1: string, postal_code: string, city: string}
+     */
+    private function deliveryAddress(): array
+    {
+        return $this->shippingSameAsBilling
+            ? ['line1' => $this->billing_line1, 'postal_code' => $this->billing_postal_code, 'city' => $this->billing_city]
+            : ['line1' => $this->shipping_line1, 'postal_code' => $this->shipping_postal_code, 'city' => $this->shipping_city];
     }
 
     /** @return array<string, mixed> */
@@ -214,7 +257,7 @@ class CheckoutWizard extends Component
         $pointId = $this->selectedPickupPointId();
         $option = $pointId === null
             ? null
-            : $options->eligibleMerchantPoint($pointId, $this->billing_line1, $this->billing_postal_code, $this->billing_city);
+            : $options->eligibleMerchantPoint($pointId, ...array_values($this->deliveryAddress()));
 
         return $option === null
             ? $this->deliveryError('deliveryChoice', 'Choisissez un point de retrait proposé pour votre adresse.')
@@ -311,6 +354,13 @@ class CheckoutWizard extends Component
                 paymentMethod: PaymentMethod::from($this->paymentMethod),
                 userId: Auth::id(),
                 deliveryMethod: $this->selectedDeliveryMethod(),
+                shipping: $this->shippingSameAsBilling ? null : [
+                    'first_name' => $this->shipping_first_name,
+                    'last_name' => $this->shipping_last_name,
+                    'line1' => $this->shipping_line1,
+                    'postal_code' => $this->shipping_postal_code,
+                    'city' => $this->shipping_city,
+                ],
             );
         } catch (RuntimeException) {
             // Panier vidé entre-temps (commande déjà validée dans un autre onglet, double clic).
@@ -350,7 +400,7 @@ class CheckoutWizard extends Component
             'empty' => false,
             'deliveryMethodValue' => $this->selectedDeliveryMethod(),
             'merchantOptions' => $this->step === 2
-                ? $options->merchantPointsNear($this->billing_line1, $this->billing_postal_code, $this->billing_city)
+                ? $options->merchantPointsNear(...array_values($this->deliveryAddress()))
                 : collect(),
             'labPickupAllowed' => $options->labPickupAllowed(Auth::user()),
             'labSnapshot' => $options->labSnapshot()['relay_snapshot'],

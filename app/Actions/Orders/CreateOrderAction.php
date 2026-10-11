@@ -36,10 +36,11 @@ class CreateOrderAction
      * @param  array{email: string, first_name: string, last_name: string, phone: string}  $customer
      * @param  array{first_name: string, last_name: string, company?: ?string, line1: string, line2?: ?string, postal_code: string, city: string}  $billing
      * @param  array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}  $relay
+     * @param  array{first_name: string, last_name: string, line1: string, postal_code: string, city: string}|null  $shipping
      */
-    public function execute(Cart $cart, array $customer, array $billing, array $relay, PaymentMethod $paymentMethod, ?int $userId = null, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay): Order
+    public function execute(Cart $cart, array $customer, array $billing, array $relay, PaymentMethod $paymentMethod, ?int $userId = null, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay, ?array $shipping = null): Order
     {
-        return DB::transaction(function () use ($cart, $customer, $billing, $relay, $paymentMethod, $userId, $deliveryMethod) {
+        return DB::transaction(function () use ($cart, $customer, $billing, $relay, $paymentMethod, $userId, $deliveryMethod, $shipping) {
             // Verrou sur le panier : deux validations simultanées (double clic,
             // deux onglets) ne créent qu'une commande, la seconde trouve le panier vide.
             Cart::query()->whereKey($cart->id)->lockForUpdate()->first();
@@ -80,6 +81,12 @@ class CreateOrderAction
                 'billing_postal_code' => $billing['postal_code'],
                 'billing_city' => $billing['city'],
                 'billing_country' => 'FR',
+                // Adresse de livraison distincte (null = identique à la facturation).
+                'shipping_first_name' => $shipping['first_name'] ?? null,
+                'shipping_last_name' => $shipping['last_name'] ?? null,
+                'shipping_line1' => $shipping['line1'] ?? null,
+                'shipping_postal_code' => $shipping['postal_code'] ?? null,
+                'shipping_city' => $shipping['city'] ?? null,
                 'relay_id' => $relay['relay_id'],
                 'relay_name' => $relay['relay_name'],
                 'relay_snapshot' => $relay['relay_snapshot'],

@@ -273,6 +273,11 @@ class OrderResource extends Resource
                     TextEntry::make('billing_line1')->label('Adresse'),
                     TextEntry::make('billing_postal_code')->label('Code postal'),
                     TextEntry::make('billing_city')->label('Ville'),
+                    TextEntry::make('shipping_line1')
+                        ->label('Adresse de livraison')
+                        ->state(fn (Order $record): string => $record->hasDistinctShippingAddress()
+                            ? trim("{$record->shipping_first_name} {$record->shipping_last_name}, {$record->shipping_line1}, {$record->shipping_postal_code} {$record->shipping_city}")
+                            : 'Identique à la facturation'),
                 ]),
             InfolistSection::make('Livraison')
                 ->columns(2)
