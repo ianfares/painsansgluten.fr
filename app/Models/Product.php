@@ -148,11 +148,18 @@ class Product extends Model implements HasMedia
 
     /**
      * Un produit n'est jamais commandable depuis le catalogue tant qu'il
-     * n'est pas publié, disponible et expédiable (PLAN.md §5.3, §6.4).
+     * n'est pas publié et disponible (PLAN.md §5.3). Un produit non expédiable
+     * reste commandable, mais uniquement en retrait (décision client 2026-10-11).
      */
     public function isOrderable(): bool
     {
-        return $this->is_published && $this->is_available && $this->is_shippable;
+        return $this->is_published && $this->is_available;
+    }
+
+    /** Non expédiable : retrait chez un commerçant partenaire ou au labo (pro autorisé), jamais Chronopost. */
+    public function isPickupOnly(): bool
+    {
+        return ! $this->is_shippable;
     }
 
     /**

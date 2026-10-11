@@ -461,3 +461,10 @@
 - **Tunnel** : case identique cochée par défaut, adresse reprise du compte ; l'adresse de livraison (sinon la facturation) sert à chercher les commerçants à 50 km. Enregistrée sur la commande (`orders.shipping_*`, null = identique), affichée dans l'admin.
 - Le colis part toujours en relais / point de retrait : cette adresse n'apparaît pas sur le bon de livraison (qui montre le point de livraison).
 - `User` et `Order` ont des valeurs par défaut côté modèle alignées sur les colonnes (type de compte, remise, mode de livraison).
+
+## 2026-10-11 — Produit non expédiable : commandable en retrait uniquement
+- Décision client : un produit « non expédiable » n'est plus bloqué. Particulier : retrait chez un commerçant partenaire (≤ 50 km) ; pro autorisé : commerçant ou laboratoire. Jamais Chronopost.
+- `Product::isOrderable()` = publié + disponible ; `Product::isPickupOnly()` = non expédiable. Le panier ne retire plus ces produits.
+- Contrôle serveur à deux niveaux : le tunnel refuse Chronopost (`deliveryChoice`) et `CreateOrderAction` lève une exception si Chronopost + produit en retrait uniquement (couvre aussi la commande manuelle admin).
+- Tunnel : Chronopost masqué, message listant les produits concernés ; si aucun point de retrait n'est proposé, le client est invité à retirer le produit.
+- Message produit (`shipping.non_shippable_message`, éditable) mis à jour par migration de paramètres seulement s'il valait encore le texte d'origine.

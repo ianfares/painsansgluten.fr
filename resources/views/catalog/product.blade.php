@@ -132,10 +132,12 @@
 
                 @if ($product->isOrderable())
                     <livewire:add-to-cart-button :product="$product" :with-quantity="true" />
-                @elseif (! $product->is_shippable)
-                    <x-ui.alert variant="warning">{{ $shippingSettings->non_shippable_message }}</x-ui.alert>
                 @else
                     <div><x-ui.badge variant="unavailable">Indisponible</x-ui.badge></div>
+                @endif
+
+                @if ($product->isPickupOnly())
+                    <x-ui.alert variant="warning">{{ $shippingSettings->non_shippable_message }}</x-ui.alert>
                 @endif
 
                 @if ($product->is_shippable)

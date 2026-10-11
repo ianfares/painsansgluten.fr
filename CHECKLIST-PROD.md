@@ -7,7 +7,7 @@
 ### Parcours client
 - [ ] Accueil, boutique, 4 catégories, fiche produit : affichage desktop + mobile
 - [ ] Produit indisponible : pas de bouton ajouter
-- [ ] Produit non expédiable : visible, message, non commandable
+- [ ] Produit non expédiable : visible, message « retrait uniquement », commandable seulement en retrait (commerçant ≤ 50 km ; labo pour un pro autorisé), jamais en Chronopost
 - [ ] Panier : ajout, quantité, suppression, tiroir + page, date d'expédition affichée
 - [ ] Frais de port : chaque tranche, franco
 - [ ] Tunnel invité complet

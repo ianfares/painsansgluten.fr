@@ -950,3 +950,14 @@ RÉSUMÉ : bloc « Adresse de livraison » dans le compte (identique à la factu
 FICHIERS : AccountController (+ route `compte.shipping-address.update`), User, Order, CreateOrderAction, CheckoutWizard (+ vue), vue compte/informations, OrderResource, migration `2026_10_11_100000_add_shipping_address_to_orders_table`, tests `tests/Feature/Compte/ShippingAddressTest.php`.
 TESTS : 440/440 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : recette de Ian.
+
+## [2026-10-11 12:10] — Claude Opus 5.5 — T27 (suite) : produits non expédiables en retrait
+OBJECTIF : décision client — un produit non expédiable est commandable en retrait uniquement (particulier : commerçant ≤ 50 km ; pro autorisé : commerçant + labo).
+RÉALISÉ : `Product::isOrderable()` sans condition d'expédition, `isPickupOnly()` ; panier ne retire plus ces produits ; tunnel : Chronopost masqué et refusé côté serveur, port à 0 dans le récapitulatif, message si aucun point ; garde-fou dans `CreateOrderAction` (tunnel + commande manuelle) ; fiche produit : bouton d'ajout + message ; carte produit : badge « Retrait uniquement » ; texte du message mis à jour (migration de paramètres conditionnelle) ; CHECKLIST-PROD ligne 10 adaptée.
+IMPACT : catalogue, panier, tunnel, création de commande. Aucune migration de table.
+SÉCURITÉ : le choix Chronopost est revalidé côté serveur (tunnel et action de création) ; une requête trafiquée est refusée (testé).
+PERFORMANCE : une lecture du panier supplémentaire au montage du tunnel et à la validation de l'étape 2.
+FICHIERS : Product, CartService, CreateOrderAction, CheckoutWizard (+ vue), catalog/product, components/ui/product-card, ManageShippingSettings, database/settings/2026_10_11_120000_update_non_shippable_message, tests Checkout/PickupOnlyProductTest + Catalog/CatalogPagesTest.
+TESTS : 444/444 ; pint OK ; phpstan 0 erreur.
+RISQUES / À VÉRIFIER : si aucun commerçant n'est saisi en prod, un particulier ne peut pas commander un produit non expédiable (comportement voulu, message affiché).
+PROCHAINE TÂCHE SUGGÉRÉE : recette de Ian (saisir un commerçant partenaire, commander un produit non expédiable).
