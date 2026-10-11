@@ -157,3 +157,11 @@ test('la liste des produits affiche d\'abord les fiches modifiées en dernier', 
 
     Livewire::test(ListProducts::class)->assertCanSeeTableRecords([$recent, $old], inOrder: true);
 });
+
+test('le taux de TVA enregistré est bien affiché à la réouverture du produit', function (float $rate) {
+    $product = Product::factory()->create(['category_id' => $this->category->id, 'vat_rate' => $rate]);
+
+    $state = Livewire::test(EditProduct::class, ['record' => $product->getRouteKey()])->get('data.vat_rate');
+
+    expect(Product::VAT_RATE_OPTIONS)->toHaveKey($state);
+})->with([2.1, 5.5, 10, 20]);

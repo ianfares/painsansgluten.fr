@@ -147,6 +147,12 @@ class Product extends Model implements HasMedia
     }
 
     /**
+     * Taux proposés dans l'admin. Les clés suivent le format du cast
+     * `decimal:2` (« 5.50 ») : sinon la liste paraît vide à la réouverture.
+     */
+    public const VAT_RATE_OPTIONS = ['2.10' => '2,1 %', '5.50' => '5,5 %', '10.00' => '10 %', '20.00' => '20 %'];
+
+    /**
      * Un produit n'est jamais commandable depuis le catalogue tant qu'il
      * n'est pas publié et disponible (PLAN.md §5.3). Un produit non expédiable
      * reste commandable, mais uniquement en retrait (décision client 2026-10-11).
