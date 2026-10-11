@@ -25,10 +25,17 @@ class ViewProAccountRequest extends ViewRecord
                 ->label('Approuver')
                 ->color('success')
                 ->icon('heroicon-o-check')
-                ->modalDescription('Le demandeur reçoit un email « nous revenons vers vous ». Aucun compte n\'est créé à cette étape.')
+                ->modalDescription('Un compte client professionnel validé est créé (le demandeur reçoit un email pour choisir son mot de passe). Si un client a déjà cet email, son compte devient professionnel.')
                 ->form([Textarea::make('admin_comment')->label('Commentaire (facultatif, repris dans l\'email)')->maxLength(1000)])
                 ->visible(fn (): bool => $this->isPending())
-                ->action(fn (array $data) => $this->process(fn (ProcessProAccountRequestAction $a, ProAccountRequest $r) => $a->approve($r, $data['admin_comment'] ?? null), 'Demande approuvée')),
+                ->action(fn (array $data) => $this->process(fn (ProcessProAccountRequestAction $a, ProAccountRequest $r) => $a->approve($r, $data['admin_comment'] ?? null), 'Demande approuvée, compte client pro prêt')),
+            Action::make('createAccount')
+                ->label('Créer le compte client')
+                ->icon('heroicon-o-user-plus')
+                ->modalDescription('Pour une demande approuvée sans compte client : le compte pro est créé (ou le compte existant passe pro) et le demandeur est prévenu par email.')
+                ->requiresConfirmation()
+                ->visible(fn (): bool => $this->needsAccount())
+                ->action(fn () => $this->process(fn (ProcessProAccountRequestAction $a, ProAccountRequest $r) => $a->createAccountFor($r), 'Compte client pro créé')),
             Action::make('reject')
                 ->label('Refuser')
                 ->color('danger')
@@ -38,6 +45,14 @@ class ViewProAccountRequest extends ViewRecord
                 ->visible(fn (): bool => $this->isPending())
                 ->action(fn (array $data) => $this->process(fn (ProcessProAccountRequestAction $a, ProAccountRequest $r) => $a->reject($r, $data['admin_comment'] ?? null), 'Demande refusée')),
         ];
+    }
+
+    private function needsAccount(): bool
+    {
+        /** @var ProAccountRequest $record */
+        $record = $this->getRecord();
+
+        return $record->status === ProRequestStatus::Approved && $record->user_id === null;
     }
 
     private function isPending(): bool

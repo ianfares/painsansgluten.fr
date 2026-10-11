@@ -81,6 +81,10 @@ class ProAccountRequestResource extends Resource
                         ->color(fn (ProRequestStatus $state): string => $state->color()),
                     TextEntry::make('created_at')->label('Reçue le')->dateTime('d/m/Y H:i'),
                     TextEntry::make('processed_at')->label('Traitée le')->dateTime('d/m/Y H:i')->placeholder('—'),
+                    TextEntry::make('user.email')
+                        ->label('Compte client')
+                        ->placeholder('Aucun (pas encore approuvée)')
+                        ->url(fn (ProAccountRequest $record): ?string => $record->user_id ? UserResource::getUrl('view', ['record' => $record->user_id]) : null),
                     TextEntry::make('admin_comment')->label('Commentaire admin')->placeholder('—')->columnSpanFull(),
                 ]),
             InfolistSection::make('Entreprise')

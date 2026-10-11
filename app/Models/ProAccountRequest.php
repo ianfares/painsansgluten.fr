@@ -10,6 +10,7 @@ use Database\Factories\ProAccountRequestFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Demande de compte professionnel (T26 B1). `status`, `admin_comment` et
@@ -53,5 +54,11 @@ class ProAccountRequest extends Model
     public function contactName(): string
     {
         return "{$this->contact_first_name} {$this->contact_last_name}";
+    }
+
+    /** Compte client pro créé ou basculé en pro à l'approbation. */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

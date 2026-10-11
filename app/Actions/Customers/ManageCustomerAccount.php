@@ -93,6 +93,22 @@ class ManageCustomerAccount
         return $user;
     }
 
+    /**
+     * Fait d'un compte existant un compte pro validé (demande pro approuvée
+     * avec l'email d'un client déjà inscrit). Raison sociale et SIRET ne sont
+     * remplacés que s'ils sont fournis. Pas d'email ici : l'appelant prévient.
+     */
+    public function promoteToPro(User $user, ?string $companyName, ?string $siret): void
+    {
+        $user->forceFill([
+            'account_type' => AccountType::Pro,
+            'company_name' => filled($companyName) ? $companyName : $user->company_name,
+            'siret' => filled($siret) ? $siret : $user->siret,
+            'pro_status' => ProStatus::Approved,
+            'pro_approved_at' => $user->pro_approved_at ?? now(),
+        ])->save();
+    }
+
     /** Valide un compte pro en attente et prévient le client. */
     public function approvePro(User $user): void
     {
