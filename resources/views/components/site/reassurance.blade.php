@@ -18,7 +18,7 @@
         [
             'color' => '#6b93c4',
             'icon' => '<path d="M12 2.5v19M3.8 7.25l16.4 9.5M20.2 7.25 3.8 16.75"/><path d="m9.6 4 2.4 2.2L14.4 4M9.6 20 12 17.8l2.4 2.2M4.2 10.6l3.1-.9-.7-3.2M19.8 13.4l-3.1.9.7 3.2M6.6 17.5l.7-3.2-3.1-.9M17.4 6.5l-.7 3.2 3.1.9"/>',
-            'text' => 'Des pains qui <strong>se congèlent tranchés</strong> : sortez juste ce qu\'il vous faut',
+            'text' => '<strong>Congelez, sortez, savourez…</strong> votre pain sans gluten à portée de main !',
         ],
         [
             'color' => '#c4932b',

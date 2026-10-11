@@ -977,3 +977,9 @@ VÉRIFICATIONS : base active = `painsansgluten` (12 produits, 4 commandes, 3 cli
 SÉCURITÉ : mot de passe SQL jamais affiché (fichier d'options temporaire 600, supprimé) ; sauvegardes en 600 dans un dossier 700.
 RISQUES / À FAIRE : supprimer `painsansgluten_preprod` après validation de Ian (en root, retirer aussi son GRANT) ; le dossier personnel de l'utilisateur système est la racine du site : prévoir un dossier de sauvegardes hors du site lors de la mise en place des sauvegardes automatiques.
 PROCHAINE TÂCHE SUGGÉRÉE : validation de Ian puis suppression de l'ancienne base.
+
+## [2026-10-11 18:40] — Claude Opus 5.5 — Home : texte de l'engagement « congélation »
+OBJECTIF : demande de Ian — remplacer « Des pains qui se congèlent tranchés : sortez juste ce qu'il vous faut » par « Congelez, sortez, savourez… votre pain sans gluten à portée de main ! ».
+RÉALISÉ : texte du 3e engagement de `components/site/reassurance` (début en gras) ; test catalogue adapté. Aucune nouvelle affirmation (pas de durée de congélation).
+TESTS : 448/448 ; pint OK.
+PROCHAINE TÂCHE SUGGÉRÉE : recette de Ian.
