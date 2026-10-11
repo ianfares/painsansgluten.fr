@@ -13,6 +13,7 @@ use App\Models\ProAccountRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use RuntimeException;
 
 /**
@@ -32,13 +33,13 @@ class ProcessProAccountRequestAction
      */
     public function approve(ProAccountRequest $request, ?string $comment = null): void
     {
-        $accountCreated = DB::transaction(function () use ($request, $comment): bool {
+        $passwordToken = DB::transaction(function () use ($request, $comment): ?string {
             $this->process($request, ProRequestStatus::Approved, $comment);
 
             return $this->attachAccount($request);
         });
 
-        Mail::to($request->email)->queue(new ProAccountRequestApprovedMail($request, $accountCreated));
+        Mail::to($request->email)->queue(new ProAccountRequestApprovedMail($request, $passwordToken));
     }
 
     /**
@@ -49,7 +50,7 @@ class ProcessProAccountRequestAction
      */
     public function createAccountFor(ProAccountRequest $request): void
     {
-        $accountCreated = DB::transaction(function () use ($request): bool {
+        $passwordToken = DB::transaction(function () use ($request): ?string {
             $locked = ProAccountRequest::query()->lockForUpdate()->findOrFail($request->id);
             if ($locked->status !== ProRequestStatus::Approved || $locked->user_id !== null) {
                 throw new RuntimeException('Cette demande n\'est pas approuvée ou a déjà un compte client.');
@@ -58,21 +59,23 @@ class ProcessProAccountRequestAction
             return $this->attachAccount($request);
         });
 
-        Mail::to($request->email)->queue(new ProAccountRequestApprovedMail($request, $accountCreated));
+        Mail::to($request->email)->queue(new ProAccountRequestApprovedMail($request, $passwordToken));
     }
 
     /**
-     * Crée le compte pro validé (true) ou bascule en pro le compte existant
-     * qui a le même email (false), et le rattache à la demande.
+     * Crée le compte pro validé ou bascule en pro le compte existant qui a le
+     * même email, recopie l'adresse de la demande si le compte n'en a pas, et
+     * rattache le compte à la demande. Retourne le jeton « choisir mon mot de
+     * passe » pour un nouveau compte (un seul email, celui d'approbation),
+     * null pour un compte existant.
      */
-    private function attachAccount(ProAccountRequest $request): bool
+    private function attachAccount(ProAccountRequest $request): ?string
     {
         $accounts = app(ManageCustomerAccount::class);
         $user = User::query()->where('email', $request->email)->first();
         $created = $user === null;
 
         if ($user === null) {
-            // Envoie aussi l'email « choisissez votre mot de passe ».
             $user = $accounts->create([
                 'account_type' => AccountType::Pro->value,
                 'first_name' => $request->contact_first_name,
@@ -81,14 +84,25 @@ class ProcessProAccountRequestAction
                 'email' => $request->email,
                 'company_name' => $request->company_name,
                 'siret' => $request->siret,
-            ]);
+            ], sendWelcomeEmail: false);
         } else {
             $accounts->promoteToPro($user, $request->company_name, $request->siret);
         }
 
+        if (filled($request->address_line1) && filled($request->postal_code) && filled($request->city) && ! $user->addresses()->exists()) {
+            $user->addresses()->create([
+                'first_name' => $request->contact_first_name,
+                'last_name' => $request->contact_last_name,
+                'company' => $request->company_name,
+                'line1' => $request->address_line1,
+                'postal_code' => $request->postal_code,
+                'city' => $request->city,
+            ]);
+        }
+
         $request->forceFill(['user_id' => $user->id])->save();
 
-        return $created;
+        return $created ? Password::broker()->createToken($user) : null;
     }
 
     /**

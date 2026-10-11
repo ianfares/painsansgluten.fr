@@ -164,7 +164,7 @@ class SendEmailSamplesCommand extends Command
             ['Admin — anomalie de paiement Stripe', new StripePaymentAnomalyMail($card, 'Un paiement de 25,80 € a été encaissé alors que la commande était déjà « Payée » (paiement en double ou commande annulée). Remboursez-le depuis le tableau de bord Stripe.')],
             ['Admin — demande de suppression de compte', new AccountDeletionRequestedMail($user)],
             ['Client pro — demande reçue', new ProAccountRequestReceivedMail($proRequest)],
-            ['Client pro — demande approuvée', new ProAccountRequestApprovedMail($proRequest)],
+            ['Client pro — demande approuvée', new ProAccountRequestApprovedMail($proRequest, 'exemple-de-jeton')],
             ['Client pro — demande refusée', new ProAccountRequestRejectedMail($proRequest)],
             ['Admin — nouvelle demande de compte pro', new NewProAccountRequestMail($proRequest)],
             ['Client — commande prête au retrait (commerçant)', new OrderReadyForPickupMail($pickup)],

@@ -5,8 +5,14 @@ Bonjour {{ $proRequest->contact_first_name }},
 
 Bonne nouvelle : votre demande de compte professionnel{{ filled($proRequest->company_name) ? ' pour **'.$proRequest->company_name.'**' : '' }} a été acceptée.
 
-@if ($accountCreated)
-Votre compte client professionnel a été créé avec l'adresse **{{ $proRequest->email }}**. Vous allez recevoir **un second email** pour choisir votre mot de passe : c'est la dernière étape avant de pouvoir commander.
+@if ($passwordUrl)
+Votre compte client professionnel a été créé avec l'adresse **{{ $proRequest->email }}**. Dernière étape : choisissez votre mot de passe, et vous pourrez commander.
+
+@component('mail::button', ['url' => $passwordUrl])
+Choisir mon mot de passe
+@endcomponent
+
+Ce lien est valable {{ $validityMinutes }} minutes. Passé ce délai, utilisez « Mot de passe oublié ? » sur la page de connexion, avec cette même adresse email.
 @else
 Votre compte client existant (**{{ $proRequest->email }}**) est désormais un compte professionnel. Il vous suffit de vous connecter.
 
