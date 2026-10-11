@@ -451,5 +451,5 @@
 ## Correctif 11/10/2026 — demande pro approuvée → compte client
 
 - Approuver une demande `/professionnels` crée désormais le **compte client pro validé** (`ManageCustomerAccount::create`, email « choisissez votre mot de passe ») ou, si un client a déjà cet email, **bascule ce compte en pro validé** (`promoteToPro`, raison sociale/SIRET remplacés seulement s'ils sont fournis), le tout dans la même transaction que le changement de statut. La demande garde le lien (`pro_account_requests.user_id`).
-- Email d'approbation réécrit : « Votre compte professionnel est prêt » + annonce du second email (nouveau compte) ou bouton « Me connecter » (compte existant).
+- Email d'approbation réécrit, **un seul email** : « Votre compte professionnel est prêt » + bouton « Choisir mon mot de passe » (jeton Fortify créé à l'approbation, 60 min, puis « Mot de passe oublié ») pour un nouveau compte, ou bouton « Me connecter » pour un compte existant. L'adresse de la demande est recopiée dans le compte s'il n'en a pas.
 - Rattrapage : action admin « Créer le compte client » sur une demande approuvée sans compte (demandes approuvées avant le correctif), une seule fois.
