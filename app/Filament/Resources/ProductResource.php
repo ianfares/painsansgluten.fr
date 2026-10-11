@@ -99,7 +99,7 @@ class ProductResource extends Resource
                                 ->dehydrateStateUsing(fn (?string $state): int => (int) round(((float) $state) * 100)),
                             Select::make('vat_rate')
                                 ->label('Taux de TVA')
-                                ->options(['2.1' => '2,1 %', '5.5' => '5,5 %', '10' => '10 %', '20' => '20 %'])
+                                ->options(Product::VAT_RATE_OPTIONS)
                                 ->helperText('Taux légaux français — le taux applicable à ce produit reste à valider par le comptable.')
                                 ->required(),
                             TextInput::make('position')->label('Position')->numeric()->default(0),

@@ -961,3 +961,11 @@ FICHIERS : Product, CartService, CreateOrderAction, CheckoutWizard (+ vue), cata
 TESTS : 444/444 ; pint OK ; phpstan 0 erreur.
 RISQUES / À VÉRIFIER : si aucun commerçant n'est saisi en prod, un particulier ne peut pas commander un produit non expédiable (comportement voulu, message affiché).
 PROCHAINE TÂCHE SUGGÉRÉE : recette de Ian (saisir un commerçant partenaire, commander un produit non expédiable).
+
+## [2026-10-11 14:30] — Claude Opus 5.5 — Correctif : taux de TVA vide à la réouverture d'un produit
+OBJECTIF : retour client — après enregistrement, la TVA d'un produit paraissait vide en le rouvrant.
+CAUSE : le taux était bien enregistré (vérifié en préprod : 4 × 2,10, 7 × 5,50), mais le cast `decimal:2` renvoie « 5.50 » alors que la liste avait les clés « 5.5 » : aucune option ne correspondait.
+RÉALISÉ : clés alignées sur le format du cast (`Product::VAT_RATE_OPTIONS` : 2.10 / 5.50 / 10.00 / 20.00). Aucune donnée à reprendre.
+TESTS : 448/448 (+4 : réaffichage de chaque taux) ; pint OK ; phpstan 0 erreur.
+RISQUES : aucun (affichage admin uniquement ; les calculs utilisaient déjà la bonne valeur).
+PROCHAINE TÂCHE SUGGÉRÉE : recette de Ian.
