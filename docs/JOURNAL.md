@@ -991,3 +991,11 @@ RÉALISÉ : `DeliveryNotePdf::qrText()` au format de l'ancien modèle Shopify fo
 TESTS : 448/448 (tests QR réécrits : format exact, pas de retour à la ligne, troncature) ; pint OK ; phpstan 0 erreur.
 RISQUES / À VÉRIFIER : (1) les références produits du site (ex. P160 = Le Bunheur) doivent correspondre à celles de la table du fichier Excel (l'exemple Shopify montre B160 = Le Bunheur) — à vérifier par Ian ; (2) n° de commande au format C2026-00001 au lieu de 1234 : à vérifier dans l'Excel ; (3) accents dans le nom selon la configuration clavier de la scanette.
 PROCHAINE TÂCHE SUGGÉRÉE : test réel scanette + Excel par le labo.
+
+## [2026-10-12 15:00] — Claude Opus 5.5 — T22 : test GTM sur la préprod
+OBJECTIF : tester le conteneur GTM-KFK55VB8 (balise GA4 créée par Ian, consentement réglé) avant la bascule du domaine.
+RÉALISÉ : `services.gtm.enabled_outside_production` (env `GTM_ENABLED_OUTSIDE_PRODUCTION`, défaut false) ; `CookieConsent::isActive()` l'accepte hors production ; `.env.example` documenté ; test ajouté. Préprod : option activée + `GTM_ID` renseigné.
+SÉCURITÉ / RGPD : même chargement qu'en prod (consent default denied avant GTM, GTM seulement après acceptation).
+TESTS : suite complète verte ; pint OK ; phpstan 0 erreur.
+À FAIRE : remettre l'option à false sur la préprod après les tests (avant mise en prod).
+PROCHAINE TÂCHE SUGGÉRÉE : test GTM Aperçu avec Ian, puis publication du conteneur.

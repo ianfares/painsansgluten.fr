@@ -8,9 +8,11 @@ namespace App\Services\Consent;
  * Décide si le bandeau de consentement (tarteaucitron) et Google Tag Manager
  * sont actifs (T22, PLAN.md §18).
  *
- * Règle unique : production ET identifiant GTM valide renseigné. Partout ailleurs
+ * Règle : production ET identifiant GTM valide renseigné. Partout ailleurs
  * (local, tests, préprod) rien n'est chargé : pas de bandeau, pas de GTM, pas de
  * cookie tiers, et le bouton « Gérer mes préférences » est masqué.
+ * Exception volontaire : `GTM_ENABLED_OUTSIDE_PRODUCTION=true` (préprod, le temps
+ * de tester le conteneur en mode Aperçu).
  */
 final class CookieConsent
 {
@@ -34,6 +36,8 @@ final class CookieConsent
 
     public function isActive(): bool
     {
-        return app()->environment('production') && $this->gtmId() !== null;
+        $allowed = app()->environment('production') || config('services.gtm.enabled_outside_production') === true;
+
+        return $allowed && $this->gtmId() !== null;
     }
 }

@@ -55,6 +55,8 @@ return [
     // Chargé uniquement en production, après consentement (tarteaucitron).
     'gtm' => [
         'id' => env('GTM_ID'),
+        // Test sur la préprod uniquement (GTM Aperçu) : à remettre à false après les tests.
+        'enabled_outside_production' => (bool) env('GTM_ENABLED_OUTSIDE_PRODUCTION', false),
     ],
 
 ];
