@@ -55,3 +55,13 @@ test('la CSP autorise Google Tag Manager et Google Analytics', function () {
         ->toContain('https://*.google-analytics.com')
         ->toContain('https://challenges.cloudflare.com');
 });
+
+test('hors production, l\'option de test GTM charge le bandeau et GTM (préprod)', function () {
+    config(['services.gtm.id' => 'GTM-KFK55VB8', 'services.gtm.enabled_outside_production' => true]);
+
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toContain('tarteaucitron')
+        ->toContain('GTM-KFK55VB8')
+        ->toContain("gtag('consent'");
+});

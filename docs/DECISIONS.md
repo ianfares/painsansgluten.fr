@@ -478,3 +478,7 @@
 - Le labo scanne le QR avec une scanette USB dans un fichier Excel « scan BL » conçu pour l'ancien modèle Shopify. Notre QR (T27-L8) contenait un texte lisible sur plusieurs lignes : la scanette tape chaque retour à la ligne comme « Entrée », le code se répartissait sur B3…B7 et Excel ne trouvait rien.
 - Le QR reprend exactement le format Shopify, sur une seule ligne : `BL=BL-{n°}|CMD={n°}|DATE=AAAA-MM-JJ|CLIENT={prénom nom}|ART1={référence}|QTE1={qté}|…`. `|`, `=` et retours à la ligne retirés des valeurs. Au-delà de 600 octets, les derniers articles sont omis (paires complètes). « BL-{n°} » est imprimé sous le QR, comme sur Shopify.
 - `ARTn` = référence produit (`order_items.product_reference`) : elle doit correspondre aux références connues du fichier Excel.
+
+## 2026-10-12 — Option de test GTM hors production
+- Pour tester le conteneur GTM (mode Aperçu) avant la bascule du domaine : `GTM_ENABLED_OUTSIDE_PRODUCTION=true` + `GTM_ID` dans le `.env` de la préprod charge tarteaucitron + GTM comme en prod (même consentement « denied » par défaut).
+- Défaut `false` ; à remettre à `false` après les tests (les visites de préprod iraient sinon dans GA4). La préprod reste `noindex`.
