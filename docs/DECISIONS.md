@@ -482,3 +482,9 @@
 ## 2026-10-12 — Option de test GTM hors production
 - Pour tester le conteneur GTM (mode Aperçu) avant la bascule du domaine : `GTM_ENABLED_OUTSIDE_PRODUCTION=true` + `GTM_ID` dans le `.env` de la préprod charge tarteaucitron + GTM comme en prod (même consentement « denied » par défaut).
 - Défaut `false` ; à remettre à `false` après les tests (les visites de préprod iraient sinon dans GA4). La préprod reste `noindex`.
+
+## 2026-10-12 — T22 : événements e-commerce GA4 (dataLayer)
+- `App\Services\Analytics\Ecommerce` construit les données (format GA4, euros TTC, remise client déduite, `item_id` = référence). Pages : composant `<x-analytics.event>` (script inline au chargement) ; Livewire : trait `PushesAnalyticsEvents` → événement navigateur `analytics-event` → `resources/js/consent.js` pousse dans le dataLayer.
+- Rien n'est produit quand GTM est inactif. Sans consentement, GTM n'est pas chargé : les données restent dans la page.
+- `purchase` : `StripePaymentStatus` (confirmation), commande carte en état payé en BDD, drapeau `ga_purchase_sent` posé par UPDATE conditionnel (une seule fois, même en cas de rechargement ou de double onglet). Virement : pas de `purchase` en V1 (PLAN §18).
+- Piège corrigé : `dispatch()` de Livewire a déjà un paramètre `$event` ; le nom de l'événement GA4 passe dans `name`.

@@ -43,6 +43,10 @@
                 @endforeach
             </div>
 
+            @if (app(\App\Services\Analytics\Ecommerce::class)->enabled())
+                <x-analytics.event name="view_item_list" :data="app(\App\Services\Analytics\Ecommerce::class)->productList($products, auth()->user(), $activeCategory?->name ?? 'Boutique')" />
+            @endif
+
             <div class="mt-10">
                 {{ $products->links() }}
             </div>

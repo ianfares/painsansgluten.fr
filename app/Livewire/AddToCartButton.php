@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Models\Product;
+use App\Services\Analytics\Ecommerce;
 use App\Services\Cart\CartService;
 use Livewire\Component;
 
 class AddToCartButton extends Component
 {
+    use PushesAnalyticsEvents;
+
     public Product $product;
 
     public bool $withQuantity = false;
@@ -23,6 +27,7 @@ class AddToCartButton extends Component
         abort_unless($this->product->isOrderable(), 403);
 
         app(CartService::class)->add($this->product, max(1, $this->quantity));
+        $this->pushAnalytics('add_to_cart', app(Ecommerce::class)->single($this->product, auth()->user(), max(1, $this->quantity)));
 
         $this->added = true;
         $this->dispatch('cart-updated')->to(CartWidget::class);

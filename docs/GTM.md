@@ -40,9 +40,26 @@ Pour la balise `GA4 - Configuration` : **Paramètres avancés > Paramètres de c
 - La balise Google gère le consentement toute seule (elle lit `analytics_storage`). Choisir **Aucun consentement supplémentaire requis** est correct pour cette balise.
 - Pour toute autre balise ajoutée plus tard (publicité, pixel…), choisir **Exiger un consentement supplémentaire** et cocher le type voulu (`ad_storage` pour la publicité).
 
-## 4. Événements e-commerce (plus tard)
+## 4. Événements e-commerce
 
-Les événements `view_item`, `add_to_cart`, `purchase`… arriveront dans la couche de données (`dataLayer`) à une étape ultérieure de la tâche T22. Il faudra alors créer, pour chacun, un déclencheur « Événement personnalisé » et une balise « Événement Google Analytics 4 » rattachée à `G-XF6EHRRV48`. Ce guide sera complété à ce moment-là.
+Le site pousse dans le `dataLayer`, au format GA4 standard (objet `ecommerce`, montants en euros TTC, remise client déduite, `item_id` = référence produit) :
+
+| Événement | Quand |
+|---|---|
+| `view_item_list` | page boutique / catégorie |
+| `view_item` | fiche produit |
+| `add_to_cart` / `remove_from_cart` | bouton « Ajouter », changement de quantité, suppression |
+| `view_cart` | page `/panier` |
+| `begin_checkout` | ouverture du tunnel |
+| `add_shipping_info` | validation du mode de livraison (`shipping_tier`) |
+| `add_payment_info` | clic « Payer » (`payment_type`) |
+| `purchase` | page de confirmation, **carte uniquement**, quand la commande est payée en BDD, **une seule fois** (`ga_purchase_sent`) ; pas de `purchase` pour les virements (V1) |
+
+Dans GTM, une seule balise suffit pour tous :
+
+1. **Déclencheurs > Nouveau** : type **Événement personnalisé**, nom de l'événement `view_item_list|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_shipping_info|add_payment_info|purchase`, cocher **Utiliser la correspondance d'expressions régulières**. Nom : `E-commerce - tous`.
+2. **Balises > Nouvelle** : type **Google Analytics : Événement GA4**, ID de mesure `G-XF6EHRRV48`, nom de l'événement `{{Event}}`, **Plus de paramètres > Envoyer des données d'e-commerce** coché, source **Data Layer**. Déclencheur : `E-commerce - tous`. Nom : `GA4 - E-commerce`.
+3. Dans GA4 : **Administration > Événements clés** : marquer `purchase` comme événement clé (souvent déjà fait automatiquement).
 
 ## 5. Tester avant de publier
 

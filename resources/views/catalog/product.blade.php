@@ -223,4 +223,7 @@
             </div>
         @endif
     </div>
+    @if (app(\App\Services\Analytics\Ecommerce::class)->enabled())
+        <x-analytics.event name="view_item" :data="app(\App\Services\Analytics\Ecommerce::class)->single($product, auth()->user(), 1)" />
+    @endif
 </x-layouts.app>
