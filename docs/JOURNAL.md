@@ -999,3 +999,8 @@ SÉCURITÉ / RGPD : même chargement qu'en prod (consent default denied avant GT
 TESTS : suite complète verte ; pint OK ; phpstan 0 erreur.
 À FAIRE : remettre l'option à false sur la préprod après les tests (avant mise en prod).
 PROCHAINE TÂCHE SUGGÉRÉE : test GTM Aperçu avec Ian, puis publication du conteneur.
+
+## [2026-10-12 16:00] — Claude Opus 5.5 — T22 : conteneur GTM publié
+RÉALISÉ (par Ian, guidé) : balise `GA4 - Configuration` créée, consentement réglé, test Aperçu sur la préprod connecté (après désactivation de son bloqueur de pub), version « GA4 + consentement » publiée. Option `GTM_ENABLED_OUTSIDE_PRODUCTION` remise à `false` sur la préprod (GTM inactif vérifié). `docs/GTM.md` : état et pièges du mode Aperçu.
+À FAIRE : filtre « Trafic interne » GA4 en Actif ; événements e-commerce dataLayer (view_item, add_to_cart, begin_checkout, purchase) ; `GTM_ID` dans le `.env` de prod à la bascule.
+PROCHAINE TÂCHE SUGGÉRÉE : événements e-commerce GA4 (T22 suite) ou test scanette du labo.
