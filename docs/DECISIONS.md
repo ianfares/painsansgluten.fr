@@ -473,3 +473,8 @@
 - Demande de Ian : ce serveur deviendra la production ; le nom `painsansgluten_preprod` aurait prêté à confusion avec la future préprod.
 - Nouvelle base `painsansgluten` (créée en root par Ian), données copiées pendant une maintenance, nombre de lignes identique sur les 30 tables, `.env` basculé. L'ancienne base `painsansgluten_preprod` est conservée jusqu'à validation de Ian (retour arrière : remettre l'ancien nom dans `.env` + `php artisan optimize`).
 - Future préprod : sa propre base ET son propre utilisateur SQL (isolation totale des données de prod).
+
+## 2026-10-12 — QR code du bon de livraison au format de la scanette du labo
+- Le labo scanne le QR avec une scanette USB dans un fichier Excel « scan BL » conçu pour l'ancien modèle Shopify. Notre QR (T27-L8) contenait un texte lisible sur plusieurs lignes : la scanette tape chaque retour à la ligne comme « Entrée », le code se répartissait sur B3…B7 et Excel ne trouvait rien.
+- Le QR reprend exactement le format Shopify, sur une seule ligne : `BL=BL-{n°}|CMD={n°}|DATE=AAAA-MM-JJ|CLIENT={prénom nom}|ART1={référence}|QTE1={qté}|…`. `|`, `=` et retours à la ligne retirés des valeurs. Au-delà de 600 octets, les derniers articles sont omis (paires complètes). « BL-{n°} » est imprimé sous le QR, comme sur Shopify.
+- `ARTn` = référence produit (`order_items.product_reference`) : elle doit correspondre aux références connues du fichier Excel.

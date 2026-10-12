@@ -67,6 +67,7 @@
 
         <div class="qr">
             <img src="{{ $note['qr'] }}" alt="QR code du bon de livraison">
+            <p>BL-{{ $order->number }}</p>
         </div>
     </div>
 @endforeach
