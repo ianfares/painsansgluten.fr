@@ -1,5 +1,9 @@
 # Google Tag Manager et Google Analytics 4 : guide pour Ian
 
+> **État au 2026-10-12** : balise `GA4 - Configuration` (Balise Google `G-XF6EHRRV48`, déclencheur Initialization - All Pages, « aucun consentement supplémentaire ») créée et **publiée** (version « GA4 + consentement »), testée en Aperçu sur la préprod (option `GTM_ENABLED_OUTSIDE_PRODUCTION`, remise à `false` après le test). Reste : filtre « Trafic interne » GA4 à passer en Actif, événements e-commerce (§4), test final en prod (§5).
+>
+> **Mode Aperçu** : GTM n'est chargé qu'après « Tout accepter » ; accepter d'abord, puis relancer l'Aperçu. Désactiver tout bloqueur de pub (il bloque googletagmanager.com et Tag Assistant ne se connecte pas).
+
 Ce que fait déjà le site (rien à coder) :
 
 - Le site charge **Google Tag Manager (GTM)** uniquement en **production**, et **seulement si le visiteur accepte** les cookies.
