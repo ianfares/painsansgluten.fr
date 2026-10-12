@@ -49,28 +49,28 @@ test('le PDF est généré (en-tête %PDF) pour une ou plusieurs commandes', fun
     expect(app(DeliveryNotePdf::class)->render($orders))->toStartWith('%PDF');
 });
 
-test('le texte du QR reprend commande, date, client, adresse et lignes', function () {
-    $order = paidOrderWithItems(['delivery_method' => DeliveryMethod::MerchantPickup]);
-    $text = app(DeliveryNotePdf::class)->qrText($order);
+test('le QR suit le format de la scanette (ancien modèle Shopify) : une seule ligne BL|CMD|DATE|CLIENT|ARTn|QTEn', function () {
+    $order = paidOrderWithItems();
+    $order->forceFill(['first_name' => 'Jeanne', 'last_name' => 'Du|Pont='])->save();
+    $text = app(DeliveryNotePdf::class)->qrText($order->fresh());
 
-    expect($text)->toContain($order->number)
-        ->toContain($order->created_at->format('d/m/Y'))
-        ->toContain($order->last_name)
-        ->toContain('3 avenue de la République')
-        ->toContain(DeliveryMethod::MerchantPickup->label());
-    foreach ($order->items as $item) {
-        expect($text)->toContain($item->quantity.' x '.$item->product_name);
+    $expected = 'BL=BL-'.$order->number.'|CMD='.$order->number.'|DATE='.$order->created_at->timezone('Europe/Paris')->format('Y-m-d').'|CLIENT=Jeanne Du Pont';
+    foreach ($order->items->values() as $i => $item) {
+        $expected .= '|ART'.($i + 1).'='.$item->product_reference.'|QTE'.($i + 1).'='.$item->quantity;
     }
+
+    expect($text)->toBe($expected)
+        ->not->toContain("\n");
 });
 
-test('le QR est tronqué quand il y a trop de produits, mais garde n° de commande et adresse', function () {
+test('trop de produits : le QR garde l\'en-tête et des paires ART/QTE complètes, sans dépasser la limite', function () {
     $order = paidOrderWithItems([], 40);
     $text = app(DeliveryNotePdf::class)->qrText($order);
 
     expect(strlen($text))->toBeLessThanOrEqual(600)
-        ->and($text)->toContain($order->number)
-        ->toContain('3 avenue de la République')
-        ->toEndWith('... (voir BL)');
+        ->and($text)->toStartWith('BL=BL-'.$order->number.'|CMD='.$order->number)
+        ->toMatch('/\|QTE\d+=\d+$/')
+        ->and(substr_count($text, '|ART'))->toBe(substr_count($text, '|QTE'));
 });
 
 test('l\'action est visible pour une commande payée et masquée sinon', function () {

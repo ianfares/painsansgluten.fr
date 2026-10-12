@@ -983,3 +983,11 @@ OBJECTIF : demande de Ian — remplacer « Des pains qui se congèlent tranchés
 RÉALISÉ : texte du 3e engagement de `components/site/reassurance` (début en gras) ; test catalogue adapté. Aucune nouvelle affirmation (pas de durée de congélation).
 TESTS : 448/448 ; pint OK.
 PROCHAINE TÂCHE SUGGÉRÉE : recette de Ian.
+
+## [2026-10-12 14:10] — Claude Opus 5.5 — Correctif : QR code du BL lisible par la scanette Excel du labo
+OBJECTIF : retour client — depuis le nouveau site, la scanette ne remplit plus les bonnes cases du fichier Excel « scan BL ».
+CAUSE : QR multi-lignes (texte lisible) ; chaque retour à la ligne = « Entrée » de la scanette → contenu éclaté sur plusieurs cellules, format inconnu d'Excel.
+RÉALISÉ : `DeliveryNotePdf::qrText()` au format de l'ancien modèle Shopify fourni par la cliente (une ligne, `BL=…|CMD=…|DATE=…|CLIENT=…|ARTn=référence|QTEn=qté`) ; nettoyage des séparateurs dans les valeurs ; troncature par paires complètes ; « BL-{n°} » sous le QR.
+TESTS : 448/448 (tests QR réécrits : format exact, pas de retour à la ligne, troncature) ; pint OK ; phpstan 0 erreur.
+RISQUES / À VÉRIFIER : (1) les références produits du site (ex. P160 = Le Bunheur) doivent correspondre à celles de la table du fichier Excel (l'exemple Shopify montre B160 = Le Bunheur) — à vérifier par Ian ; (2) n° de commande au format C2026-00001 au lieu de 1234 : à vérifier dans l'Excel ; (3) accents dans le nom selon la configuration clavier de la scanette.
+PROCHAINE TÂCHE SUGGÉRÉE : test réel scanette + Excel par le labo.

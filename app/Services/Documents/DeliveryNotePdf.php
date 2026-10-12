@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Documents;
 
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Settings\ShopSettings;
 use BaconQrCode\Common\ErrorCorrectionLevel;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
@@ -84,37 +83,41 @@ class DeliveryNotePdf
     }
 
     /**
-     * Texte encodé dans le QR. Le n° de commande, le client et l'adresse sont
-     * toujours présents ; la liste des produits est tronquée si besoin.
+     * Texte encodé dans le QR, au format lu par le fichier Excel « scan BL » du
+     * labo (le même que l'ancien modèle Shopify) : UNE seule ligne, sans retour
+     * à la ligne (la scanette les tape comme « Entrée » et éclate le code sur
+     * plusieurs cellules) :
+     *   BL=BL-{n°}|CMD={n°}|DATE=AAAA-MM-JJ|CLIENT={nom}|ART1={réf}|QTE1={qté}|ART2=…
+     * Si la commande a trop de lignes, les derniers articles sont omis (paires
+     * ART/QTE complètes uniquement) : n° de commande, date et client restent.
      */
     public function qrText(Order $order): string
     {
         $order->loadMissing('items');
 
-        $head = implode("\n", [
-            'Bon de livraison '.$order->number,
-            'Date : '.$order->created_at->timezone('Europe/Paris')->format('d/m/Y'),
-            'Client : '.$order->first_name.' '.$order->last_name.' - '.$order->phone,
-            'Livraison : '.$order->delivery_method->label().' - '.$this->deliveryAddress($order),
+        $text = implode('|', [
+            'BL=BL-'.$this->qrValue($order->number),
+            'CMD='.$this->qrValue($order->number),
+            'DATE='.$order->created_at->timezone('Europe/Paris')->format('Y-m-d'),
+            'CLIENT='.$this->qrValue($order->first_name.' '.$order->last_name),
         ]);
 
-        $lines = $order->items->map(fn (OrderItem $item): string => $item->quantity.' x '.$item->product_name)->all();
-
-        $full = $head."\n".implode("\n", $lines);
-        if (strlen($full) <= self::QR_MAX_BYTES) {
-            return $full;
-        }
-
-        $marker = "\n... (voir BL)";
-        $text = $head;
-        foreach ($lines as $line) {
-            if (strlen($text."\n".$line.$marker) > self::QR_MAX_BYTES) {
+        foreach ($order->items->values() as $index => $item) {
+            $n = $index + 1;
+            $pair = '|ART'.$n.'='.$this->qrValue($item->product_reference).'|QTE'.$n.'='.$item->quantity;
+            if (strlen($text.$pair) > self::QR_MAX_BYTES) {
                 break;
             }
-            $text .= "\n".$line;
+            $text .= $pair;
         }
 
-        return $text.$marker;
+        return $text;
+    }
+
+    /** Valeur sans séparateur (« | », « = ») ni retour à la ligne, pour ne pas casser la lecture d'Excel. */
+    private function qrValue(string $value): string
+    {
+        return trim((string) preg_replace('/\s+/', ' ', str_replace(['|', '='], ' ', $value)));
     }
 
     private function qrSvgDataUri(string $text): string
