@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Models\CartItem;
+use App\Services\Analytics\Ecommerce;
 use App\Services\Cart\CartService;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -16,6 +18,8 @@ use Livewire\Component;
  */
 class CartWidget extends Component
 {
+    use PushesAnalyticsEvents;
+
     /** Affiché sur la page /panier (pas dans le tiroir) : pas de lien « Voir mon panier ». */
     #[Locked]
     public bool $onCartPage = false;
@@ -30,7 +34,9 @@ class CartWidget extends Component
         $item = CartItem::query()->findOrFail($itemId);
         $this->authorizeItem($item);
 
+        $before = $item->quantity;
         app(CartService::class)->updateQuantity($item, $quantity);
+        $this->pushQuantityChange($item, $before, (int) (CartItem::query()->whereKey($item->id)->value('quantity') ?? 0));
     }
 
     public function removeItem(int $itemId): void
@@ -38,7 +44,22 @@ class CartWidget extends Component
         $item = CartItem::query()->findOrFail($itemId);
         $this->authorizeItem($item);
 
+        $before = $item->quantity;
         app(CartService::class)->remove($item);
+        $this->pushQuantityChange($item, $before, 0);
+    }
+
+    /** add_to_cart / remove_from_cart selon le sens du changement de quantité. */
+    private function pushQuantityChange(CartItem $item, int $before, int $after): void
+    {
+        if ($after === $before || $item->product === null) {
+            return;
+        }
+
+        $this->pushAnalytics(
+            $after > $before ? 'add_to_cart' : 'remove_from_cart',
+            app(Ecommerce::class)->single($item->product, auth()->user(), abs($after - $before)),
+        );
     }
 
     #[On('cart-updated')]

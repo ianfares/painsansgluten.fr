@@ -7,9 +7,11 @@ namespace App\Livewire;
 use App\Actions\Orders\CreateOrderAction;
 use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
+use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Mail\Admin\NewBankTransferOrderMail;
 use App\Mail\BankTransferInstructionsMail;
 use App\Models\CartItem;
+use App\Services\Analytics\Ecommerce;
 use App\Services\Cart\CartService;
 use App\Services\Mail\AdminMailer;
 use App\Services\Shipping\DeliveryOptions;
@@ -36,6 +38,8 @@ use RuntimeException;
  */
 class CheckoutWizard extends Component
 {
+    use PushesAnalyticsEvents;
+
     /** Modifiée uniquement côté serveur (goToStep), jamais par le navigateur. */
     #[Locked]
     public int $step = 1;
@@ -106,6 +110,8 @@ class CheckoutWizard extends Component
             $this->deliveryChoice = ''; // Chronopost impossible : le client choisit un retrait
         }
 
+        $this->pushAnalytics('begin_checkout', $this->analyticsCart());
+
         if (Auth::check()) {
             $user = Auth::user();
             $this->email = $user->email;
@@ -140,6 +146,10 @@ class CheckoutWizard extends Component
 
         if ($step === 3 && $this->resolveDelivery() === null) {
             return;
+        }
+
+        if ($step === 3 && $this->step === 2) {
+            $this->pushAnalytics('add_shipping_info', $this->analyticsCart() + ['shipping_tier' => $this->selectedDeliveryMethod()->label()]);
         }
 
         $this->step = $step;
@@ -240,6 +250,14 @@ class CheckoutWizard extends Component
         };
     }
 
+    /** @return array<string, mixed> panier au format GA4 (T22) */
+    private function analyticsCart(): array
+    {
+        $cartService = app(CartService::class);
+
+        return app(Ecommerce::class)->cart($cartService->validItems($cartService->currentCart())['items'], Auth::user());
+    }
+
     /** Un produit non expédiable dans le panier : Chronopost n'est pas proposé. */
     private function cartIsPickupOnly(): bool
     {
@@ -334,6 +352,8 @@ class CheckoutWizard extends Component
             return;
         }
         RateLimiter::hit($limiterKey, 600);
+
+        $this->pushAnalytics('add_payment_info', $this->analyticsCart() + ['payment_type' => $this->paymentMethod === 'stripe' ? 'Carte bancaire' : 'Virement']);
 
         $this->submitting = true;
 

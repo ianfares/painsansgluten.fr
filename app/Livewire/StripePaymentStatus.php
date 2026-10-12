@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Models\Order;
+use App\Services\Analytics\Ecommerce;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -15,6 +17,8 @@ use Livewire\Component;
  */
 class StripePaymentStatus extends Component
 {
+    use PushesAnalyticsEvents;
+
     public const MAX_POLLS = 15;
 
     #[Locked]
@@ -25,9 +29,16 @@ class StripePaymentStatus extends Component
     public function render()
     {
         $this->polls++;
+        $order = Order::query()->where('token', $this->token)->firstOrFail();
+
+        // GA4 `purchase` : une seule fois, dès que la BDD dit « payée » (T22).
+        $purchase = app(Ecommerce::class)->claimPurchase($order);
+        if ($purchase !== null) {
+            $this->pushAnalytics('purchase', $purchase);
+        }
 
         return view('livewire.stripe-payment-status', [
-            'order' => Order::query()->where('token', $this->token)->firstOrFail(),
+            'order' => $order,
             'keepPolling' => $this->polls < self::MAX_POLLS,
         ]);
     }

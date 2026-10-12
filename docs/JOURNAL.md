@@ -1004,3 +1004,12 @@ PROCHAINE TÂCHE SUGGÉRÉE : test GTM Aperçu avec Ian, puis publication du con
 RÉALISÉ (par Ian, guidé) : balise `GA4 - Configuration` créée, consentement réglé, test Aperçu sur la préprod connecté (après désactivation de son bloqueur de pub), version « GA4 + consentement » publiée. Option `GTM_ENABLED_OUTSIDE_PRODUCTION` remise à `false` sur la préprod (GTM inactif vérifié). `docs/GTM.md` : état et pièges du mode Aperçu.
 À FAIRE : filtre « Trafic interne » GA4 en Actif ; événements e-commerce dataLayer (view_item, add_to_cart, begin_checkout, purchase) ; `GTM_ID` dans le `.env` de prod à la bascule.
 PROCHAINE TÂCHE SUGGÉRÉE : événements e-commerce GA4 (T22 suite) ou test scanette du labo.
+
+## [2026-10-12 17:00] — Claude Opus 5.5 — T22 : événements e-commerce GA4
+OBJECTIF : demande de Ian (« active tout, même sur la préprod ») : GTM réactivé sur la préprod + événements e-commerce.
+RÉALISÉ : view_item_list, view_item, add_to_cart, remove_from_cart, view_cart, begin_checkout, add_shipping_info, add_payment_info, purchase (cf. docs/GTM.md §4). Préprod : `GTM_ENABLED_OUTSIDE_PRODUCTION=true` (les visites de préprod vont dans GA4, accepté par Ian).
+FICHIERS : app/Services/Analytics/Ecommerce.php, app/Livewire/Concerns/PushesAnalyticsEvents.php, components/analytics/event, AddToCartButton, CartWidget, CheckoutWizard, StripePaymentStatus, catalog/boutique|product|panier, resources/js/consent.js, CartService (commentaire), tests Consent/EcommerceEventsTest (9 tests).
+SÉCURITÉ / RGPD : aucune donnée personnelle dans le dataLayer (n° de commande, produits, montants) ; JSON échappé (JSON_HEX_*) ; rien sans GTM actif ni consentement.
+TESTS : 458/458 ; pint OK ; phpstan 0 erreur ; vérification navigateur locale (view_item puis add_to_cart dans le dataLayer).
+À FAIRE (Ian, guidé) : déclencheur + balise « GA4 - E-commerce » dans GTM, publication ; remettre l'option préprod à false avant la mise en prod.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements, test Aperçu d'un achat Stripe test.

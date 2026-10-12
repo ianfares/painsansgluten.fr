@@ -86,7 +86,25 @@ function bindManagerButtons() {
     });
 }
 
+/**
+ * Événements e-commerce envoyés par Livewire (ajout/retrait panier, étapes du
+ * tunnel, achat) : poussés dans le dataLayer au format GA4. Le serveur n'en
+ * envoie que si GTM est actif ; GTM ne lit le dataLayer qu'après consentement.
+ */
+function bindAnalyticsEvents() {
+    window.addEventListener('analytics-event', (e) => {
+        const { name, ecommerce } = e.detail || {};
+        if (!name || !ecommerce) {
+            return;
+        }
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({ event: name, ecommerce });
+    });
+}
+
 function boot() {
+    bindAnalyticsEvents();
     bindManagerButtons();
     // tarteaucitron.min.js est chargé en `defer` avant ce module : il est déjà défini ici.
     initConsent();

@@ -5,6 +5,11 @@
 
         <livewire:cart-widget :on-cart-page="true" />
 
+        @if (app(\App\Services\Analytics\Ecommerce::class)->enabled())
+            @php($cartService = app(\App\Services\Cart\CartService::class))
+            <x-analytics.event name="view_cart" :data="app(\App\Services\Analytics\Ecommerce::class)->cart($cartService->validItems($cartService->currentCart())['items'], auth()->user())" />
+        @endif
+
         <a href="{{ route('boutique.index') }}" class="mt-6 inline-block text-sm text-ink-muted hover:text-sage">← Continuer mes achats</a>
     </div>
 </x-layouts.app>

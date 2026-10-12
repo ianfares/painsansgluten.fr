@@ -119,7 +119,8 @@ class CartService
     }
 
     /**
-     * Lignes valides (produit publié, disponible, expédiable). Les lignes
+     * Lignes valides (produit publié et disponible ; un produit non expédiable
+     * reste valide, en retrait uniquement). Les lignes
      * devenues invalides sont retirées silencieusement du panier
      * (PLAN.md §7) ; leurs noms sont retournés pour affichage d'un message.
      *

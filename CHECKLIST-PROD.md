@@ -53,7 +53,7 @@
 - [ ] Pied de page « Gérer mes préférences » : clic → le panneau tarteaucitron s'ouvre (aussi juste après le chargement de la page) ; accepter → cookies `_ga` posés ; rouvrir et refuser → `_ga` supprimés / `analytics_storage` repasse à `denied` (GTM Preview ou `dataLayer` en console)
 - [ ] Préprod/local : aucun bandeau ni bouton « Gérer mes préférences », aucun appel à googletagmanager.com
 - [ ] Console navigateur sans erreur CSP bloquante liée à GTM/GA4 (la CSP est en report-only)
-- [ ] GTM Preview : événements e-commerce présents, `purchase` unique
+- [ ] GTM Preview : événements e-commerce présents, `purchase` unique — remettre `GTM_ENABLED_OUTSIDE_PRODUCTION=false` sur la préprod avant la prod
 - [ ] Sitemap valide, robots préprod = `Disallow`, `X-Robots-Tag: noindex` en préprod
 - [ ] 301 Shopify : tester chaque ligne de PLAN §23 (`curl -sI https://…/collections/all`)
 - [ ] Accès à la commande / facture d'un autre client → refusé
