@@ -1021,3 +1021,11 @@ FICHIERS : resources/views/catalog/product.blade.php, tests/Feature/Catalog/Prod
 SÉCURITÉ : aucune nouvelle donnée affichée ; description longue toujours rendue comme avant (HTML de l'admin).
 TESTS : tests Catalog 30/30 ; pint OK ; phpstan 0 erreur ; vérification navigateur locale (fermé par défaut, Plus… ouvre, Moins referme).
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-13 09:30] — Claude Opus 5.5 — Admin catégories : description plus longue
+OBJECTIF : Ian bloqué par la limite de 500 caractères du « Texte de présentation » des catégories.
+RÉALISÉ : limite portée à 10 000 caractères (colonne `text` en base, aucune migration), champ agrandi (8 lignes). La meta description reste coupée à 160 caractères par le layout.
+FICHIERS : app/Filament/Resources/CategoryResource.php, tests/Feature/Catalog/CategoryResourceTest.php (+1 test).
+SÉCURITÉ : affichage inchangé (`nl2br(e(...))`, texte échappé).
+TESTS : Catalog 31/31 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
