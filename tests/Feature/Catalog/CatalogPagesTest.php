@@ -89,3 +89,13 @@ test('les pages de compte utilisent le gabarit du site (en-tête et pied de page
         $this->get(route($route))->assertOk()->assertSee('auth-card', false)->assertSee('Mon Sans Gluten by Angélique');
     }
 });
+
+test('le menu du haut propose « Professionnels » juste après la dernière catégorie (ordinateur et mobile)', function () {
+    Category::factory()->create(['name' => 'Biscuits', 'is_active' => true]);
+
+    $html = $this->get('/')->assertOk()->getContent();
+    $link = '<a href="'.route('pro.request.create').'"';
+
+    expect(substr_count($html, $link))->toBeGreaterThanOrEqual(2)
+        ->and($html)->toMatch('/Biscuits\s*<\/a>\s*<a href="'.preg_quote(route('pro.request.create'), '/').'"[^>]*>\s*<span aria-hidden="true">💼<\/span>\s*Professionnels/');
+});
