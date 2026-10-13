@@ -1045,3 +1045,11 @@ FICHIERS : app/Models/Category.php, app/Filament/Resources/CategoryResource.php,
 SÉCURITÉ : affichage `{!! !!}` uniquement d'un HTML purifié (liste blanche) ou d'un texte échappé ; test : `<script>` retiré.
 TESTS : 462/462 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-13 11:00] — Claude Opus 5.5 — Admin : encadré Filament retiré, date et heure en haut
+OBJECTIF : demande de Ian : retirer l'encadré « Filament / Documentation / GitHub » du tableau de bord et afficher la date et l'heure dans la barre du haut.
+RÉALISÉ : `FilamentInfoWidget` retiré du panneau ; render hook `USER_MENU_BEFORE` → vue `filament/topbar-clock` (date et heure Europe/Paris, rendue par le serveur puis mise à jour toutes les 30 s par Alpine ; masquée sur très petit écran).
+FICHIERS : app/Providers/Filament/AdminPanelProvider.php, resources/views/filament/topbar-clock.blade.php, tests/Feature/Admin/DashboardTopbarTest.php.
+SÉCURITÉ : aucune donnée affichée hors date/heure.
+TESTS : Admin 21/21 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
