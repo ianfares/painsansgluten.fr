@@ -18,7 +18,7 @@
 ## Catégories
 
 @foreach ($categories as $category)
-- [{!! $category->name !!}]({!! route('content.show', $category) !!})@if ($category->description): {!! \Illuminate\Support\Str::limit($category->description, 200) !!}@endif
+- [{!! $category->name !!}]({!! route('content.show', $category) !!})@if ($category->description): {!! $seo->plainText($category->description, 200) !!}@endif
 
 @endforeach
 

@@ -1037,3 +1037,11 @@ FICHIERS : resources/views/components/site/header.blade.php, tests/Feature/Catal
 SÉCURITÉ : simple lien vers une route publique existante.
 TESTS : 460/460 ; pint OK.
 PROCHAINE TÂCHE SUGGÉRÉE : mise en forme du texte de présentation des catégories (demande de Ian).
+
+## [2026-10-13 10:30] — Claude Opus 5.5 — Catégories : texte de présentation mis en forme
+OBJECTIF : demande de Ian : pouvoir mettre en forme le texte de présentation des catégories.
+RÉALISÉ : RichEditor (gras, italique, souligné, lien, titres H2/H3, listes, annuler/rétablir ; pas d'images) ; HTML purifié à l'écriture (Purifier, comme la description produit) ; affichage `prose` sur la page catégorie via `Category::descriptionHtml()` (ancien texte brut : échappé + retours à la ligne conservés, aucune migration de données) ; meta description et llms.txt en texte simple (`plainText`).
+FICHIERS : app/Models/Category.php, app/Filament/Resources/CategoryResource.php, resources/views/catalog/boutique.blade.php, resources/views/seo/llms.blade.php, tests/Feature/Catalog/CatalogPagesTest.php (+2 tests).
+SÉCURITÉ : affichage `{!! !!}` uniquement d'un HTML purifié (liste blanche) ou d'un texte échappé ; test : `<script>` retiré.
+TESTS : 462/462 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).

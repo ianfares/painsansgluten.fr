@@ -6,9 +6,11 @@ namespace App\Models;
 
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Mews\Purifier\Facades\Purifier;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -45,6 +47,33 @@ class Category extends Model implements HasMedia
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Texte de présentation édité en RichEditor (BO) et affiché via `{!! !!}` :
+     * purifié à l'écriture (liste blanche, QUALITE.md §2.3), comme la
+     * description produit. Un ancien texte brut (sans balise) est gardé tel quel.
+     *
+     * @return Attribute<?string, ?string>
+     */
+    protected function description(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?string => $value,
+            set: fn (?string $value): ?string => $value !== null && $value !== strip_tags($value) ? Purifier::clean($value) : $value,
+        );
+    }
+
+    /** HTML sûr à afficher : HTML purifié, ou texte brut échappé avec ses retours à la ligne. */
+    public function descriptionHtml(): ?string
+    {
+        $description = $this->description;
+
+        if ($description === null || trim($description) === '') {
+            return null;
+        }
+
+        return $description === strip_tags($description) ? nl2br(e($description)) : $description;
     }
 
     /**

@@ -2,7 +2,7 @@
     $seoData = app(\App\Services\Seo\StructuredData::class);
     $seoTitle = $activeCategory?->seo_title ?: $title;
     $seoDescription = $activeCategory
-        ? ($activeCategory->seo_description ?: $activeCategory->description ?: "{$activeCategory->name} 100 % sans gluten, fabriqués à la commande à Avranches et livrés en point relais Chronopost.")
+        ? ($activeCategory->seo_description ?: $seoData->plainText($activeCategory->description) ?: "{$activeCategory->name} 100 % sans gluten, fabriqués à la commande à Avranches et livrés en point relais Chronopost.")
         : 'Pains, viennoiseries, pâtisseries et biscuits 100 % sans gluten, fabriqués à la commande à Avranches et livrés en point relais Chronopost.';
     $seoSchema = $activeCategory
         ? [$seoData->breadcrumb([['label' => $activeCategory->name, 'url' => route('content.show', $activeCategory)]])]
@@ -15,8 +15,8 @@
 
         <h1 class="mb-6 text-2xl font-semibold text-ink">{{ $title }}</h1>
 
-        @if ($activeCategory?->description)
-            <p class="-mt-2 mb-8 max-w-3xl text-sm leading-relaxed text-ink-muted">{!! nl2br(e($activeCategory->description)) !!}</p>
+        @if ($activeCategory?->descriptionHtml())
+            <div class="prose prose-sm -mt-2 mb-8 max-w-3xl leading-relaxed text-ink-muted">{!! $activeCategory->descriptionHtml() !!}</div>
         @endif
 
         <div class="mb-8 flex flex-wrap gap-2">

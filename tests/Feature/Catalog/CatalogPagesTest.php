@@ -99,3 +99,30 @@ test('le menu du haut propose « Professionnels » juste après la dernière cat
     expect(substr_count($html, $link))->toBeGreaterThanOrEqual(2)
         ->and($html)->toMatch('/Biscuits\s*<\/a>\s*<a href="'.preg_quote(route('pro.request.create'), '/').'"[^>]*>\s*<span aria-hidden="true">💼<\/span>\s*Professionnels/');
 });
+
+test('texte de présentation mis en forme : gras et listes affichés, script retiré, meta description en texte simple', function () {
+    $category = Category::factory()->create([
+        'is_active' => true,
+        'slug' => 'pains-mis-en-forme',
+        'description' => '<p>Nos <strong>pains</strong> du jour</p><ul><li>Campagne</li></ul><script>alert(1)</script>',
+    ]);
+
+    expect($category->fresh()->description)->not->toContain('<script>');
+
+    $html = $this->get(route('content.show', $category))->assertOk()->getContent();
+
+    expect($html)->toContain('Nos <strong>pains</strong> du jour')
+        ->and($html)->toContain('<li>Campagne</li>')
+        ->and($html)->not->toContain('alert(1)')
+        ->and($html)->toContain('<meta name="description" content="Nos pains du jour Campagne">');
+});
+
+test('un ancien texte de présentation sans mise en forme garde ses retours à la ligne et reste échappé', function () {
+    $category = Category::factory()->create([
+        'is_active' => true,
+        'slug' => 'pains-texte-brut',
+        'description' => "Ligne 1 & co\nLigne 2",
+    ]);
+
+    expect($category->descriptionHtml())->toBe("Ligne 1 &amp; co<br />\nLigne 2");
+});
