@@ -96,26 +96,22 @@
             <div class="flex flex-col gap-4">
                 <h1 class="text-2xl font-semibold text-ink">{{ $product->name }}</h1>
 
-                @if ($product->short_description)
+                @if ($product->short_description && $product->description)
+                    {{-- Retour d'Angélique : « Plus… » à la fin du texte court ouvre la description longue juste en dessous. --}}
+                    <div x-data="{ open: false }" class="flex flex-col gap-3">
+                        <p class="text-ink-muted">
+                            {{ $product->short_description }}
+                            <button type="button" x-show="! open" x-on:click="open = true" aria-controls="product-description" x-bind:aria-expanded="open" class="font-semibold text-sage-dark underline underline-offset-2 hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage">Plus…</button>
+                        </p>
+                        <div id="product-description" x-show="open" x-cloak class="prose max-w-none text-ink">
+                            {!! $product->description !!}
+                            <button type="button" x-on:click="open = false" class="not-prose font-semibold text-sage-dark underline underline-offset-2 hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage">Moins</button>
+                        </div>
+                    </div>
+                @elseif ($product->short_description)
                     <p class="text-ink-muted">{{ $product->short_description }}</p>
-                @endif
-
-                @if ($product->description)
-                    @if ($product->short_description)
-                        <details class="group text-ink">
-                            {{-- Bouton bien visible (retour de Ian) : « Lire la suite » fermé, « Réduire » ouvert. --}}
-                            <summary class="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-sage bg-sage/10 px-4 py-2 text-base font-semibold text-sage-dark transition hover:bg-sage hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage [&::-webkit-details-marker]:hidden">
-                                <span class="group-open:hidden">Lire la suite</span>
-                                <span class="hidden group-open:inline">Réduire</span>
-                                <svg class="h-5 w-5 shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                                    <path d="M5 8l5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </summary>
-                            <div class="prose max-w-none pt-3 text-ink">{!! $product->description !!}</div>
-                        </details>
-                    @else
-                        <div class="prose prose-sm max-w-none">{!! $product->description !!}</div>
-                    @endif
+                @elseif ($product->description)
+                    <div class="prose prose-sm max-w-none">{!! $product->description !!}</div>
                 @endif
 
                 <div>

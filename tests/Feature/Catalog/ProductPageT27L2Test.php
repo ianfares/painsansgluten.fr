@@ -39,17 +39,17 @@ test('sans poids net, la fiche n\'affiche ni poids ni prix au kilo', function ()
         ->assertDontSee('€/kg');
 });
 
-test('la description longue se déplie sous la description courte, fermée par défaut', function () {
+test('« Plus… » à la fin de la description courte ouvre la description longue, fermée par défaut', function () {
     $product = Product::factory()->create([
         'is_published' => true, 'short_description' => 'Courte', 'description' => '<p>Longue</p>',
     ]);
 
     $html = $this->get(route('products.show', $product))->assertOk()->getContent();
 
-    expect($html)->toMatch('/Courte.*<details class="group text-ink">.*<summary.*Lire la suite.*<p>Longue<\/p>/s')
-        ->and($html)->not->toContain('<details open class="group text-ink">')
-        ->and($html)->toContain('group-open:inline">Réduire</span>')
-        ->and($html)->not->toContain('<h2>Description</h2>');
+    expect($html)->toMatch('/Courte\s*<button[^>]*x-on:click="open = true"[^>]*>Plus…<\/button>\s*<\/p>/')
+        ->and($html)->toMatch('/<div id="product-description" x-show="open" x-cloak[^>]*>\s*<p>Longue<\/p>/')
+        ->and($html)->toContain('>Moins</button>')
+        ->and($html)->not->toContain('Lire la suite');
 });
 
 test('sans description courte, la description longue s\'affiche directement', function () {
@@ -60,5 +60,5 @@ test('sans description courte, la description longue s\'affiche directement', fu
     $html = $this->get(route('products.show', $product))->assertOk()->getContent();
 
     expect($html)->toContain('<p>Longue seule</p>')
-        ->and($html)->not->toContain('Lire la suite');
+        ->and($html)->not->toContain('Plus…');
 });
