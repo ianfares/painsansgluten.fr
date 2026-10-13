@@ -93,6 +93,10 @@
                     {{ $category->name }}
                 </a>
             @endforeach
+            <a href="{{ route('pro.request.create') }}" class="flex items-center gap-1.5 text-sm font-medium text-ink hover:text-sage">
+                <span aria-hidden="true">💼</span>
+                Professionnels
+            </a>
         </div>
     </div>
 
@@ -116,6 +120,10 @@
                     {{ $category->name }}
                 </a>
             @endforeach
+            <a href="{{ route('pro.request.create') }}" class="flex items-center gap-2 text-ink hover:text-sage">
+                <span aria-hidden="true">💼</span>
+                Professionnels
+            </a>
         </nav>
     </div>
 </header>

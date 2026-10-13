@@ -1029,3 +1029,11 @@ FICHIERS : app/Filament/Resources/CategoryResource.php, tests/Feature/Catalog/Ca
 SÉCURITÉ : affichage inchangé (`nl2br(e(...))`, texte échappé).
 TESTS : Catalog 31/31 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-13 10:00] — Claude Opus 5.5 — Menu : lien « Professionnels »
+OBJECTIF : demande de Ian : lien « Professionnels » avec icône juste après « Biscuits » dans le menu du haut, vers le formulaire /professionnels.
+RÉALISÉ : lien 💼 Professionnels (même style d'icône emoji que les catégories) après la dernière catégorie, menu ordinateur et menu mobile, vers `pro.request.create`.
+FICHIERS : resources/views/components/site/header.blade.php, tests/Feature/Catalog/CatalogPagesTest.php (+1 test).
+SÉCURITÉ : simple lien vers une route publique existante.
+TESTS : 460/460 ; pint OK.
+PROCHAINE TÂCHE SUGGÉRÉE : mise en forme du texte de présentation des catégories (demande de Ian).
