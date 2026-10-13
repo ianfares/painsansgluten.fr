@@ -39,3 +39,14 @@ test('deux catégories ne peuvent pas partager le même slug', function () {
         ->call('create')
         ->assertHasFormErrors(['slug']);
 });
+
+test('le texte de présentation accepte un long texte (plus de 500 caractères)', function () {
+    $long = str_repeat('Pains sans gluten fabriqués à la commande. ', 60); // ~2 600 caractères
+
+    Livewire::test(CreateCategory::class)
+        ->fillForm(['name' => 'Pains', 'slug' => 'pains', 'description' => $long])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Category::query()->where('slug', 'pains')->value('description'))->toBe($long);
+});

@@ -49,7 +49,7 @@ class CategoryResource extends Resource
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
-                Textarea::make('description')->label('Texte de présentation')->helperText('Affiché sous le titre de la catégorie : utile pour Google et les assistants IA.')->rows(4)->maxLength(500),
+                Textarea::make('description')->label('Texte de présentation')->helperText('Affiché sous le titre de la catégorie : utile pour Google et les assistants IA.')->rows(8)->maxLength(10000),
                 TextInput::make('seo_title')->label('Title SEO')->maxLength(255),
                 TextInput::make('seo_description')->label('Description SEO')->maxLength(300),
                 Toggle::make('is_active')->label('Active')->default(true),
