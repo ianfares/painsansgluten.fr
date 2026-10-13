@@ -1013,3 +1013,11 @@ SÉCURITÉ / RGPD : aucune donnée personnelle dans le dataLayer (n° de command
 TESTS : 458/458 ; pint OK ; phpstan 0 erreur ; vérification navigateur locale (view_item puis add_to_cart dans le dataLayer).
 À FAIRE (Ian, guidé) : déclencheur + balise « GA4 - E-commerce » dans GTM, publication ; remettre l'option préprod à false avant la mise en prod.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements, test Aperçu d'un achat Stripe test.
+
+## [2026-10-13 09:00] — Claude Opus 5.5 — Fiche produit : lien « Plus… »
+OBJECTIF : retour d'Angélique : le bouton « Lire la suite » laissait croire qu'il fallait descendre ; elle veut « Plus… » à la fin de la description courte, qui ouvre la description longue.
+RÉALISÉ : lien « Plus… » en fin de description courte (Alpine, déjà fourni par Livewire) ; la description longue s'ouvre juste en dessous, avec « Moins » à la fin pour refermer. Sans description courte : description longue affichée directement (inchangé).
+FICHIERS : resources/views/catalog/product.blade.php, tests/Feature/Catalog/ProductPageT27L2Test.php.
+SÉCURITÉ : aucune nouvelle donnée affichée ; description longue toujours rendue comme avant (HTML de l'admin).
+TESTS : tests Catalog 30/30 ; pint OK ; phpstan 0 erreur ; vérification navigateur locale (fermé par défaut, Plus… ouvre, Moins referme).
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
