@@ -22,3 +22,6 @@ Schedule::command('orders:process-bank-transfer-deadlines')->hourly();
 // File d'attente (factures, emails) traitée par le cron, sans superviseur :
 // le plus simple sur un seul serveur (voir docs/DECISIONS.md, T14).
 Schedule::command('queue:work --stop-when-empty --max-time=55')->everyMinute()->withoutOverlapping();
+
+// Détection d'intrusion : code comparé à la référence du déploiement, email à support@yafar.org si différence (14/10/2026).
+Schedule::command('security:integrity-check')->hourly()->withoutOverlapping();

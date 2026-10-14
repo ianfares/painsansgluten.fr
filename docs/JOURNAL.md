@@ -1053,3 +1053,12 @@ FICHIERS : app/Providers/Filament/AdminPanelProvider.php, resources/views/filame
 SÉCURITÉ : aucune donnée affichée hors date/heure.
 TESTS : Admin 21/21 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-14 10:00] — Claude Opus 5.5 — Détection d'intrusion
+OBJECTIF : demande de Ian : détecter un piratage. Validé : empreintes SHA-256 du code, vérification horaire, alerte sur fichier PHP dans les uploads, alerte de connexion admin depuis une nouvelle IP ; toutes les alertes à support@yafar.org, objet « nom du site — ALERTE — … », détail dans le corps. Refusé : contrôle externe depuis le PC.
+RÉALISÉ : service `App\Services\Security\FileIntegrity` ; commandes `security:integrity-snapshot` (fin de déploiement) et `security:integrity-check` (hourly, cron existant, envoi direct) ; `SecurityAlertMail` ; écouteur `AlertOnNewAdminIp` + table `admin_known_ips` (empreinte HMAC de l'IP) ; config `config/security.php` ; script de déploiement et DECISIONS (procédure) mis à jour.
+FICHIERS : config/security.php, app/Services/Security/FileIntegrity.php, app/Console/Commands/Integrity{Snapshot,Check}Command.php, app/Mail/Admin/SecurityAlertMail.php, resources/views/emails/admin/security-alert.blade.php, app/Listeners/Auth/AlertOnNewAdminIp.php, migration 2026_10_14_090000_create_admin_known_ips_table, routes/console.php, .env.example, docs/DECISIONS.md, tests/Feature/Security/IntrusionDetectionTest.php (8 tests).
+SÉCURITÉ / RGPD : référence en 0600 hors webroot ; liens symboliques non suivis ; IP admin jamais en clair en base ni dans les logs (seulement dans l'email d'alerte) ; alerte intégrité envoyée sans la file d'attente.
+RISQUES : un pirate maître du serveur peut refaire la référence ou couper le cron (limite acceptée) ; une modification volontaire sur le serveur (.env) déclenche une alerte horaire jusqu'au snapshot ; 1re connexion de chaque admin = 1 alerte.
+TESTS : 471/471 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).

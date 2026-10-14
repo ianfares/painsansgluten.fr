@@ -285,7 +285,7 @@
 - **Mettre à jour la préprod** (depuis le poste local, sur `develop` à jour, après `npm run build`) :
   ```bash
   rsync -az --exclude-from=<liste> ./ painsansgluten:/var/www/painsansgluten/
-  ssh painsansgluten 'php artisan migrate --force && php artisan optimize && php artisan filament:optimize'
+  ssh painsansgluten 'php artisan migrate --force && php artisan optimize && php artisan filament:optimize && php artisan security:integrity-snapshot'
   ```
   Liste d'exclusion : `/.git/ /node_modules/ /.env /.remember/ /public/.htaccess /public/hot /public/storage /storage/logs/* /storage/framework/cache/* /storage/framework/sessions/* /storage/framework/views/* /storage/framework/testing/ /storage/framework/phpstan/ /storage/app/purifier/ /bootstrap/cache/*.php /tests/ /docs/` (une par ligne).
 - **Base** : importée une fois depuis la base locale (données de démonstration, sans sessions ni cache). Ne **pas** réimporter ensuite : la préprod a désormais ses propres données, seules les migrations s'appliquent.
@@ -488,3 +488,12 @@
 - Rien n'est produit quand GTM est inactif. Sans consentement, GTM n'est pas chargé : les données restent dans la page.
 - `purchase` : `StripePaymentStatus` (confirmation), commande carte en état payé en BDD, drapeau `ga_purchase_sent` posé par UPDATE conditionnel (une seule fois, même en cas de rechargement ou de double onglet). Virement : pas de `purchase` en V1 (PLAN §18).
 - Piège corrigé : `dispatch()` de Livewire a déjà un paramètre `$event` ; le nom de l'événement GA4 passe dans `name`.
+
+## 2026-10-14 — Détection d'intrusion (empreintes SHA-256 + alerte de connexion admin)
+- **Demande de Ian** : être alerté d'un piratage. Toutes les alertes vont à `support@yafar.org` (`SECURITY_ALERT_EMAIL`), objet « {nom du site} — ALERTE — {quoi} », détail dans le corps.
+- **Intégrité des fichiers** : `security:integrity-snapshot` (lancé en fin de déploiement, après `optimize`) enregistre le SHA-256 du code (`app`, `bootstrap`, `config`, `database`, `lang`, `public`, `resources`, `routes`, `vendor`, `artisan`, `composer.*`, `.env`) dans `storage/app/private/security/` (0600, hors webroot). `security:integrity-check` (toutes les heures via le cron existant) compare et envoie l'alerte **directement** (sans la file d'attente). SHA-256 plutôt que MD5 (MD5 permet de fabriquer un fichier différent de même empreinte).
+- **Uploads** : `storage/app` change normalement ; on n'y compare rien mais tout fichier exécutable (`.php`, `.phtml`, `.phar`…, `.htaccess`, `.user.ini`) déclenche « fichier suspect détecté ». Liens symboliques jamais suivis (`public/storage`).
+- **Modification volontaire sur le serveur** (ex. `.env`) : alerte toutes les heures jusqu'à `php artisan security:integrity-snapshot`.
+- **Connexion admin** : écouteur `Login` (garde admin) ; table `admin_known_ips` (empreinte HMAC de l'IP avec `APP_KEY`, jamais l'IP en clair ; index unique admin+IP → une seule alerte même en cas de connexions simultanées). Email en file d'attente (pas de latence au login). IP en clair uniquement dans l'email. Première connexion de chaque admin après la mise en place = une alerte (normal).
+- **Limite connue (acceptée par Ian)** : un pirate maître du serveur peut aussi refaire la référence ou couper le cron ; le contrôle externe depuis un autre poste a été proposé et refusé.
+- **Écarté** : AIDE/Tripwire (pas de sudo sur le serveur), MD5.
