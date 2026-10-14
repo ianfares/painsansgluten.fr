@@ -140,3 +140,25 @@ test('connexion admin : une alerte par nouvelle IP, aucune pour une IP connue ; 
     expect(DB::table('admin_known_ips')->where('admin_id', $admin->id)->count())->toBe(2)
         ->and(DB::table('admin_known_ips')->pluck('ip_hash')->implode(','))->not->toContain('203.0.113.7');
 });
+
+test('une seule alerte par anomalie : rien de plus aux vérifications suivantes, nouvel email si un autre fichier est touché ou après retour à la normale', function () {
+    $this->artisan('security:integrity-snapshot')->assertSuccessful();
+
+    File::put($this->root.'/storage/app/public/products/photo.php', '<?php');
+    $this->artisan('security:integrity-check')->assertFailed();
+    $this->artisan('security:integrity-check')->assertFailed();
+    $this->artisan('security:integrity-check')->assertFailed();
+    Mail::assertSent(SecurityAlertMail::class, 1);
+
+    File::put($this->root.'/app/Checkout.php', '<?php // modifié');
+    $this->artisan('security:integrity-check')->assertFailed();
+    Mail::assertSent(SecurityAlertMail::class, 2);
+
+    // Retour à la normale (nouvelle référence), puis même anomalie qu'au début : signalée à nouveau.
+    File::delete($this->root.'/storage/app/public/products/photo.php');
+    $this->artisan('security:integrity-snapshot')->assertSuccessful();
+    $this->artisan('security:integrity-check')->assertSuccessful();
+    File::put($this->root.'/storage/app/public/products/photo.php', '<?php');
+    $this->artisan('security:integrity-check')->assertFailed();
+    Mail::assertSent(SecurityAlertMail::class, 3);
+});
