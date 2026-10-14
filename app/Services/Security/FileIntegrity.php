@@ -35,8 +35,40 @@ class FileIntegrity
         File::ensureDirectoryExists(dirname($manifest), 0700);
         File::put($manifest, (string) json_encode(['created_at' => now()->toIso8601String(), 'files' => $hashes], JSON_UNESCAPED_SLASHES));
         @chmod($manifest, 0600);
+        $this->forgetAlert();
 
         return count($hashes);
+    }
+
+    /**
+     * Une seule alerte par anomalie (demande de Ian) : vrai si cette même
+     * anomalie (mêmes fichiers) a déjà été signalée.
+     *
+     * @param  array{missing_manifest: bool, modified: list<string>, added: list<string>, removed: list<string>, suspicious: list<string>}  $result
+     */
+    public function alreadyAlerted(array $result): bool
+    {
+        $file = $this->alertFile();
+
+        return is_file($file) && hash_equals((string) file_get_contents($file), $this->fingerprint($result));
+    }
+
+    /**
+     * @param  array{missing_manifest: bool, modified: list<string>, added: list<string>, removed: list<string>, suspicious: list<string>}  $result
+     */
+    public function rememberAlert(array $result): void
+    {
+        $file = $this->alertFile();
+
+        File::ensureDirectoryExists(dirname($file), 0700);
+        File::put($file, $this->fingerprint($result));
+        @chmod($file, 0600);
+    }
+
+    /** Situation revenue à la normale (ou nouvelle référence) : la prochaine anomalie sera signalée. */
+    public function forgetAlert(): void
+    {
+        File::delete($this->alertFile());
     }
 
     /**
@@ -77,6 +109,19 @@ class FileIntegrity
     {
         return $result['missing_manifest'] || $result['modified'] !== [] || $result['added'] !== []
             || $result['removed'] !== [] || $result['suspicious'] !== [];
+    }
+
+    /**
+     * @param  array{missing_manifest: bool, modified: list<string>, added: list<string>, removed: list<string>, suspicious: list<string>}  $result
+     */
+    private function fingerprint(array $result): string
+    {
+        return hash('sha256', (string) json_encode($result));
+    }
+
+    private function alertFile(): string
+    {
+        return dirname((string) config('security.integrity.manifest')).'/last-alert.sha256';
     }
 
     /**

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Mail;
 /**
  * Vérification horaire : code modifié/ajouté/supprimé depuis le déploiement,
  * ou fichier exécutable dans un dossier d'upload → email d'alerte immédiat
- * (envoi direct, sans passer par la file d'attente).
+ * (envoi direct, sans passer par la file d'attente), une seule fois par anomalie.
  */
 class IntegrityCheckCommand extends Command
 {
@@ -25,9 +25,17 @@ class IntegrityCheckCommand extends Command
         $result = $integrity->check();
 
         if (! FileIntegrity::hasProblems($result)) {
+            $integrity->forgetAlert();
             $this->info('Aucune anomalie.');
 
             return self::SUCCESS;
+        }
+
+        // Une seule alerte par anomalie : la même situation n'est pas renvoyée chaque heure.
+        if ($integrity->alreadyAlerted($result)) {
+            $this->warn('Anomalie déjà signalée : pas de nouvel email.');
+
+            return self::FAILURE;
         }
 
         $details = [];
@@ -55,8 +63,9 @@ class IntegrityCheckCommand extends Command
             details: $details,
             advice: 'Si personne n\'a modifié le site, il a peut-être été piraté : ne supprimez rien, prévenez le développeur. '
                 .'Si c\'est une modification volontaire (ex. fichier .env), relancez « php artisan security:integrity-snapshot » sur le serveur pour mettre à jour la référence. '
-                .'Cette alerte est renvoyée toutes les heures tant que la situation n\'est pas réglée.',
+                .'Cette alerte n\'est envoyée qu\'une fois ; un nouvel email partira seulement si d\'autres fichiers sont touchés.',
         ));
+        $integrity->rememberAlert($result);
 
         $this->error('Anomalie détectée : alerte envoyée.');
 

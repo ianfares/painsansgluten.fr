@@ -1062,3 +1062,11 @@ SÉCURITÉ / RGPD : référence en 0600 hors webroot ; liens symboliques non sui
 RISQUES : un pirate maître du serveur peut refaire la référence ou couper le cron (limite acceptée) ; une modification volontaire sur le serveur (.env) déclenche une alerte horaire jusqu'au snapshot ; 1re connexion de chaque admin = 1 alerte.
 TESTS : 471/471 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-14 11:30] — Claude Opus 5.5 — Détection d'intrusion : une seule alerte par anomalie
+OBJECTIF : Ian ne veut pas recevoir la même alerte toutes les heures : une seule suffit.
+RÉALISÉ : `FileIntegrity::alreadyAlerted/rememberAlert/forgetAlert` (empreinte de la dernière anomalie signalée, fichier 0600 à côté de la référence) ; la commande horaire n'envoie plus rien si l'anomalie est identique ; nouvel email si d'autres fichiers sont touchés ou après retour à la normale ; `security:integrity-snapshot` remet à zéro. Texte de l'email adapté.
+FICHIERS : app/Services/Security/FileIntegrity.php, app/Console/Commands/IntegrityCheckCommand.php, docs/DECISIONS.md, tests/Feature/Security/IntrusionDetectionTest.php (+1 test).
+SÉCURITÉ : si un pirate supprime ce fichier, l'alerte repart (sans risque).
+TESTS : Security 25/25 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
