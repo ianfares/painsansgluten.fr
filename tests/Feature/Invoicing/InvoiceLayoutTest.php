@@ -7,6 +7,7 @@ use App\Enums\DeliveryMethod;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Settings\BillingSettings;
+use App\Settings\HomepageSettings;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
@@ -32,7 +33,7 @@ function renderInvoice(Order $order): string
     return preg_replace('/\s+/u', ' ', view('pdf.invoice', ['invoice' => $invoice->fresh()])->render());
 }
 
-test('facture : facturation à gauche, livraison à droite, vendeur en pied de page (sans « 10000 » brut)', function () {
+test('facture : facturation à gauche, livraison à droite, pied de page = mentions saisies dans le BO uniquement', function () {
     $html = renderInvoice(Order::factory()->create([
         'billing_first_name' => 'Jeanne', 'billing_last_name' => 'Dupont',
         'billing_line1' => '1 rue du Pain', 'billing_postal_code' => '50300', 'billing_city' => 'Avranches',
@@ -49,11 +50,11 @@ test('facture : facturation à gauche, livraison à droite, vendeur en pied de p
         ->and($deliveryPos)->toBeLessThan($footerPos)
         ->and($html)->toContain('Jeanne Dupont')->toContain('50300 Avranches')
         ->toContain('Retrait chez un commerçant partenaire')->toContain('Épicerie du Port')->toContain('3 quai du Port')->toContain('50400 Granville')
-        ->and(substr($html, $footerPos))->toContain('SASU Aguyapi au capital de 10 000 € — 2 rue Jean Goujon, 78180 Montigny-le-Bretonneux — SIRET : 12345678901234 — RCS : Versailles 123 456 789 — TVA intracommunautaire : FR12123456789')
-        ->toContain('Pénalités de retard : taux légal.')
-        // Le vendeur n'apparaît plus en haut, et « 10000 » n'est plus affiché brut.
-        ->and(substr($html, 0, $footerPos))->not->toContain('Aguyapi')
-        ->and($html)->not->toContain('10000');
+        ->and(substr($html, $footerPos))->toContain('Pénalités de retard : taux légal.')
+        // Plus de ligne vendeur ajoutée automatiquement (doublon avec les mentions du BO), ni « 10000 » brut.
+        ->and($html)->not->toContain('Aguyapi')
+        ->and($html)->not->toContain('10000')
+        ->and($html)->not->toContain('au capital de');
 });
 
 test('facture : la livraison est figée dans la facture ; une facture plus ancienne la reprend de la commande', function () {
@@ -69,4 +70,25 @@ test('facture : la livraison est figée dans la facture ; une facture plus ancie
     $invoice->forceFill(['snapshot' => $snapshot])->saveQuietly();
 
     expect(view('pdf.invoice', ['invoice' => $invoice->fresh()])->render())->toContain('Relais Avranches');
+});
+
+test('facture : le logo de la boutique est intégré en haut du document', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('branding/logo.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='));
+    $homepage = app(HomepageSettings::class);
+    $homepage->logo_path = 'branding/logo.png';
+    $homepage->save();
+
+    $html = renderInvoice(Order::factory()->create());
+
+    expect($html)->toContain('<img src="data:image/png;base64,')
+        ->and(strpos($html, 'data:image/png'))->toBeLessThan(strpos($html, '<h1>'));
+});
+
+test('facture : sans logo renseigné, pas d\'image', function () {
+    $homepage = app(HomepageSettings::class);
+    $homepage->logo_path = null;
+    $homepage->save();
+
+    expect(renderInvoice(Order::factory()->create()))->not->toContain('<img');
 });
