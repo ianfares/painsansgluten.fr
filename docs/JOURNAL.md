@@ -1070,3 +1070,11 @@ FICHIERS : app/Services/Security/FileIntegrity.php, app/Console/Commands/Integri
 SÉCURITÉ : si un pirate supprime ce fichier, l'alerte repart (sans risque).
 TESTS : Security 25/25 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-15 10:00] — Claude Opus 5.5 — Prix HT pour les professionnels
+OBJECTIF : demande de Ian : afficher le prix HT aux comptes professionnels sur la fiche produit, et le prix HT dans le back-office.
+RÉALISÉ : `CustomerPricing::htFromTtc()` (même arrondi que les lignes de facture) ; composant `x-ui.price` : avec `vatRate` et un compte `account_type = pro`, prix HT en premier (barré + remisé si remise), puis « soit X € TTC (TVA Y %) » ; utilisé sur la fiche produit uniquement (cartes, panier, tunnel inchangés, en TTC). BO : colonne « Prix HT » dans la liste des produits, champ calculé « Prix HT (calculé) » dans la fiche, mis à jour quand on change le prix ou la TVA.
+FICHIERS : app/Services/Pricing/CustomerPricing.php, resources/views/components/ui/price.blade.php, resources/views/catalog/product.blade.php, app/Filament/Resources/ProductResource.php, tests/Feature/Catalog/ProPriceHtTest.php (4 tests).
+SÉCURITÉ : affichage seul, le serveur calcule ; aucun prix venant du navigateur.
+TESTS : Catalog 38/38 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : mise en page des factures (demande de Ian du 15/10).
