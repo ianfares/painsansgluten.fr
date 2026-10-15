@@ -89,7 +89,7 @@
             <a href="{{ route('boutique.index') }}" class="text-sm font-medium text-ink hover:text-sage">Toute la boutique</a>
             @foreach ($headerCategories as $category)
                 <a href="{{ route('content.show', $category) }}" class="flex items-center gap-1.5 text-sm font-medium text-ink hover:text-sage">
-                    <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
+                    <span aria-hidden="true">{{ $category->icon() }}</span>
                     {{ $category->name }}
                 </a>
             @endforeach
@@ -116,7 +116,7 @@
             <a href="{{ route('boutique.index') }}" class="text-ink hover:text-sage">Boutique</a>
             @foreach ($headerCategories as $category)
                 <a href="{{ route('content.show', $category) }}" class="flex items-center gap-2 pl-4 text-sm text-ink-muted hover:text-sage">
-                    <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
+                    <span aria-hidden="true">{{ $category->icon() }}</span>
                     {{ $category->name }}
                 </a>
             @endforeach

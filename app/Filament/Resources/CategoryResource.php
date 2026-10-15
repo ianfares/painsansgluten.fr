@@ -52,6 +52,9 @@ class CategoryResource extends Resource
                 RichEditor::make('description')->label('Texte de présentation')->helperText('Affiché sous le titre de la catégorie : utile pour Google et les assistants IA.')
                     ->toolbarButtons(['bold', 'italic', 'underline', 'link', 'h2', 'h3', 'bulletList', 'orderedList', 'undo', 'redo'])
                     ->maxLength(10000),
+                TextInput::make('icon')->label('Icône (emoji)')->maxLength(16)
+                    ->placeholder(fn (?Category $record): string => $record?->fallbackIcon() ?? '🌾')
+                    ->helperText('Affichée dans le menu et sur l\'accueil. Collez un emoji (ex. 🫒 🫙 🧀 🍯). Vide = icône choisie automatiquement d\'après le nom.'),
                 TextInput::make('seo_title')->label('Title SEO')->maxLength(255),
                 TextInput::make('seo_description')->label('Description SEO')->maxLength(300),
                 Toggle::make('is_active')->label('Active')->default(true),
