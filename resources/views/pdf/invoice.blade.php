@@ -10,11 +10,15 @@
         th { background: #f3ecdc; }
         .text-right { text-align: right; }
         .totals { margin-top: 16px; width: 300px; margin-left: auto; }
-        .footer { margin-top: 40px; font-size: 10px; color: #666; }
+        @page { margin: 40px 40px 100px 40px; }
+        /* Pied de page vendeur fixé en bas de chaque page (dompdf : position fixed). */
+        .footer { position: fixed; bottom: -70px; left: 0; right: 0; height: 60px; padding-top: 8px; border-top: 1px solid #ddd; font-size: 10px; color: #666; text-align: center; }
     </style>
 </head>
 <body>
-@php($s = $invoice->snapshot)
+@php
+    $s = $invoice->snapshot;
+@endphp
 
 <h1>{{ $invoice->type->label() }} {{ $s['number'] ?? $invoice->number }}</h1>
 @if (($s['related_invoice_number'] ?? null))
@@ -22,27 +26,35 @@
 @endif
 <p>Date d'émission : {{ $invoice->issued_at->format('d/m/Y') }}</p>
 
+@php
+    // Livraison : figée dans la facture depuis le 15/10/2026 ; avant, reprise de la commande (champs non modifiables).
+    $delivery = $s['delivery'] ?? ($invoice->order ? \App\Actions\Invoicing\IssueInvoiceAction::deliveryFor($invoice->order) : null);
+@endphp
 <table>
     <tr>
         <td style="border: none; width: 50%; vertical-align: top;">
-            <strong>{{ $s['seller']['name'] ?? '[RAISON SOCIALE À RENSEIGNER]' }}</strong><br>
-            {{ $s['seller']['legal_form'] ?? '' }} {{ $s['seller']['share_capital'] ?? '' }}<br>
-            {{ $s['seller']['address'] ?? '[ADRESSE À RENSEIGNER]' }}<br>
-            SIRET : {{ $s['seller']['siret'] ?? '[À RENSEIGNER]' }}<br>
-            RCS : {{ $s['seller']['rcs'] ?? '[À RENSEIGNER]' }}<br>
-            TVA intracommunautaire : {{ $s['seller']['vat_number'] ?? '[À RENSEIGNER]' }}
-        </td>
-        <td style="border: none; width: 50%; vertical-align: top;">
-            <strong>Client</strong><br>
+            <strong>Adresse de facturation</strong><br>
             {{ $s['customer']['name'] ?? '' }}<br>
-            {{ $s['customer']['company'] ?? '' }}<br>
+            @if ($s['customer']['company'] ?? null){{ $s['customer']['company'] }}<br>@endif
             {{ $s['customer']['address'] ?? '' }}<br>
             {{ $s['customer']['postal_code'] ?? '' }} {{ $s['customer']['city'] ?? '' }}
+        </td>
+        <td style="border: none; width: 50%; vertical-align: top;">
+            @if ($delivery)
+                <strong>Adresse de livraison</strong><br>
+                {{ $delivery['method'] }}<br>
+                @if ($delivery['recipient'])À l'attention de {{ $delivery['recipient'] }}<br>@endif
+                @if ($delivery['point']){{ $delivery['point'] }}<br>@endif
+                @if ($delivery['address']){{ $delivery['address'] }}<br>@endif
+                {{ $delivery['postal_code'] }} {{ $delivery['city'] }}
+            @endif
         </td>
     </tr>
 </table>
 
-@php($hasDiscount = ($s['discount']['total_ttc'] ?? 0) > 0)
+@php
+    $hasDiscount = ($s['discount']['total_ttc'] ?? 0) > 0;
+@endphp
 <table>
     <thead>
         <tr>
@@ -114,8 +126,26 @@
     <p>Réglé par avoir : {{ $s['settlement_reference'] }}</p>
 @endif
 
+@php
+    // Pied de page vendeur (15/10/2026) : « SASU Aguyapi au capital de 10 000 € — adresse — SIRET — RCS — TVA ».
+    $seller = $s['seller'] ?? [];
+    $capital = trim((string) ($seller['share_capital'] ?? ''));
+    if ($capital !== '' && is_numeric(str_replace([' ', ','], ['', '.'], $capital))) {
+        $capital = number_format((float) str_replace([' ', ','], ['', '.'], $capital), 0, ',', ' ').' €';
+    }
+    $identity = trim(mb_strtoupper(trim((string) ($seller['legal_form'] ?? ''))).' '.($seller['name'] ?? '[RAISON SOCIALE À RENSEIGNER]'))
+        .($capital !== '' ? ' au capital de '.$capital : '');
+    $sellerLine = collect([
+        $identity,
+        $seller['address'] ?? '[ADRESSE À RENSEIGNER]',
+        'SIRET : '.($seller['siret'] ?? '[À RENSEIGNER]'),
+        'RCS : '.($seller['rcs'] ?? '[À RENSEIGNER]'),
+        'TVA intracommunautaire : '.($seller['vat_number'] ?? '[À RENSEIGNER]'),
+    ])->filter()->implode(' — ');
+@endphp
 <div class="footer">
-    {{ $s['seller']['footer_mentions'] ?? '[Mentions légales de pied de facture à renseigner]' }}
+    <strong>{{ $sellerLine }}</strong><br>
+    {{ $seller['footer_mentions'] ?? '[Mentions légales de pied de facture à renseigner]' }}
 </div>
 </body>
 </html>

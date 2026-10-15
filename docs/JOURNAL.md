@@ -1078,3 +1078,11 @@ FICHIERS : app/Services/Pricing/CustomerPricing.php, resources/views/components/
 SÉCURITÉ : affichage seul, le serveur calcule ; aucun prix venant du navigateur.
 TESTS : Catalog 38/38 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : mise en page des factures (demande de Ian du 15/10).
+
+## [2026-10-15 11:00] — Claude Opus 5.5 — Factures / avoirs : nouvelle mise en page
+OBJECTIF : demande de Ian : retirer « Sasu 10000 » de l'en-tête ; adresse de facturation du client à gauche, adresse de livraison à droite, informations du vendeur (SASU Aguyapi) en pied de page.
+RÉALISÉ : en-tête = facturation (gauche) / livraison (droite : mode, destinataire, point relais / commerçant / labo et son adresse) ; snapshot de facture enrichi d'un bloc `delivery` (`IssueInvoiceAction::deliveryFor`), repris de la commande pour les factures plus anciennes ; pied de page fixé en bas de chaque page : « SASU Aguyapi au capital de 10 000 € — adresse — SIRET — RCS — TVA intracommunautaire » + mentions de pied de facture. Le capital n'apparaît plus brut (« 10000 ») : formaté « au capital de 10 000 € » dans le pied de page (mention obligatoire pour une société commerciale, art. R123-237 du Code de commerce — signalé à Ian). Avoirs : même gabarit. Les PDF déjà émis (fichiers stockés) ne changent pas.
+FICHIERS : app/Actions/Invoicing/IssueInvoiceAction.php, resources/views/pdf/invoice.blade.php, tests/Feature/Invoicing/InvoiceLayoutTest.php (2 tests).
+SÉCURITÉ : facture émise immuable (PDF stocké inchangé, aucun montant ni numéro touché).
+TESTS : Invoicing + Orders 96/96 ; pint OK ; phpstan 0 erreur ; rendu PDF vérifié visuellement.
+PROCHAINE TÂCHE SUGGÉRÉE : mise en forme du texte de présentation de l'accueil.
