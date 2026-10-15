@@ -10,7 +10,7 @@
     $percent = \App\Services\Pricing\CustomerPricing::percentFor(auth('web')->user());
     $net = \App\Services\Pricing\CustomerPricing::unitNet((int) $amount, $percent);
     $format = fn (int $cents): string => number_format($cents / 100, 2, ',', ' ').' €';
-    $showHt = $vatRate !== null && auth('web')->user()?->account_type === \App\Enums\AccountType::Pro;
+    $showHt = $vatRate !== null && \App\Services\Pricing\CustomerPricing::showsHt(auth('web')->user());
     $ht = fn (int $cents): int => \App\Services\Pricing\CustomerPricing::htFromTtc($cents, (float) $vatRate);
 @endphp
 @if ($showHt)

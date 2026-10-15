@@ -1094,3 +1094,11 @@ FICHIERS : app/Filament/Pages/ManageHomepageSettings.php, app/Settings/HomepageS
 SÉCURITÉ : `{!! !!}` uniquement sur HTML purifié ou texte échappé ; test : `<script>` retiré.
 TESTS : suite complète verte ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-15 14:00] — Claude Opus 5.5 — Prix HT pour les pros : boutique, panier, commande
+OBJECTIF : suite de la demande de Ian : le HT aussi sur la boutique, le panier et la commande pour les comptes professionnels.
+RÉALISÉ : `CustomerPricing::showsHt()` (compte `pro`) ; cartes produit en HT (+ « soit X € TTC ») ; `CartService::totals()` enrichi (`show_ht`, `subtotal_ht`, `shipping_ht`, `total_ht`, `total_vat`, même calcul ligne par ligne que la commande et la facture) ; tiroir/page panier et récapitulatif de commande (étape 3) : lignes HT, puis « Sous-total HT (remise déduite) / Port HT / Total HT / TVA / Total TTC » via le composant `x-cart.ht-summary`. Particuliers inchangés (TTC). Le montant payé reste le TTC calculé par le serveur.
+FICHIERS : app/Services/Pricing/CustomerPricing.php, app/Services/Cart/CartService.php, resources/views/components/cart/ht-summary.blade.php, resources/views/components/ui/{price,product-card}.blade.php, resources/views/livewire/{cart-widget,checkout-wizard}.blade.php, tests/Feature/Catalog/ProPriceHtTest.php (+3 tests).
+SÉCURITÉ : affichage seul ; aucun montant venant du navigateur.
+TESTS : 483/483 ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
