@@ -115,7 +115,7 @@
                 @endif
 
                 <div>
-                    <x-ui.price :amount="$product->price_ttc" suffix="TTC" class="block text-2xl font-semibold text-ink" />
+                    <x-ui.price :amount="$product->price_ttc" suffix="TTC" :vat-rate="(float) $product->vat_rate" class="block text-2xl font-semibold text-ink" />
                     @if ($product->formattedNetWeight())
                         @php
                             $pricePerKg = $product->pricePerKgTtc();

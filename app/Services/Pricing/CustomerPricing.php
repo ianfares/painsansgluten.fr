@@ -32,6 +32,12 @@ final class CustomerPricing
         return max(0, min(self::MAX_PERCENT, (int) $user->discount_percent));
     }
 
+    /** Prix HT d'un prix TTC, en centimes (même arrondi que les lignes de facture). */
+    public static function htFromTtc(int $ttc, float $vatRate): int
+    {
+        return (int) round($ttc / (1 + $vatRate / 100));
+    }
+
     /** Remise sur une unité, en centimes (arrondi au plus proche, demi vers le haut). */
     public static function unitDiscount(int $unitPriceTtc, int $percent): int
     {

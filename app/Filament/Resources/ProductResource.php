@@ -8,6 +8,7 @@ use App\Enums\Allergen;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\Pricing\CustomerPricing;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
@@ -96,12 +97,20 @@ class ProductResource extends Resource
                                 ->afterStateHydrated(function (TextInput $component, ?Product $record): void {
                                     $component->state($record ? round($record->price_ttc / 100, 2) : null);
                                 })
-                                ->dehydrateStateUsing(fn (?string $state): int => (int) round(((float) $state) * 100)),
+                                ->dehydrateStateUsing(fn (?string $state): int => (int) round(((float) $state) * 100))
+                                ->live(onBlur: true),
                             Select::make('vat_rate')
                                 ->label('Taux de TVA')
                                 ->options(Product::VAT_RATE_OPTIONS)
                                 ->helperText('Taux légaux français — le taux applicable à ce produit reste à valider par le comptable.')
-                                ->required(),
+                                ->required()
+                                ->live(),
+                            // Prix HT affiché aux professionnels (calculé, non saisi).
+                            Placeholder::make('price_ht_preview')
+                                ->label('Prix HT (calculé)')
+                                ->content(fn (Get $get): string => is_numeric($get('price_ttc')) && is_numeric($get('vat_rate'))
+                                    ? number_format(CustomerPricing::htFromTtc((int) round((float) $get('price_ttc') * 100), (float) $get('vat_rate')) / 100, 2, ',', ' ').' €'
+                                    : '—'),
                             TextInput::make('position')->label('Position')->numeric()->default(0),
                             Textarea::make('short_description')->label('Description courte')->rows(2)->columnSpanFull(),
                             Grid::make(4)->schema([
@@ -234,6 +243,9 @@ class ProductResource extends Resource
                 TextColumn::make('name')->label('Nom')->searchable()->sortable(),
                 TextColumn::make('category.name')->label('Catégorie')->sortable(),
                 TextColumn::make('price_ttc')->label('Prix TTC')->money('EUR', divideBy: 100)->sortable(),
+                TextColumn::make('price_ht')->label('Prix HT')
+                    ->state(fn (Product $record): int => CustomerPricing::htFromTtc($record->price_ttc, (float) $record->vat_rate))
+                    ->money('EUR', divideBy: 100),
                 IconColumn::make('is_published')->label('Publié')->boolean(),
                 IconColumn::make('is_available')->label('Disponible')->boolean(),
                 TextColumn::make('updated_at')->label('Modifié le')->dateTime('d/m/Y H:i')->sortable(),
