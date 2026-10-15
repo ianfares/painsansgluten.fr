@@ -7,9 +7,9 @@ namespace App\Filament\Pages;
 use App\Models\Product;
 use App\Settings\HomepageSettings;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -57,7 +57,9 @@ class ManageHomepageSettings extends SettingsPage
             Section::make('Contenu')
                 ->schema([
                     TextInput::make('slogan')->label('Slogan')->maxLength(255),
-                    Textarea::make('presentation_text')->label('Texte de présentation')->rows(4),
+                    RichEditor::make('presentation_text')->label('Texte de présentation')
+                        ->toolbarButtons(['bold', 'italic', 'underline', 'link', 'h2', 'h3', 'bulletList', 'orderedList', 'undo', 'redo'])
+                        ->columnSpanFull(),
                     Select::make('featured_product_ids')
                         ->label('Produits mis en avant')
                         ->multiple()

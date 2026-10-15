@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Settings\HomepageSettings;
 
 test('l\'accueil, la boutique et une page catégorie répondent 200', function () {
     $category = Category::factory()->create(['is_active' => true]);
@@ -125,4 +126,17 @@ test('un ancien texte de présentation sans mise en forme garde ses retours à l
     ]);
 
     expect($category->descriptionHtml())->toBe("Ligne 1 &amp; co<br />\nLigne 2");
+});
+
+test('accueil : le texte de présentation mis en forme s\'affiche (gras, liste), script retiré ; un ancien texte brut garde ses retours à la ligne', function () {
+    $homepage = app(HomepageSettings::class);
+    $homepage->presentation_text = '<p>Du pain <strong>sans gluten</strong></p><ul><li>Frais</li></ul><script>alert(1)</script>';
+    $homepage->save();
+
+    $html = $this->get('/')->assertOk()->getContent();
+    expect($html)->toContain('Du pain <strong>sans gluten</strong>')->toContain('<li>Frais</li>')->not->toContain('alert(1)');
+
+    $homepage->presentation_text = "Ligne 1 & co\nLigne 2";
+    $homepage->save();
+    expect($homepage->presentationHtml())->toBe("Ligne 1 &amp; co<br />\nLigne 2");
 });
