@@ -74,13 +74,13 @@
     </div>
 
     {{-- Slogan (T26 A9) et texte de présentation --}}
-    @if ($homepage->slogan || $homepage->presentation_text)
+    @if ($homepage->slogan || $homepage->presentationHtml())
         <div class="mx-auto max-w-3xl px-4 py-12 text-center">
             @if ($homepage->slogan)
                 <p class="text-2xl font-semibold italic text-sage">« {{ $homepage->slogan }} »</p>
             @endif
-            @if ($homepage->presentation_text)
-                <p class="mt-4 text-ink-muted">{{ $homepage->presentation_text }}</p>
+            @if ($homepage->presentationHtml())
+                <div class="prose mx-auto mt-4 max-w-none text-ink-muted">{!! $homepage->presentationHtml() !!}</div>
             @endif
         </div>
     @endif

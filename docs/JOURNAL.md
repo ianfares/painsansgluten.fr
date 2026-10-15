@@ -1086,3 +1086,11 @@ FICHIERS : app/Actions/Invoicing/IssueInvoiceAction.php, resources/views/pdf/inv
 SÉCURITÉ : facture émise immuable (PDF stocké inchangé, aucun montant ni numéro touché).
 TESTS : Invoicing + Orders 96/96 ; pint OK ; phpstan 0 erreur ; rendu PDF vérifié visuellement.
 PROCHAINE TÂCHE SUGGÉRÉE : mise en forme du texte de présentation de l'accueil.
+
+## [2026-10-15 11:30] — Claude Opus 5.5 — Accueil : texte de présentation mis en forme
+OBJECTIF : demande de Ian : pouvoir mettre en forme le « Texte de présentation » (section Contenu des paramètres de l'accueil).
+RÉALISÉ : RichEditor (mêmes boutons que les catégories, sans image) ; `HomepageSettings::presentationHtml()` : HTML purifié à l'affichage (Purifier), ancien texte brut échappé avec retours à la ligne ; affichage `prose` centré sur l'accueil.
+FICHIERS : app/Filament/Pages/ManageHomepageSettings.php, app/Settings/HomepageSettings.php, resources/views/catalog/home.blade.php, tests (CatalogPagesTest +1, CategoryResourceTest +1).
+SÉCURITÉ : `{!! !!}` uniquement sur HTML purifié ou texte échappé ; test : `<script>` retiré.
+TESTS : suite complète verte ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).

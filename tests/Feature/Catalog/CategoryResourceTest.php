@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Filament\Pages\ManageHomepageSettings;
 use App\Filament\Resources\CategoryResource\Pages\CreateCategory;
 use App\Filament\Resources\CategoryResource\Pages\ListCategories;
 use App\Models\Admin;
 use App\Models\Category;
+use App\Settings\HomepageSettings;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -49,4 +51,14 @@ test('le texte de présentation accepte un long texte (plus de 500 caractères)'
         ->assertHasNoFormErrors();
 
     expect(Category::query()->where('slug', 'pains')->value('description'))->toBe($long);
+});
+
+test('paramètres de l\'accueil : le texte de présentation s\'édite avec l\'éditeur de mise en forme', function () {
+    Livewire::test(ManageHomepageSettings::class)
+        ->assertOk()
+        ->fillForm(['presentation_text' => '<p>Texte <strong>gras</strong></p>'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(HomepageSettings::class)->presentation_text)->toContain('<strong>gras</strong>');
 });

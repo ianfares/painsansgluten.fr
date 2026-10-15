@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Settings;
 
+use Mews\Purifier\Facades\Purifier;
 use Spatie\LaravelSettings\Settings;
 
 /**
@@ -44,5 +45,21 @@ class HomepageSettings extends Settings
     public static function group(): string
     {
         return 'homepage';
+    }
+
+    /**
+     * Texte de présentation de l'accueil, mis en forme dans le BO (RichEditor) :
+     * HTML purifié à l'affichage (liste blanche, QUALITE.md §2.3) ; un ancien
+     * texte brut reste échappé avec ses retours à la ligne.
+     */
+    public function presentationHtml(): ?string
+    {
+        $text = $this->presentation_text;
+
+        if ($text === null || trim(strip_tags($text)) === '') {
+            return null;
+        }
+
+        return $text === strip_tags($text) ? nl2br(e($text)) : Purifier::clean($text);
     }
 }
