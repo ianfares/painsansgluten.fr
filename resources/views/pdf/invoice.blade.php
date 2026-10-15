@@ -20,6 +20,16 @@
     $s = $invoice->snapshot;
 @endphp
 
+@php
+    // Logo de la boutique (Paramètres de l'accueil), intégré au PDF : dompdf ne charge pas d'URL distante.
+    $logoPath = app(\App\Settings\HomepageSettings::class)->logo_path;
+    $logoData = $logoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($logoPath)
+        ? 'data:'.\Illuminate\Support\Facades\Storage::disk('public')->mimeType($logoPath).';base64,'.base64_encode((string) \Illuminate\Support\Facades\Storage::disk('public')->get($logoPath))
+        : null;
+@endphp
+@if ($logoData)
+    <img src="{{ $logoData }}" alt="" style="height: 70px; margin-bottom: 8px;">
+@endif
 <h1>{{ $invoice->type->label() }} {{ $s['number'] ?? $invoice->number }}</h1>
 @if (($s['related_invoice_number'] ?? null))
     <p>Avoir relatif à la facture {{ $s['related_invoice_number'] }}</p>
@@ -126,26 +136,9 @@
     <p>Réglé par avoir : {{ $s['settlement_reference'] }}</p>
 @endif
 
-@php
-    // Pied de page vendeur (15/10/2026) : « SASU Aguyapi au capital de 10 000 € — adresse — SIRET — RCS — TVA ».
-    $seller = $s['seller'] ?? [];
-    $capital = trim((string) ($seller['share_capital'] ?? ''));
-    if ($capital !== '' && is_numeric(str_replace([' ', ','], ['', '.'], $capital))) {
-        $capital = number_format((float) str_replace([' ', ','], ['', '.'], $capital), 0, ',', ' ').' €';
-    }
-    $identity = trim(mb_strtoupper(trim((string) ($seller['legal_form'] ?? ''))).' '.($seller['name'] ?? '[RAISON SOCIALE À RENSEIGNER]'))
-        .($capital !== '' ? ' au capital de '.$capital : '');
-    $sellerLine = collect([
-        $identity,
-        $seller['address'] ?? '[ADRESSE À RENSEIGNER]',
-        'SIRET : '.($seller['siret'] ?? '[À RENSEIGNER]'),
-        'RCS : '.($seller['rcs'] ?? '[À RENSEIGNER]'),
-        'TVA intracommunautaire : '.($seller['vat_number'] ?? '[À RENSEIGNER]'),
-    ])->filter()->implode(' — ');
-@endphp
+{{-- Pied de page : uniquement les « Mentions de pied de facture » saisies dans le BO (Paramètres de facturation). --}}
 <div class="footer">
-    <strong>{{ $sellerLine }}</strong><br>
-    {{ $seller['footer_mentions'] ?? '[Mentions légales de pied de facture à renseigner]' }}
+    {{ $s['seller']['footer_mentions'] ?? '[Mentions légales de pied de facture à renseigner]' }}
 </div>
 </body>
 </html>

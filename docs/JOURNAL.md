@@ -1111,3 +1111,11 @@ SÉCURITÉ : règle appliquée côté serveur (validation + action), pas seuleme
 TESTS : 490/490 ; pint OK ; phpstan 0 erreur.
 À SIGNALER : les CGV (contenu client) mentionnent peut-être le virement pour tous : à faire relire.
 PROCHAINE TÂCHE SUGGÉRÉE : pied de page et logo des factures (demande de Ian).
+
+## [2026-10-15 16:00] — Claude Opus 5.5 — Factures : pied de page sans doublon + logo
+OBJECTIF : Ian : les infos vendeur étaient en double dans le pied de page (ligne ajoutée le 15/10 + « Mentions de pied de facture » du BO) ; retirer l'ajout, tout gérer depuis le BO. Ajouter le logo de la société.
+RÉALISÉ : ligne vendeur automatique supprimée ; pied de page (toujours fixé en bas de page) = uniquement `invoice_footer_mentions` (Paramètres de facturation) ; logo de la boutique (Paramètres de l'accueil, `logo_path`, disque public) intégré en base64 en haut de la facture/avoir (rien si pas de logo).
+FICHIERS : resources/views/pdf/invoice.blade.php, tests/Feature/Invoicing/InvoiceLayoutTest.php (+2 tests).
+POINT D'ATTENTION : les mentions obligatoires (forme, capital, adresse, SIRET, RCS, TVA) dépendent désormais du texte saisi dans le BO.
+TESTS : Invoicing 15/15 ; pint OK ; phpstan 0 erreur ; rendu PDF vérifié avec le vrai logo.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
