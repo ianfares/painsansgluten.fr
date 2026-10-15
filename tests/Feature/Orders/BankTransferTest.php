@@ -14,6 +14,7 @@ use App\Mail\BankTransferReminderMail;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ShippingRate;
+use App\Models\User;
 use App\Services\Cart\CartService;
 use App\Settings\BankTransferSettings;
 use App\Settings\ShippingSettings;
@@ -49,6 +50,7 @@ beforeEach(function () {
 
 test('une commande par virement envoie l\'email d\'instructions avec la référence', function () {
     Mail::fake();
+    $this->actingAs(User::factory()->pro()->create()); // virement réservé aux pros (15/10/2026)
     $product = Product::factory()->create(['price_ttc' => 1000]);
     app(CartService::class)->add($product, 1);
 

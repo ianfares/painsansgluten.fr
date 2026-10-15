@@ -68,7 +68,7 @@ function auditWizard(array $overrides = []): Testable
     foreach (array_merge([
         'email' => 'cliente@example.com', 'first_name' => 'Jeanne', 'last_name' => 'Dupont', 'phone' => '0612345678',
         'billing_line1' => '1 rue du Pain', 'billing_postal_code' => '50300', 'billing_city' => 'Avranches',
-        'relay_postal_code' => '50300', 'relay_name' => 'Relais Avranches', 'cgvAccepted' => true, 'paymentMethod' => 'bank_transfer',
+        'relay_postal_code' => '50300', 'relay_name' => 'Relais Avranches', 'cgvAccepted' => true, 'paymentMethod' => 'stripe',
     ], $overrides) as $field => $value) {
         $component->set($field, $value);
     }

@@ -26,6 +26,7 @@ use Illuminate\Notifications\Notifiable;
  * @property ?string $company_name
  * @property ?string $siret
  * @property bool $lab_pickup_allowed
+ * @property bool $bank_transfer_allowed virement autorisé (pros uniquement, 15/10/2026)
  * @property int $discount_percent remise client en % (T27-L6), hors $fillable
  */
 #[Fillable(['first_name', 'last_name', 'email', 'phone', 'password'])]
@@ -36,7 +37,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
     use HasFactory, MustVerifyEmail, Notifiable;
 
     /** Valeurs par défaut aussi côté modèle (comme les colonnes) : un compte neuf est particulier, sans remise. */
-    protected $attributes = ['account_type' => 'individual', 'discount_percent' => 0, 'lab_pickup_allowed' => false];
+    protected $attributes = ['account_type' => 'individual', 'discount_percent' => 0, 'lab_pickup_allowed' => false, 'bank_transfer_allowed' => true];
 
     /**
      * Get the attributes that should be cast.
@@ -52,6 +53,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'pro_status' => ProStatus::class,
             'pro_approved_at' => 'datetime',
             'lab_pickup_allowed' => 'boolean',
+            'bank_transfer_allowed' => 'boolean',
             'discount_percent' => 'integer',
             'deactivated_at' => 'datetime',
             'password' => 'hashed',
@@ -64,6 +66,15 @@ class User extends Authenticatable implements MustVerifyEmailContract
      * désactivation) ne sont pas assignables en masse : ils sont posés
      * explicitement par l'inscription et par `ManageCustomerAccount`.
      */
+    /**
+     * Virement (15/10/2026) : réservé aux comptes pro validés et actifs dont le
+     * virement n'a pas été désactivé dans le BO. Particuliers et invités : carte seule.
+     */
+    public function canPayByBankTransfer(): bool
+    {
+        return ! $this->isDeactivated() && $this->isApprovedPro() && $this->bank_transfer_allowed;
+    }
+
     public function isApprovedPro(): bool
     {
         return $this->account_type === AccountType::Pro && $this->pro_status === ProStatus::Approved;

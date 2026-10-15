@@ -50,7 +50,7 @@ function fillStep2(Testable $component): Testable
         ->set('relay_name', 'Relais Avranches Centre');
 }
 
-test('un invité peut finaliser une commande par virement', function () {
+test('un invité peut finaliser une commande (carte : redirection vers le paiement Stripe)', function () {
     seedShippingOk();
     $product = Product::factory()->create(['price_ttc' => 1000]);
     app(CartService::class)->add($product, 2);
@@ -60,7 +60,7 @@ test('un invité peut finaliser une commande par virement', function () {
     fillStep2($component)->call('goToStep', 3);
     $component->call('goToStep', 4)
         ->set('cgvAccepted', true)
-        ->set('paymentMethod', 'bank_transfer')
+        ->set('paymentMethod', 'stripe')
         ->call('pay')
         ->assertHasNoErrors();
 
@@ -69,12 +69,12 @@ test('un invité peut finaliser une commande par virement', function () {
     $order = Order::query()->first();
     expect($order->user_id)->toBeNull()
         ->and($order->email)->toBe('cliente@example.com')
-        ->and($order->payment_method->value)->toBe('bank_transfer')
+        ->and($order->payment_method->value)->toBe('stripe')
         ->and($order->status->value)->toBe('pending_payment')
         ->and($order->relay_name)->toBe('Relais Avranches Centre')
         ->and($order->items)->toHaveCount(1);
 
-    $component->assertRedirect(route('checkout.confirmation', $order->token));
+    $component->assertRedirect(route('checkout.stripe.start', $order));
 });
 
 test('les coordonnées et l\'adresse d\'un client connecté sont pré-remplies', function () {
@@ -107,7 +107,7 @@ test('impossible de payer sans accepter les CGV', function () {
     fillStep1($component)->call('goToStep', 2);
     fillStep2($component)->call('goToStep', 3);
     $component->call('goToStep', 4)
-        ->set('paymentMethod', 'bank_transfer')
+        ->set('paymentMethod', 'stripe')
         ->call('pay')
         ->assertHasErrors(['cgvAccepted']);
 
@@ -153,7 +153,7 @@ test('une configuration de livraison incomplète bloque la commande sans la cré
     fillStep2($component)->call('goToStep', 3);
     $component->call('goToStep', 4)
         ->set('cgvAccepted', true)
-        ->set('paymentMethod', 'bank_transfer')
+        ->set('paymentMethod', 'stripe')
         ->call('pay');
 
     expect(Order::query()->count())->toBe(0);
@@ -170,7 +170,7 @@ test('un double-clic sur payer ne crée qu\'une seule commande', function () {
     fillStep2($component)->call('goToStep', 3);
     $component->call('goToStep', 4)
         ->set('cgvAccepted', true)
-        ->set('paymentMethod', 'bank_transfer')
+        ->set('paymentMethod', 'stripe')
         ->call('pay');
 
     expect(Order::query()->count())->toBe(1);

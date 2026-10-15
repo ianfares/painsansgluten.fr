@@ -11,6 +11,7 @@ use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Mail\Admin\NewBankTransferOrderMail;
 use App\Mail\BankTransferInstructionsMail;
 use App\Models\CartItem;
+use App\Models\User;
 use App\Services\Analytics\Ecommerce;
 use App\Services\Cart\CartService;
 use App\Services\Mail\AdminMailer;
@@ -339,9 +340,11 @@ class CheckoutWizard extends Component
 
         $this->validate([
             'cgvAccepted' => 'accepted',
-            'paymentMethod' => 'required|in:stripe,bank_transfer',
+            // Virement réservé aux pros autorisés (15/10/2026) ; revérifié à la création de la commande.
+            'paymentMethod' => $this->bankTransferAllowed() ? 'required|in:stripe,bank_transfer' : 'required|in:stripe',
         ], [
             'cgvAccepted.accepted' => 'Vous devez accepter les CGV pour continuer.',
+            'paymentMethod.in' => 'Le paiement par virement est réservé aux comptes professionnels autorisés : choisissez la carte bancaire.',
         ]);
 
         // Anti-abus : chaque commande envoie des emails à l'adresse saisie.
@@ -420,6 +423,14 @@ class CheckoutWizard extends Component
         $this->redirect(route('checkout.confirmation', $order->token), navigate: false);
     }
 
+    /** Particuliers et invités : carte seule ; pros validés : virement sauf s'il a été désactivé dans le BO. */
+    private function bankTransferAllowed(): bool
+    {
+        $user = Auth::guard('web')->user();
+
+        return $user instanceof User && $user->canPayByBankTransfer();
+    }
+
     public function render()
     {
         $cartService = app(CartService::class);
@@ -448,6 +459,7 @@ class CheckoutWizard extends Component
                 ? $options->merchantPointsNear(...array_values($this->deliveryAddress()))
                 : collect(),
             'labPickupAllowed' => $options->labPickupAllowed(Auth::user()),
+            'bankTransferAllowed' => $this->bankTransferAllowed(),
             'labSnapshot' => $options->labSnapshot()['relay_snapshot'],
         ]);
     }
