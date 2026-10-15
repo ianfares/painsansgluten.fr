@@ -35,7 +35,7 @@ beforeEach(function () {
     ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 5000, 'price_ht' => 500]);
 
     $this->admin = Admin::factory()->create();
-    $this->client = User::factory()->create(['email' => 'pro@example.com']);
+    $this->client = User::factory()->pro()->create(['email' => 'pro@example.com']); // virement réservé aux pros (15/10/2026)
     $this->client->forceFill(['discount_percent' => 10])->save();
     $this->bread = Product::factory()->create(['name' => 'Pain', 'price_ttc' => 750, 'vat_rate' => 5.5, 'shipping_weight_g' => 400]);
 });

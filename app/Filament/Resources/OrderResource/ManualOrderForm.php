@@ -95,7 +95,10 @@ final class ManualOrderForm
                         ->live(),
                     Radio::make('payment_method')
                         ->label('Paiement par le client')
-                        ->options([PaymentMethod::Stripe->value => 'Carte bancaire (lien de paiement envoyé par email)', PaymentMethod::BankTransfer->value => 'Virement (instructions envoyées par email)'])
+                        // Virement seulement pour un pro autorisé (15/10/2026) ; revérifié à la création.
+                        ->options(fn (Get $get): array => [PaymentMethod::Stripe->value => 'Carte bancaire (lien de paiement envoyé par email)']
+                            + (User::query()->find($get('user_id'))?->canPayByBankTransfer() ? [PaymentMethod::BankTransfer->value => 'Virement (instructions envoyées par email)'] : []))
+                        ->helperText('Virement possible uniquement pour un compte professionnel autorisé (fiche client).')
                         ->default(PaymentMethod::Stripe->value)
                         ->required(),
                     TextInput::make('relay_name')->label('Relais Chronopost (nom et ville)')->maxLength(255)

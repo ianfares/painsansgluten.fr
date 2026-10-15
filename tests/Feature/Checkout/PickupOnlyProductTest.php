@@ -68,7 +68,7 @@ test('tunnel : Chronopost non proposé, retrait chez le commerçant accepté san
         ->call('goToStep', 3)->assertHasErrors('deliveryChoice');
 
     $component->set('deliveryChoice', 'merchant_pickup:'.$this->point->id)->call('goToStep', 3)->call('goToStep', 4)
-        ->set('cgvAccepted', true)->set('paymentMethod', 'bank_transfer')->call('pay')->assertHasNoErrors();
+        ->set('cgvAccepted', true)->set('paymentMethod', 'stripe')->call('pay')->assertHasNoErrors();
 
     $order = Order::query()->sole();
     expect($order->delivery_method)->toBe(DeliveryMethod::MerchantPickup)

@@ -1102,3 +1102,12 @@ FICHIERS : app/Services/Pricing/CustomerPricing.php, app/Services/Cart/CartServi
 SÉCURITÉ : affichage seul ; aucun montant venant du navigateur.
 TESTS : 483/483 ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-15 15:30] — Claude Opus 5.5 — Virement réservé aux professionnels
+OBJECTIF : demande de Ian : particuliers (et invités) = carte bancaire uniquement ; pros = virement possible, désactivable compte par compte dans la fiche client.
+RÉALISÉ : colonne `users.bank_transfer_allowed` (défaut vrai) ; `User::canPayByBankTransfer()` = pro validé, actif, virement non désactivé ; tunnel : option « Virement » masquée sinon + validation `in:stripe` ; `CreateOrderAction` refuse elle-même le virement (couvre aussi la commande manuelle du BO) ; BO : interrupteur « Paiement par virement autorisé » dans la fiche client (pros validés), état affiché dans la fiche, formulaire de commande manuelle ne propose le virement que si le client y a droit ; llms.txt mis à jour. Tests existants qui payaient par virement en invité/particulier : passés en carte (sans appel externe) ou en compte pro.
+FICHIERS : migration 2026_10_15_120000_add_bank_transfer_allowed_to_users_table, app/Models/User.php, app/Actions/Customers/ManageCustomerAccount.php, app/Actions/Orders/CreateOrderAction.php, app/Livewire/CheckoutWizard.php, resources/views/livewire/checkout-wizard.blade.php, app/Filament/Resources/UserResource.php, app/Filament/Resources/OrderResource/ManualOrderForm.php, resources/views/seo/llms.blade.php, tests (BankTransferAccessTest 7 tests + adaptations).
+SÉCURITÉ : règle appliquée côté serveur (validation + action), pas seulement à l'affichage ; test de falsification depuis le navigateur.
+TESTS : 490/490 ; pint OK ; phpstan 0 erreur.
+À SIGNALER : les CGV (contenu client) mentionnent peut-être le virement pour tous : à faire relire.
+PROCHAINE TÂCHE SUGGÉRÉE : pied de page et logo des factures (demande de Ian).

@@ -53,7 +53,7 @@ function pickupCheckout(): Testable
 function payNow(Testable $component): Testable
 {
     return $component->call('goToStep', 3)->call('goToStep', 4)
-        ->set('cgvAccepted', true)->set('paymentMethod', 'bank_transfer')
+        ->set('cgvAccepted', true)->set('paymentMethod', 'stripe')
         ->call('pay');
 }
 

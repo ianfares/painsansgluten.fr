@@ -48,7 +48,7 @@ function discountedCheckout(int $percent): Order
         ->call('goToStep', 2)
         ->set('relay_postal_code', '50300')->set('relay_name', 'Relais Avranches Centre')
         ->call('goToStep', 3)->call('goToStep', 4)
-        ->set('cgvAccepted', true)->set('paymentMethod', 'bank_transfer')
+        ->set('cgvAccepted', true)->set('paymentMethod', 'stripe')
         ->call('pay')
         ->assertHasNoErrors();
 

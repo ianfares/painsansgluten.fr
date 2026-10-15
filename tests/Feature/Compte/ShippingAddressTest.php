@@ -73,7 +73,7 @@ test('commande : adresse de livraison reprise du compte, enregistrée sur la com
 
     $component->set('deliveryChoice', 'chronopost_relay')->set('relay_postal_code', '14000')->set('relay_name', 'Relais Caen')
         ->call('goToStep', 3)->call('goToStep', 4)
-        ->set('cgvAccepted', true)->set('paymentMethod', 'bank_transfer')
+        ->set('cgvAccepted', true)->set('paymentMethod', 'stripe')
         ->call('pay')->assertHasNoErrors();
 
     $order = Order::query()->sole();

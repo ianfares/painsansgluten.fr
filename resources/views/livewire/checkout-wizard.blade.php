@@ -212,9 +212,11 @@
                     <label class="flex items-center gap-2 text-sm">
                         <input type="radio" wire:model="paymentMethod" value="stripe"> Carte bancaire (Stripe)
                     </label>
-                    <label class="mt-1 flex items-center gap-2 text-sm">
-                        <input type="radio" wire:model="paymentMethod" value="bank_transfer"> Virement bancaire
-                    </label>
+                    @if ($bankTransferAllowed)
+                        <label class="mt-1 flex items-center gap-2 text-sm">
+                            <input type="radio" wire:model="paymentMethod" value="bank_transfer"> Virement bancaire
+                        </label>
+                    @endif
                     @error('paymentMethod')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror

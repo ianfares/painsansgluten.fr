@@ -101,6 +101,12 @@ class UserResource extends Resource
                         ->helperText('Réservé aux comptes pro validés.')
                         ->disabled(fn (?User $record): bool => $record === null || ! $record->isApprovedPro())
                         ->visible(fn (string $operation): bool => $operation === 'edit'),
+                    Toggle::make('bank_transfer_allowed')
+                        ->label('Paiement par virement autorisé')
+                        ->helperText('Comptes pro validés uniquement (les particuliers paient toujours par carte). Décochez pour imposer la carte bancaire à ce client.')
+                        ->default(true)
+                        ->disabled(fn (?User $record): bool => $record === null || ! $record->isApprovedPro())
+                        ->visible(fn (string $operation): bool => $operation === 'edit'),
                 ]),
         ]);
     }
@@ -170,6 +176,8 @@ class UserResource extends Resource
                     TextEntry::make('pro_approved_at')->label('Pro validé le')->dateTime('d/m/Y H:i')->placeholder('—'),
                     TextEntry::make('discount_percent')->label('Remise client')->formatStateUsing(fn (int $state): string => $state > 0 ? "{$state} %" : 'Aucune'),
                     TextEntry::make('lab_pickup_allowed')->label('Retrait au laboratoire')->formatStateUsing(fn (bool $state): string => $state ? 'Autorisé' : 'Non autorisé'),
+                    TextEntry::make('bank_transfer_allowed')->label('Paiement par virement')
+                        ->state(fn (User $record): string => $record->canPayByBankTransfer() ? 'Autorisé' : 'Non autorisé (carte bancaire uniquement)'),
                     TextEntry::make('deactivated_at')->label('Désactivé le')->dateTime('d/m/Y H:i')->placeholder('—'),
                     TextEntry::make('email_verified_at')->label('Email vérifié le')->dateTime('d/m/Y H:i')->placeholder('Non vérifié'),
                     TextEntry::make('deletion_requested_at')->label('Suppression demandée le')->dateTime('d/m/Y H:i')->placeholder('—'),

@@ -91,6 +91,9 @@ class ManageCustomerAccount
 
         // Le retrait au labo n'a de sens que pour un pro validé.
         $user->lab_pickup_allowed = $user->isApprovedPro() && (bool) ($data['lab_pickup_allowed'] ?? false);
+        if (array_key_exists('bank_transfer_allowed', $data)) {
+            $user->bank_transfer_allowed = (bool) $data['bank_transfer_allowed'];
+        }
         $user->save();
 
         return $user;

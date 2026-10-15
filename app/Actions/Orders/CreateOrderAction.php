@@ -11,6 +11,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
+use App\Models\User;
 use App\Services\Cart\CartService;
 use App\Services\Pricing\CustomerPricing;
 use App\Services\Sequencing\SequenceGenerator;
@@ -49,6 +50,11 @@ class CreateOrderAction
 
             if ($items->isEmpty()) {
                 throw new RuntimeException('Impossible de créer une commande avec un panier vide.');
+            }
+
+            // Virement réservé aux pros autorisés (15/10/2026) : vérifié ici, pas seulement dans le tunnel.
+            if ($paymentMethod === PaymentMethod::BankTransfer && ! ($userId !== null && User::query()->find($userId)?->canPayByBankTransfer())) {
+                throw new RuntimeException('Le paiement par virement est réservé aux comptes professionnels autorisés : payez par carte bancaire.');
             }
 
             if ($deliveryMethod === DeliveryMethod::ChronopostRelay && $items->contains(fn ($item) => $item->product->isPickupOnly())) {

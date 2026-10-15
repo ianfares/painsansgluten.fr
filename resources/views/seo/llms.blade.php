@@ -1,6 +1,6 @@
 # {!! $shop->shop_name ?: 'Mon Sans Gluten by Angélique' !!}
 
-> Boulangerie artisanale 100 % sans gluten à Avranches (Manche, Normandie). Pains, viennoiseries, pâtisseries et biscuits fabriqués à la commande, expédiés en point relais Chronopost partout en France métropolitaine (hors Corse). Paiement par carte bancaire ou par virement.
+> Boulangerie artisanale 100 % sans gluten à Avranches (Manche, Normandie). Pains, viennoiseries, pâtisseries et biscuits fabriqués à la commande, expédiés en point relais Chronopost partout en France métropolitaine (hors Corse). Paiement par carte bancaire (virement possible pour les professionnels).
 
 ## À savoir
 
