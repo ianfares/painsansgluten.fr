@@ -32,6 +32,12 @@ final class CustomerPricing
         return max(0, min(self::MAX_PERCENT, (int) $user->discount_percent));
     }
 
+    /** Les comptes professionnels voient les prix HT en premier (demande de Ian, 15/10/2026). */
+    public static function showsHt(?User $user): bool
+    {
+        return $user !== null && $user->account_type === AccountType::Pro;
+    }
+
     /** Prix HT d'un prix TTC, en centimes (même arrondi que les lignes de facture). */
     public static function htFromTtc(int $ttc, float $vatRate): int
     {

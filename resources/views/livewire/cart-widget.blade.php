@@ -18,7 +18,12 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm font-medium text-ink">{{ $item->product->name }}</p>
+                        @if ($totals['show_ht'])
+                            @php($rate = (float) $item->product->vat_rate)
+                            <p class="text-xs text-ink-muted">@if ($totals['discount_percent'] > 0)<s>{{ number_format(\App\Services\Pricing\CustomerPricing::htFromTtc($item->product->price_ttc, $rate) / 100, 2, ',', ' ') }} €</s> @endif{{ number_format(\App\Services\Pricing\CustomerPricing::htFromTtc(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']), $rate) / 100, 2, ',', ' ') }} € HT / unité</p>
+                        @else
                         <p class="text-xs text-ink-muted">@if ($totals['discount_percent'] > 0)<s>{{ number_format($item->product->price_ttc / 100, 2, ',', ' ') }} €</s> @endif{{ number_format(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']) / 100, 2, ',', ' ') }} € / unité</p>
+                        @endif
                         <div class="mt-1 flex items-center gap-2">
                             <button type="button" wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})" class="h-6 w-6 rounded-full border border-line text-xs" aria-label="Diminuer la quantité">−</button>
                             <span class="text-sm">{{ $item->quantity }}</span>
@@ -26,7 +31,11 @@
                         </div>
                     </div>
                     <div class="text-right">
+                        @if ($totals['show_ht'])
+                            <p class="text-sm font-semibold text-ink">{{ number_format(\App\Services\Pricing\CustomerPricing::htFromTtc(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']) * $item->quantity, (float) $item->product->vat_rate) / 100, 2, ',', ' ') }} € HT</p>
+                        @else
                         <p class="text-sm font-semibold text-ink">{{ number_format(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']) * $item->quantity / 100, 2, ',', ' ') }} €</p>
+                        @endif
                         <button type="button" wire:click="removeItem({{ $item->id }})" class="mt-1 text-xs text-ink-muted hover:text-red-600" aria-label="Retirer {{ $item->product->name }}">Retirer</button>
                     </div>
                 </div>
@@ -34,20 +43,24 @@
         </div>
 
         <div class="mt-4 flex flex-col gap-2 border-t border-line pt-4 text-sm">
+            @if ($totals['shipping_error'] || ! $totals['show_ht'])
             <div class="flex justify-between"><span>Sous-total TTC</span><span>{{ number_format(($totals['subtotal_ttc'] + $totals['discount_ttc']) / 100, 2, ',', ' ') }} €</span></div>
             @if ($totals['discount_ttc'] > 0)
                 <div class="flex justify-between text-sage-dark"><span>Votre remise -{{ $totals['discount_percent'] }} %</span><span>-{{ number_format($totals['discount_ttc'] / 100, 2, ',', ' ') }} €</span></div>
             @endif
-
+            @endif
             @if ($totals['shipping_error'])
                 {{-- Message client générique : le détail technique est signalé à l'admin (tableau de bord). --}}
                 <x-ui.alert variant="warning">Livraison momentanément indisponible pour votre panier. Contactez-nous pour finaliser votre commande.</x-ui.alert>
+            @elseif ($totals['show_ht'])
+                {{-- Compte professionnel : HT d'abord (15/10/2026). --}}
+                <x-cart.ht-summary :totals="$totals" />
             @else
                 <div class="flex justify-between"><span>Frais de port</span><span>{{ $totals['shipping_ttc'] === 0 ? 'Offerts' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
                 <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
-                @if ($totals['planned_ship_date'])
-                    <p class="text-xs text-ink-muted">📦 Expédition prévue le {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
-                @endif
+            @endif
+            @if (! $totals['shipping_error'] && $totals['planned_ship_date'])
+                <p class="text-xs text-ink-muted">📦 Expédition prévue le {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
             @endif
 
             {{-- Accès au tunnel de commande (oubli corrigé le 10/10/2026). L'invité peut

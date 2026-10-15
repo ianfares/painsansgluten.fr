@@ -157,19 +157,32 @@
                     @foreach ($items as $item)
                         <div class="flex items-center justify-between p-3 text-sm" wire:key="recap-item-{{ $item->id }}">
                             <span>{{ $item->product->name }} × {{ $item->quantity }}</span>
-                            <span>{{ number_format(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']) * $item->quantity / 100, 2, ',', ' ') }} €</span>
+                            @if ($totals['show_ht'])
+                                <span>{{ number_format(\App\Services\Pricing\CustomerPricing::htFromTtc(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']) * $item->quantity, (float) $item->product->vat_rate) / 100, 2, ',', ' ') }} € HT</span>
+                            @else
+                                <span>{{ number_format(\App\Services\Pricing\CustomerPricing::unitNet($item->product->price_ttc, $totals['discount_percent']) * $item->quantity / 100, 2, ',', ' ') }} €</span>
+                            @endif
                         </div>
                     @endforeach
                 </div>
 
                 <div class="flex flex-col gap-1 text-sm">
+                    @if ($totals['shipping_error'] || ! $totals['show_ht'])
                     <div class="flex justify-between"><span>Sous-total TTC</span><span>{{ number_format(($totals['subtotal_ttc'] + $totals['discount_ttc']) / 100, 2, ',', ' ') }} €</span></div>
                     @if ($totals['discount_ttc'] > 0)
                         <div class="flex justify-between text-sage-dark"><span>Votre remise -{{ $totals['discount_percent'] }} %</span><span>-{{ number_format($totals['discount_ttc'] / 100, 2, ',', ' ') }} €</span></div>
                     @endif
+                    @endif
 
                     @if ($totals['shipping_error'])
                         <x-ui.alert variant="danger">Livraison momentanément indisponible pour votre commande. Contactez-nous pour la finaliser.</x-ui.alert>
+                    @elseif ($totals['show_ht'])
+                        {{-- Compte professionnel : HT d'abord (15/10/2026). --}}
+                        <x-cart.ht-summary :totals="$totals" :pickup="$deliveryMethodValue->isPickup()"
+                            :shipping-label="$deliveryMethodValue->isPickup() ? $deliveryMethodValue->label() : (app(\App\Settings\ShippingSettings::class)->carrier_label ?: 'Frais de port')" />
+                        @if ($totals['planned_ship_date'])
+                            <p class="text-xs text-ink-muted">{{ $deliveryMethodValue->isPickup() ? '🧺 Prête à retirer à partir du' : '📦 Expédition prévue le' }} {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
+                        @endif
                     @else
                         @if ($deliveryMethodValue->isPickup())
                             <div class="flex justify-between gap-4"><span>{{ $deliveryMethodValue->label() }}</span><span class="whitespace-nowrap">Gratuit</span></div>

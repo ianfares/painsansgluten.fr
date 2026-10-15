@@ -29,7 +29,7 @@
         <a href="{{ $url }}" class="font-medium text-ink hover:text-sage">{{ $product->name }}</a>
 
         <div class="mt-auto flex flex-wrap items-center justify-between gap-2">
-            <x-ui.price :amount="$product->price_ttc" class="font-semibold text-ink" />
+            <x-ui.price :amount="$product->price_ttc" :vat-rate="(float) $product->vat_rate" class="font-semibold text-ink" />
 
             @if ($orderable)
                 @if ($product->isPickupOnly())

@@ -159,8 +159,13 @@ class CartService
      * le montant remisé. La remise vient du compte du panier, jamais du navigateur.
      * Retrait (commerçant, labo — T27-L7b) : frais de port à 0, même date de préparation.
      *
+     * HT (affichage pro, 15/10/2026) : même calcul que la commande et la
+     * facture (HT de chaque ligne à son taux + HT du port) ; `show_ht` vrai
+     * pour un compte professionnel.
+     *
      * @return array{count: int, subtotal_ttc: int, discount_percent: int, discount_ttc: int, shipping_ttc: int|null,
-     *     total_ttc: int|null, planned_ship_date: ?CarbonImmutable, shipping_error: ?string}
+     *     total_ttc: int|null, planned_ship_date: ?CarbonImmutable, shipping_error: ?string,
+     *     show_ht: bool, subtotal_ht: int, shipping_ht: int|null, total_ht: int|null, total_vat: int|null}
      */
     public function totals(Cart $cart, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay): array
     {
@@ -185,6 +190,11 @@ class CartService
             }
         }
 
+        $subtotalHt = $items->sum(fn (CartItem $item) => CustomerPricing::htFromTtc(
+            CustomerPricing::unitNet($item->product->price_ttc, $percent) * $item->quantity, (float) ($item->product->vat_rate ?? 0)
+        ));
+        $shippingHt = $shipping !== null ? CustomerPricing::htFromTtc($shipping, (float) ($this->shippingSettings->shipping_vat_rate ?? 0)) : null;
+
         return [
             'count' => $count,
             'subtotal_ttc' => $subtotal,
@@ -194,6 +204,11 @@ class CartService
             'total_ttc' => $shipping !== null ? $subtotal + $shipping : null,
             'planned_ship_date' => $plannedShipDate,
             'shipping_error' => $shippingError,
+            'show_ht' => CustomerPricing::showsHt($cart->user_id !== null ? $cart->user : null),
+            'subtotal_ht' => (int) $subtotalHt,
+            'shipping_ht' => $shippingHt,
+            'total_ht' => $shippingHt !== null ? (int) $subtotalHt + $shippingHt : null,
+            'total_vat' => $shippingHt !== null ? $subtotal + (int) $shipping - ((int) $subtotalHt + $shippingHt) : null,
         ];
     }
 
