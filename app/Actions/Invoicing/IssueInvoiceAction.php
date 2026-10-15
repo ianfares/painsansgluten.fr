@@ -91,6 +91,7 @@ class IssueInvoiceAction
                 'country' => $order->billing_country,
                 'email' => $order->email,
             ],
+            'delivery' => self::deliveryFor($order),
             'lines' => $order->items->map(fn ($item) => [
                 'designation' => $item->product_name,
                 'reference' => $item->product_reference,
@@ -116,6 +117,29 @@ class IssueInvoiceAction
             'payment_method' => $order->payment_method->label(),
             'settlement_reference' => $order->settlement_reference,
             'paid_at' => $order->paid_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * Adresse de livraison figée sur la facture (15/10/2026) : le mode, le
+     * destinataire et le point (relais, commerçant ou labo) où le colis est remis.
+     * Aussi utilisé pour l'affichage des factures émises avant cet ajout.
+     *
+     * @return array{method: string, recipient: string, point: ?string, address: ?string, postal_code: ?string, city: ?string}
+     */
+    public static function deliveryFor(Order $order): array
+    {
+        $recipient = trim("{$order->shipping_first_name} {$order->shipping_last_name}")
+            ?: trim("{$order->billing_first_name} {$order->billing_last_name}");
+        $point = (array) $order->relay_snapshot;
+
+        return [
+            'method' => $order->delivery_method->label(),
+            'recipient' => $recipient,
+            'point' => $order->relay_name ?: null,
+            'address' => isset($point['address_line1']) ? (string) $point['address_line1'] : null,
+            'postal_code' => isset($point['postal_code']) ? (string) $point['postal_code'] : null,
+            'city' => isset($point['city']) ? (string) $point['city'] : null,
         ];
     }
 
