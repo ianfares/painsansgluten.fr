@@ -98,7 +98,7 @@
                             @if ($url = $category->getFirstMediaUrl('cover', 'menu'))
                                 <img src="{{ $url }}" alt="" width="200" height="200" loading="lazy" class="h-full w-full object-cover">
                             @else
-                                <span aria-hidden="true">{{ $category->fallbackIcon() }}</span>
+                                <span aria-hidden="true">{{ $category->icon() }}</span>
                             @endif
                         </span>
                         <span class="font-medium text-ink">{{ $category->name }}</span>

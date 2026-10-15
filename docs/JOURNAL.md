@@ -1119,3 +1119,11 @@ FICHIERS : resources/views/pdf/invoice.blade.php, tests/Feature/Invoicing/Invoic
 POINT D'ATTENTION : les mentions obligatoires (forme, capital, adresse, SIRET, RCS, TVA) dépendent désormais du texte saisi dans le BO.
 TESTS : Invoicing 15/15 ; pint OK ; phpstan 0 erreur ; rendu PDF vérifié avec le vrai logo.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-15 17:00] — Claude Opus 5.5 — Icône des catégories
+OBJECTIF : Ian : « Apéritif » et « Epicerie » avaient la même icône (🌾 par défaut).
+RÉALISÉ : reconnaissance sans accents + 🫒 apéritif, 🫙 épicerie ; nouveau champ « Icône (emoji) » dans la fiche catégorie (colonne `categories.icon`, vide = icône devinée) ; menu et accueil utilisent `Category::icon()`.
+FICHIERS : migration 2026_10_15_170000_add_icon_to_categories_table, app/Models/Category.php, app/Filament/Resources/CategoryResource.php, resources/views/components/site/header.blade.php, resources/views/catalog/home.blade.php, tests (CategoryTest, CategoryResourceTest).
+SÉCURITÉ : texte affiché échappé (`{{ }}`), 16 caractères max.
+TESTS : suite complète verte ; pint OK ; phpstan 0 erreur.
+PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).

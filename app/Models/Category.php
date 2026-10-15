@@ -10,13 +10,14 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Mews\Purifier\Facades\Purifier;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-#[Fillable(['name', 'slug', 'description', 'position', 'is_active', 'seo_title', 'seo_description'])]
+#[Fillable(['name', 'slug', 'description', 'icon', 'position', 'is_active', 'seo_title', 'seo_description'])]
 class Category extends Model implements HasMedia
 {
     /** @use HasFactory<CategoryFactory> */
@@ -97,14 +98,25 @@ class Category extends Model implements HasMedia
      */
     public function fallbackIcon(): string
     {
-        $name = mb_strtolower($this->name);
+        // Sans accents : « Apéritif », « Aperitif », « Épicerie », « Epicerie » sont reconnus.
+        $name = Str::lower(Str::ascii($this->name));
 
         return match (true) {
             str_contains($name, 'viennoiserie') => '🥐',
-            str_contains($name, 'pâtisserie'), str_contains($name, 'patisserie') => '🍰',
+            str_contains($name, 'patisserie') => '🍰',
             str_contains($name, 'biscuit') => '🍪',
+            str_contains($name, 'aperitif') => '🫒',
+            str_contains($name, 'epicerie') => '🫙',
             str_contains($name, 'pain') => '🥖',
             default => '🌾',
         };
+    }
+
+    /** Icône affichée : celle choisie dans le BO, sinon celle devinée d'après le nom. */
+    public function icon(): string
+    {
+        $icon = trim((string) $this->getAttribute('icon'));
+
+        return $icon !== '' ? $icon : $this->fallbackIcon();
     }
 }

@@ -13,5 +13,13 @@ test('le pictogramme de repli correspond au type de catégorie', function (strin
     ['Viennoiseries', '🥐'],
     ['Pâtisseries', '🍰'],
     ['Biscuits', '🍪'],
+    ['Apéritif ', '🫒'],
+    ['Epicerie', '🫙'],
+    ['Épicerie fine', '🫙'],
     ['Catégorie quelconque', '🌾'],
 ]);
+
+test('l\'icône choisie dans le back-office remplace l\'icône devinée', function () {
+    expect(Category::factory()->make(['name' => 'Apéritif', 'icon' => '🧀'])->icon())->toBe('🧀')
+        ->and(Category::factory()->make(['name' => 'Apéritif', 'icon' => '  '])->icon())->toBe('🫒');
+});
