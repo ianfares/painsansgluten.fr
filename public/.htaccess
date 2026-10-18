@@ -1,24 +1,15 @@
-# Protection préprod (spécifique au serveur, non versionnée)
-#AuthType Basic
-#AuthName "Zone preprod protegee"
-AuthUserFile /etc/apache2/.htpasswd-painsansgluten-preprod
-# Stripe doit pouvoir appeler le webhook (authentifié par sa signature).
-#<RequireAny>
-#    Require expr %{THE_REQUEST} =~ m#^POST /webhooks/stripe[ ?]#
-    # Logo affiché dans les emails (fichier public).
-#    Require expr %{THE_REQUEST} =~ m#^GET /storage/branding/[A-Za-z0-9_-]+\.(png|jpe?g|webp) HTTP/#
-#    Require valid-user
-#</RequireAny>
-<IfModule mod_headers.c>
-    Header always set X-Robots-Tag "noindex, nofollow"
-</IfModule>
-
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
     RewriteEngine On
+
+    # Domaine unique : www et l'ancienne préprod redirigés en 301 vers painsansgluten.fr
+    # (chemin et paramètres conservés ; renouvellement des certificats exclu).
+    RewriteCond %{HTTP_HOST} ^(www|preprod)\.painsansgluten\.fr$ [NC]
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteRule ^ https://painsansgluten.fr%{REQUEST_URI} [L,R=301]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
