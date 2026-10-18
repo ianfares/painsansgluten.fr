@@ -1127,3 +1127,13 @@ FICHIERS : migration 2026_10_15_170000_add_icon_to_categories_table, app/Models/
 SÉCURITÉ : texte affiché échappé (`{{ }}`), 16 caractères max.
 TESTS : suite complète verte ; pint OK ; phpstan 0 erreur.
 PROCHAINE TÂCHE SUGGÉRÉE : configuration GTM des événements e-commerce (Ian).
+
+## [2026-10-18 21:10] — Claude Opus 5.5 — Texte du bandeau cookies
+OBJECTIF : Ian : remplacer le texte par défaut de tarteaucitron (« Ce site utilise des cookies et vous donne le contrôle… ») par un texte plus chaleureux.
+RÉALISÉ : `window.tarteaucitronCustomText.alertBigPrivacy` défini avant `tarteaucitron.init()` : « Pas de gluten ici, mais quelques cookies 🍪 ! Ils nous aident à savoir comment le site est utilisé pour l'améliorer. À vous de choisir : vous pouvez les accepter ou les refuser. » Librairie tarteaucitron non modifiée.
+FICHIERS : resources/js/consent.js, docs/JOURNAL.md.
+ANALYSE D'IMPACT : bandeau de consentement uniquement (prod). Boutons Accepter/Refuser inchangés.
+SÉCURITÉ / RGPD : le texte mentionne la finalité (mesure d'audience, seul GA4 dépose des cookies) et la possibilité de refuser. À adapter si un autre service à cookies est ajouté.
+TESTS : `npm run build` OK (texte présent dans le bundle) ; suite complète 497/497 ; pint OK ; phpstan 0 erreur. Contrôle visuel du bandeau à faire en prod (bandeau absent hors production).
+DÉPLOIEMENT : `npm run build` sur le serveur (public/build non versionné).
+PROCHAINE TÂCHE SUGGÉRÉE : bascule du domaine (APP_URL, webhook Stripe live), puis 301 des URL indexées par Google dans `public/.htaccess`.
