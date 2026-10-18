@@ -1158,3 +1158,11 @@ FICHIERS : docs/JOURNAL.md (aucun code modifié).
 SÉCURITÉ : aucune donnée personnelle affichée (comptages uniquement). Les paiements de test restent visibles dans Stripe en mode test (sans effet).
 RETOUR ARRIÈRE : `zcat ~/backups-ia/20261018-211909/db-avant-purge.sql.gz | mariadb <base>` (à faire par Ian).
 PROCHAINE TÂCHE SUGGÉRÉE : webhook Stripe live puis commande réelle de test ; 301 des URL Google.
+
+## [2026-10-18 21:56] — Claude Opus 5.5 — Import des clients Shopify
+OBJECTIF : Ian : injecter l'export clients Shopify (`customers_export.csv`) dans la base de production.
+RÉALISÉ : analyse sans lecture des valeurs (comptage par colonne) : 15 lignes, email seul renseigné (0 nom, 0 adresse, 0 téléphone, 0 commande ; 14 consentements marketing). Import validé par Ian malgré l'absence de nom : 15 comptes particuliers (`users`, nom/prénom vides, mot de passe aléatoire inutilisable, email non vérifié) — accès via « Mot de passe oublié », aucun email envoyé. Dump préalable `~/backups-ia/20261018-215458/db-avant-purge.sql.gz`. Script et copie du CSV supprimés du serveur ; CSV local exclu de Git (`.git/info/exclude`).
+FICHIERS : docs/JOURNAL.md (aucun code modifié).
+SÉCURITÉ / RGPD : aucune donnée personnelle affichée. Consentements marketing non repris (pas de newsletter en V1) ; si une annonce est envoyée, la faire via Brevo aux seuls 14 consentants.
+POINTS À RELIRE PAR UN HUMAIN : affichage des comptes sans nom dans le BO / « Mon compte » (le tunnel redemande nom et prénom à la commande).
+PROCHAINE TÂCHE SUGGÉRÉE : commande test de la cliente ; intégration recherche points relais Chronopost (T11) dès réception des identifiants Web Services.
