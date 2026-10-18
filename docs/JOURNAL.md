@@ -1166,3 +1166,25 @@ FICHIERS : docs/JOURNAL.md (aucun code modifié).
 SÉCURITÉ / RGPD : aucune donnée personnelle affichée. Consentements marketing non repris (pas de newsletter en V1) ; si une annonce est envoyée, la faire via Brevo aux seuls 14 consentants.
 POINTS À RELIRE PAR UN HUMAIN : affichage des comptes sans nom dans le BO / « Mon compte » (le tunnel redemande nom et prénom à la commande).
 PROCHAINE TÂCHE SUGGÉRÉE : commande test de la cliente ; intégration recherche points relais Chronopost (T11) dès réception des identifiants Web Services.
+
+## [2026-10-18 22:15] — Claude Opus 5.5 — POINT D'ÉTAPE MISE EN PRODUCTION (à reprendre le 2026-10-19)
+OBJECTIF : récapituler l'état de la bascule en production pour la session suivante.
+ÉTAT : **le site est EN PRODUCTION sur https://painsansgluten.fr** (même VPS et même dossier `/var/www/painsansgluten` que l'ex-préprod, base `painsansgluten`). Il n'y a plus de préprod : `www.` et `preprod.` redirigent en 301 (règle dans `public/.htaccess`).
+FAIT LE 2026-10-18 :
+- Apache : vhost `painsansgluten.conf` + `-le-ssl.conf` (certificat Let's Encrypt painsansgluten.fr + www), fait par Ian en root.
+- `.env` prod : APP_ENV=production, APP_DEBUG=false, APP_URL=https://painsansgluten.fr (sans www, choix définitif), GTM_ID=GTM-KFK55VB8, GTM_ENABLED_OUTSIDE_PRODUCTION=false, config en cache.
+- Stripe LIVE : clé publiable pk_live + clé restreinte rk_live (Checkout Sessions écriture, Charges and Refunds écriture, Payment Intents lecture) ; webhook live `https://painsansgluten.fr/webhooks/stripe` (5 événements) + STRIPE_WEBHOOK_SECRET. Vérifié : clé live OK, solde refusé (clé bien restreinte), webhook joignable (400 sans signature).
+- `.htaccess` : protection préprod et `X-Robots-Tag noindex` retirés ; site indexable (robots.txt prod, sitemap 30 URL, canonical OK).
+- Bandeau cookies : nouveau texte déployé.
+- Base : données de test purgées (numérotation C/F/A repart à 1) ; 15 comptes clients Shopify importés (email seul).
+- Brevo, sauvegardes, supervision, DNS, contenus BO : déclarés faits par Ian.
+RESTE À FAIRE :
+1. **Chronopost** : Ian apporte les identifiants Web Services de prod le 2026-10-19. ⚠️ Mettre les identifiants dans le `.env` NE SUFFIT PAS : la recherche de points relais n'est pas développée (le tunnel demande au client de saisir à la main CP + nom du relais, cf. `app/Livewire/CheckoutWizard.php` l.36 ; les variables CHRONOPOST_* de `.env.example` ne sont lues nulle part dans `config/`). À faire : T11 (intégration Web Service recherche de points relais), en local + tests, puis déploiement. Les identifiants ne doivent jamais être collés dans la conversation : Ian les met lui-même dans le `.env`.
+2. **Commande réelle de test** (faite par la cliente) : petite somme, vérifier passage en « payée » (Stripe → Webhooks → statut 200), facture n°1, emails reçus (Brevo jamais testé en prod), puis **remboursement depuis le BO** (valide l'avoir et le droit « Refunds » de la clé rk_live).
+3. **Search Console** : soumettre `https://painsansgluten.fr/sitemap.xml`.
+4. GTM : événements e-commerce GA4 (non bloquant).
+5. Ménage serveur (Ian) : le dossier du site est le home de l'utilisateur et contient `backups/env-*` (copies du .env), historiques shell/psysh — hors `public/`, à déplacer/supprimer. Dumps de la journée dans `~/backups-ia/2026101*-*/`.
+DÉCISIONS DE LA SESSION : redirections 301 des anciennes URL Shopify abandonnées (Ian : « on s'en fout ») ; pas de synchro complète serveur → local (rapatrierait des secrets : `bootstrap/cache/config.php`, `backups/env-*`) — synchroniser fichier par fichier ; `public/build` compilé en local et envoyé (pas de node_modules sur le serveur).
+FICHIERS LOCAUX À NETTOYER (Ian) : `customers_export.csv` (données clients, exclu de Git via `.git/info/exclude`) ; `qrcode.zip` apparaît supprimé dans le working tree (non fait par Claude).
+GIT : `develop` a 8 commits non poussés vers origin (push à faire par Ian) ; tag `deploy-20261018-211523`.
+PROCHAINE TÂCHE SUGGÉRÉE : T11 Chronopost (recherche de points relais) dès que les identifiants sont dans le `.env`, puis commande réelle de test.
