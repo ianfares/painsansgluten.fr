@@ -1137,3 +1137,15 @@ SÉCURITÉ / RGPD : le texte mentionne la finalité (mesure d'audience, seul GA4
 TESTS : `npm run build` OK (texte présent dans le bundle) ; suite complète 497/497 ; pint OK ; phpstan 0 erreur. Contrôle visuel du bandeau à faire en prod (bandeau absent hors production).
 DÉPLOIEMENT : `npm run build` sur le serveur (public/build non versionné).
 PROCHAINE TÂCHE SUGGÉRÉE : bascule du domaine (APP_URL, webhook Stripe live), puis 301 des URL indexées par Google dans `public/.htaccess`.
+
+## [2026-10-18 21:20] — Claude Opus 5.5 — Bascule domaine : .htaccess de production + déploiement
+OBJECTIF : Ian : passer la préprod en production sur painsansgluten.fr (domaine sans www).
+RÉALISÉ : `public/.htaccess` du serveur récupéré seul (commit « sync ») puis nettoyé : bloc « Protection préprod » (déjà désactivé) et `X-Robots-Tag noindex` retirés ; ajout d'une redirection 301 `www.` / `preprod.painsansgluten.fr` → `https://painsansgluten.fr` (chemin et paramètres conservés, `/.well-known/` exclu pour certbot). Déployés : `public/.htaccess`, `resources/js/consent.js`, `public/build/` (compilé en local : pas de `node_modules` sur le serveur).
+CÔTÉ IAN (hors dépôt) : vhost Apache `painsansgluten.conf` + certificat Let's Encrypt (painsansgluten.fr + www) ; `.env` : APP_ENV=production, APP_DEBUG=false, APP_URL=https://painsansgluten.fr, clés Stripe live (clé restreinte rk_live : Checkout Sessions écriture, Charges and Refunds écriture, Payment Intents lecture), GTM. Incident pendant certbot : vhost `painsansgluten-le-ssl.conf` sans certificat → Apache arrêté quelques minutes, résolu par `a2dissite` puis certbot.
+FICHIERS : public/.htaccess, docs/JOURNAL.md.
+ANALYSE D'IMPACT : toutes les requêtes HTTP ; le site est désormais indexable.
+SÉCURITÉ : la synchro complète serveur → local a été volontairement évitée : le dossier du site (= home de l'utilisateur) contient `bootstrap/cache/config.php`, `backups/env-*`, historiques shell/psysh, hors de `public/` (non servis) — ne jamais les rapatrier. La première clé rk_live a été collée dans la conversation puis révoquée et remplacée par Ian.
+TESTS : vérifs externes : `/` 200 sans X-Robots-Tag ; `www.…/boutique?x=1` et `preprod.…/faq` → 301 vers painsansgluten.fr ; robots.txt de production ; POST `/webhooks/stripe` sans signature → 400 (atteignable, pas bloqué par Cloudflare). Suite complète 497/497, pint OK, phpstan 0 (tâche précédente, aucun PHP modifié ici).
+SAUVEGARDE SERVEUR : ~/backups-ia/20261018-211523/ (= /var/www/painsansgluten/backups-ia/). Retour arrière : recopier ces fichiers dans /var/www/painsansgluten/.
+À RENSEIGNER / QUESTIONS OUVERTES : webhook Stripe live (`https://painsansgluten.fr/webhooks/stripe`, 5 événements) + `STRIPE_WEBHOOK_SECRET` ; 301 des anciennes URL Shopify indexées (liste Search Console attendue) ; commande réelle + remboursement de test ; sitemap à soumettre dans Search Console ; identifiants Chronopost Web Services de production.
+PROCHAINE TÂCHE SUGGÉRÉE : webhook Stripe live puis commande réelle de test ; 301 des URL Google.
