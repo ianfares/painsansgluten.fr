@@ -52,6 +52,11 @@ function initConsent() {
     document.addEventListener('googletagmanager_consentModeOk', () => updateConsent(true));
     document.addEventListener('googletagmanager_consentModeKo', () => updateConsent(false));
 
+    // Texte du bandeau (remplace celui par défaut de tarteaucitron, appliqué au chargement de la langue).
+    window.tarteaucitronCustomText = {
+        alertBigPrivacy: "Pas de gluten ici, mais quelques cookies 🍪 ! Ils nous aident à savoir comment le site est utilisé pour l'améliorer. À vous de choisir : vous pouvez les accepter ou les refuser.",
+    };
+
     window.tarteaucitron.init({
         privacyUrl: config.privacyUrl,
         hashtag: '#cookies',
