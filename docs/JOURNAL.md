@@ -1149,3 +1149,12 @@ TESTS : vérifs externes : `/` 200 sans X-Robots-Tag ; `www.…/boutique?x=1` et
 SAUVEGARDE SERVEUR : ~/backups-ia/20261018-211523/ (= /var/www/painsansgluten/backups-ia/). Retour arrière : recopier ces fichiers dans /var/www/painsansgluten/.
 À RENSEIGNER / QUESTIONS OUVERTES : webhook Stripe live (`https://painsansgluten.fr/webhooks/stripe`, 5 événements) + `STRIPE_WEBHOOK_SECRET` ; 301 des anciennes URL Shopify indexées (liste Search Console attendue) ; commande réelle + remboursement de test ; sitemap à soumettre dans Search Console ; identifiants Chronopost Web Services de production.
 PROCHAINE TÂCHE SUGGÉRÉE : webhook Stripe live puis commande réelle de test ; 301 des URL Google.
+
+## [2026-10-18 21:20] — Claude Opus 5.5 — Purge des données de test avant ouverture
+OBJECTIF : Ian : supprimer toutes les données de test (commandes, paiements, factures, avoirs, comptes clients…) de la base de production.
+RÉALISÉ : dump complet préalable (`~/backups-ia/20261018-211909/db-avant-purge.sql.gz`, 600, = /var/www/painsansgluten/backups-ia/) ; contrôle : 0 commande créée après le passage aux clés live ; suppression en transaction : 11 commandes (+ lignes, historiques), 6 paiements, 8 événements Stripe, 10 factures/avoirs + 10 PDF `storage/app/invoices/`, 3 comptes clients, 1 adresse, 1 demande pro, 137 paniers, sessions ; `invoice_sequences` vidée (numérotation commandes C, factures F, avoirs A repart à 1) ; cache vidé. Script ponctuel (Laravel, connexion de l'appli, aucun identifiant manipulé) supprimé du serveur après usage.
+CONSERVÉ : produits (26 médias), catégories, pages, FAQ, paramètres, frais de port, jours fermés, points de retrait, 1 compte admin.
+FICHIERS : docs/JOURNAL.md (aucun code modifié).
+SÉCURITÉ : aucune donnée personnelle affichée (comptages uniquement). Les paiements de test restent visibles dans Stripe en mode test (sans effet).
+RETOUR ARRIÈRE : `zcat ~/backups-ia/20261018-211909/db-avant-purge.sql.gz | mariadb <base>` (à faire par Ian).
+PROCHAINE TÂCHE SUGGÉRÉE : webhook Stripe live puis commande réelle de test ; 301 des URL Google.
