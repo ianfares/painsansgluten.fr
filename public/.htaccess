@@ -1,3 +1,18 @@
+# Protection préprod (spécifique au serveur, non versionnée)
+#AuthType Basic
+#AuthName "Zone preprod protegee"
+AuthUserFile /etc/apache2/.htpasswd-painsansgluten-preprod
+# Stripe doit pouvoir appeler le webhook (authentifié par sa signature).
+#<RequireAny>
+#    Require expr %{THE_REQUEST} =~ m#^POST /webhooks/stripe[ ?]#
+    # Logo affiché dans les emails (fichier public).
+#    Require expr %{THE_REQUEST} =~ m#^GET /storage/branding/[A-Za-z0-9_-]+\.(png|jpe?g|webp) HTTP/#
+#    Require valid-user
+#</RequireAny>
+<IfModule mod_headers.c>
+    Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
