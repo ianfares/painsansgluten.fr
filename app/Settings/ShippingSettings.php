@@ -49,6 +49,12 @@ class ShippingSettings extends Settings
     /** Distance maximale (km, à vol d'oiseau) des points de retrait proposés. */
     public int $pickup_max_distance_km;
 
+    /** Minimum de commande (centimes TTC, produits hors port, après remise) en Chronopost Relais ; 0 = aucun. */
+    public int $minimum_order_chronopost_ttc;
+
+    /** Minimum de commande (centimes TTC, produits hors port, après remise) en retrait (commerçant, labo) ; 0 = aucun. */
+    public int $minimum_order_pickup_ttc;
+
     public static function group(): string
     {
         return 'shipping';

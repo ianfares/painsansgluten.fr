@@ -7,6 +7,7 @@ namespace App\Actions\Orders;
 use App\Enums\DeliveryMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Exceptions\Orders\OrderBelowMinimum;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
@@ -38,10 +39,13 @@ class CreateOrderAction
      * @param  array{first_name: string, last_name: string, company?: ?string, line1: string, line2?: ?string, postal_code: string, city: string}  $billing
      * @param  array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}  $relay
      * @param  array{first_name: string, last_name: string, line1: string, postal_code: string, city: string}|null  $shipping
+     * @param  bool  $enforceMinimum  faux pour la commande manuelle du BO (l'admin décide)
+     *
+     * @throws OrderBelowMinimum montant des produits sous le minimum du mode de livraison
      */
-    public function execute(Cart $cart, array $customer, array $billing, array $relay, PaymentMethod $paymentMethod, ?int $userId = null, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay, ?array $shipping = null): Order
+    public function execute(Cart $cart, array $customer, array $billing, array $relay, PaymentMethod $paymentMethod, ?int $userId = null, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay, ?array $shipping = null, bool $enforceMinimum = true): Order
     {
-        return DB::transaction(function () use ($cart, $customer, $billing, $relay, $paymentMethod, $userId, $deliveryMethod, $shipping) {
+        return DB::transaction(function () use ($cart, $customer, $billing, $relay, $paymentMethod, $userId, $deliveryMethod, $shipping, $enforceMinimum) {
             // Verrou sur le panier : deux validations simultanées (double clic,
             // deux onglets) ne créent qu'une commande, la seconde trouve le panier vide.
             Cart::query()->whereKey($cart->id)->lockForUpdate()->first();
@@ -65,6 +69,11 @@ class CreateOrderAction
 
             if ($totals['shipping_error'] !== null) {
                 throw new RuntimeException($totals['shipping_error']);
+            }
+
+            // Minimum de commande (19/10/2026) : revérifié ici, pas seulement dans le tunnel.
+            if ($enforceMinimum && $totals['minimum_missing_ttc'] > 0) {
+                throw OrderBelowMinimum::forAmounts($totals['minimum_ttc'], $totals['minimum_missing_ttc']);
             }
 
             $number = $this->sequenceGenerator->next('order', 'C');

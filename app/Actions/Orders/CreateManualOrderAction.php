@@ -71,6 +71,7 @@ class CreateManualOrderAction
                     paymentMethod: $paymentMethod,
                     userId: $user->id,
                     deliveryMethod: $deliveryMethod,
+                    enforceMinimum: false,
                 );
             } catch (RuntimeException $e) {
                 throw ManualOrderNotAllowed::because('Commande impossible : '.$e->getMessage());

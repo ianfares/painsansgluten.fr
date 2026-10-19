@@ -129,6 +129,11 @@
                     @endif
 
                     @error('deliveryChoice')<p class="text-sm text-red-700">{{ $message }}</p>@enderror
+                    @if (! $errors->has('deliveryChoice') && $totals['minimum_missing_ttc'] > 0)
+                        <x-ui.alert variant="warning">
+                            Le minimum de commande pour ce mode de livraison est de {{ number_format($totals['minimum_ttc'] / 100, 2, ',', ' ') }} € (hors frais de livraison) : il vous manque {{ number_format($totals['minimum_missing_ttc'] / 100, 2, ',', ' ') }} €.
+                        </x-ui.alert>
+                    @endif
                 </fieldset>
 
                 @if ($deliveryMethodValue->value === 'chronopost_relay' && ! $pickupOnly)

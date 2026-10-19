@@ -497,3 +497,10 @@
 - **Connexion admin** : écouteur `Login` (garde admin) ; table `admin_known_ips` (empreinte HMAC de l'IP avec `APP_KEY`, jamais l'IP en clair ; index unique admin+IP → une seule alerte même en cas de connexions simultanées). Email en file d'attente (pas de latence au login). IP en clair uniquement dans l'email. Première connexion de chaque admin après la mise en place = une alerte (normal).
 - **Limite connue (acceptée par Ian)** : un pirate maître du serveur peut aussi refaire la référence ou couper le cron ; le contrôle externe depuis un autre poste a été proposé et refusé.
 - **Écarté** : AIDE/Tripwire (pas de sudo sur le serveur), MD5.
+
+## 2026-10-19 — Montant minimum de commande par mode de livraison
+- **Demande de Ian** : minimum d'achat pour tous les clients (particuliers et pros), un montant pour Chronopost Relais et un pour les retraits, modifiables dans le BO (Paramètres > Expédition, saisie en euros, stockage en centimes). Valeur initiale 15 € pour les deux ; 0 = pas de minimum.
+- **Assiette** : produits hors frais de livraison, **après remise client** (`subtotal_ttc`, ce qui est payé pour les produits), comme le seuil de port offert. Les deux retraits (commerçant partenaire, laboratoire) partagent le minimum « retrait ».
+- **Contrôles** : panier (message + bouton « Passer commande » désactivé sous le plus petit des deux minimums), tunnel étape 2 (mode refusé si son minimum n'est pas atteint), et `CreateOrderAction` (exception `OrderBelowMinimum`) pour qu'aucun appel direct ne le contourne.
+- **Commande manuelle du BO** : non soumise au minimum (`enforceMinimum: false`) — l'admin décide ; à confirmer par Ian.
+- **Tests** : le minimum est mis à 0 par défaut dans `tests/Pest.php` pour les tests antérieurs (petits paniers) ; il est testé dans `tests/Feature/Checkout/MinimumOrderTest.php`.

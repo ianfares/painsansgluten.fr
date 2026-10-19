@@ -7,6 +7,7 @@ namespace App\Livewire;
 use App\Actions\Orders\CreateOrderAction;
 use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
+use App\Exceptions\Orders\OrderBelowMinimum;
 use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Mail\Admin\NewBankTransferOrderMail;
 use App\Mail\BankTransferInstructionsMail;
@@ -232,6 +233,9 @@ class CheckoutWizard extends Component
      */
     private function resolveDelivery(): ?array
     {
+        // Erreur d'un choix précédent (ex. minimum non atteint) effacée à chaque nouvelle tentative.
+        $this->resetErrorBag('deliveryChoice');
+
         if (DeliveryMethod::tryFrom(explode(':', $this->deliveryChoice)[0]) === null) {
             return $this->deliveryError('deliveryChoice', 'Choisissez un mode de livraison.');
         }
@@ -240,6 +244,13 @@ class CheckoutWizard extends Component
 
         if ($this->selectedDeliveryMethod() === DeliveryMethod::ChronopostRelay && $this->cartIsPickupOnly()) {
             return $this->deliveryError('deliveryChoice', 'Votre panier contient un produit disponible uniquement en retrait : choisissez un point de retrait.');
+        }
+
+        // Minimum de commande du mode choisi (19/10/2026), revérifié par CreateOrderAction.
+        $cartService = app(CartService::class);
+        $totals = $cartService->totals($cartService->currentCart(), $this->selectedDeliveryMethod());
+        if ($totals['minimum_missing_ttc'] > 0) {
+            return $this->deliveryError('deliveryChoice', OrderBelowMinimum::forAmounts($totals['minimum_ttc'], $totals['minimum_missing_ttc'])->getMessage());
         }
 
         return match ($this->selectedDeliveryMethod()) {
@@ -403,6 +414,12 @@ class CheckoutWizard extends Component
                     'city' => $this->shipping_city,
                 ],
             );
+        } catch (OrderBelowMinimum $e) {
+            // Panier modifié dans un autre onglet après l'étape 2.
+            $this->error = $e->getMessage();
+            $this->submitting = false;
+
+            return;
         } catch (RuntimeException) {
             // Panier vidé entre-temps (commande déjà validée dans un autre onglet, double clic).
             $this->error = 'Votre panier est vide ou cette commande a déjà été validée.';

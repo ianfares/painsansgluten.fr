@@ -61,6 +61,22 @@ class ManageShippingSettings extends SettingsPage
                     TextInput::make('max_quantity_per_line')->label('Quantité maximum par ligne')->numeric()->minValue(1)->required(),
                 ]),
 
+            // Saisie en euros, stockage en centimes (19/10/2026).
+            Section::make('Minimum de commande')
+                ->description('Montant minimum des produits (hors frais de livraison, après remise client), pour tous les clients. 0 = pas de minimum.')
+                ->schema([
+                    TextInput::make('minimum_order_chronopost_ttc')
+                        ->label('Minimum en livraison Chronopost Relais (€ TTC)')
+                        ->numeric()->step(0.01)->minValue(0)->maxValue(10000)->prefix('€')->required()
+                        ->formatStateUsing(fn (?int $state): ?float => $state !== null ? round($state / 100, 2) : null)
+                        ->dehydrateStateUsing(fn (?string $state): int => (int) round(((float) $state) * 100)),
+                    TextInput::make('minimum_order_pickup_ttc')
+                        ->label('Minimum en retrait (commerçant partenaire ou laboratoire) (€ TTC)')
+                        ->numeric()->step(0.01)->minValue(0)->maxValue(10000)->prefix('€')->required()
+                        ->formatStateUsing(fn (?int $state): ?float => $state !== null ? round($state / 100, 2) : null)
+                        ->dehydrateStateUsing(fn (?string $state): int => (int) round(((float) $state) * 100)),
+                ]),
+
             Section::make('Frais de port')
                 ->schema([
                     Toggle::make('free_shipping_enabled')->label('Franco de port activé')->live(),
