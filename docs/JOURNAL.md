@@ -1202,5 +1202,5 @@ DOCUMENTATION : docs/DECISIONS.md, docs/JOURNAL.md.
 À RENSEIGNER / QUESTIONS OUVERTES : commande manuelle du BO exemptée du minimum : à confirmer par Ian. Valeur du minimum « retrait » (15 € par défaut, modifiable dans le BO).
 POINTS À RELIRE PAR UN HUMAIN : textes affichés au client (panier et étape 2) ; le minimum porte sur le montant après remise pro.
 AJOUTÉ AU BACKLOG : rien.
-DÉPLOIEMENT (non fait, sur ordre) : fichiers ci-dessus + `public/build/` ; sur le serveur `php artisan migrate --force` (migration de paramètres), `optimize`, puis `security:integrity-snapshot`.
-PROCHAINE TÂCHE SUGGÉRÉE : déploiement de cette évolution, puis T11 Chronopost (recherche de points relais).
+DÉPLOIEMENT (2026-10-19, sur ordre de Ian) : fichiers du serveur vérifiés identiques à la version locale avant modification ; 12 fichiers envoyés (`public/build` inchangé : CSS identique) ; `php -l` OK ; `migrate --force` (seule migration en attente : minimums 15 €/15 €, vérifiés en base) ; `optimize` ; `security:integrity-snapshot`. Pages /, /panier, /commande, /boutique : 200. Sauvegarde : ~/backups-ia/20261019-220143/ (fichiers + `settings-table.json`, export de la table `settings`). Retour arrière : recopier les fichiers depuis cette sauvegarde, supprimer les 3 fichiers nouveaux, puis `optimize` (les 2 paramètres en base peuvent rester, inutilisés). Tag `deploy-20261019-220143`.
+PROCHAINE TÂCHE SUGGÉRÉE : T11 Chronopost (recherche de points relais), puis commande réelle de test.
