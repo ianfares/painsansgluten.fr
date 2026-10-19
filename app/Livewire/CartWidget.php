@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Enums\DeliveryMethod;
 use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Models\CartItem;
 use App\Services\Analytics\Ecommerce;
@@ -85,6 +86,8 @@ class CartWidget extends Component
         return view('livewire.cart-widget', [
             'items' => $items,
             'totals' => $totals,
+            'minimumChronopost' => $cartService->minimumOrderFor(DeliveryMethod::ChronopostRelay),
+            'minimumPickup' => $cartService->minimumOrderFor(DeliveryMethod::MerchantPickup),
         ]);
     }
 

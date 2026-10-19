@@ -65,10 +65,20 @@
 
             {{-- Accès au tunnel de commande (oubli corrigé le 10/10/2026). L'invité peut
                  commander sans compte ; la connexion / création de compte est proposée. --}}
+            <x-cart.minimum-notice :subtotal="$totals['subtotal_ttc']" :chronopost="$minimumChronopost" :pickup="$minimumPickup" />
+
+            {{-- Sous le plus petit minimum, aucun mode de livraison n'est possible :
+                 bouton désactivé (le tunnel et CreateOrderAction revérifient). --}}
             @unless ($totals['shipping_error'])
-                <x-ui.button variant="primary" href="{{ route('checkout') }}" class="mt-3 w-full justify-center">
-                    Passer commande
-                </x-ui.button>
+                @if ($totals['subtotal_ttc'] < min($minimumChronopost, $minimumPickup))
+                    <x-ui.button type="button" disabled aria-disabled="true" class="mt-3 w-full cursor-not-allowed justify-center opacity-50">
+                        Passer commande
+                    </x-ui.button>
+                @else
+                    <x-ui.button variant="primary" href="{{ route('checkout') }}" class="mt-3 w-full justify-center">
+                        Passer commande
+                    </x-ui.button>
+                @endif
             @endunless
 
             @unless ($onCartPage)

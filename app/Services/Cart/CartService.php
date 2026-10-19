@@ -165,7 +165,8 @@ class CartService
      *
      * @return array{count: int, subtotal_ttc: int, discount_percent: int, discount_ttc: int, shipping_ttc: int|null,
      *     total_ttc: int|null, planned_ship_date: ?CarbonImmutable, shipping_error: ?string,
-     *     show_ht: bool, subtotal_ht: int, shipping_ht: int|null, total_ht: int|null, total_vat: int|null}
+     *     show_ht: bool, subtotal_ht: int, shipping_ht: int|null, total_ht: int|null, total_vat: int|null,
+     *     minimum_ttc: int, minimum_missing_ttc: int}
      */
     public function totals(Cart $cart, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay): array
     {
@@ -209,7 +210,27 @@ class CartService
             'shipping_ht' => $shippingHt,
             'total_ht' => $shippingHt !== null ? (int) $subtotalHt + $shippingHt : null,
             'total_vat' => $shippingHt !== null ? $subtotal + (int) $shipping - ((int) $subtotalHt + $shippingHt) : null,
+            'minimum_ttc' => $this->minimumOrderFor($deliveryMethod),
+            'minimum_missing_ttc' => max(0, $this->minimumOrderFor($deliveryMethod) - $subtotal),
         ];
+    }
+
+    /**
+     * Minimum de commande du mode de livraison (19/10/2026), en centimes TTC.
+     * Il porte sur `subtotal_ttc` (produits après remise, hors frais de port),
+     * comme le seuil de port offert. Les deux retraits partagent le minimum « retrait ».
+     */
+    public function minimumOrderFor(DeliveryMethod $deliveryMethod): int
+    {
+        return $deliveryMethod->isPickup()
+            ? $this->shippingSettings->minimum_order_pickup_ttc
+            : $this->shippingSettings->minimum_order_chronopost_ttc;
+    }
+
+    /** Plus petit des deux minimums : en dessous, aucun mode de livraison n'est possible. */
+    public function lowestMinimumOrder(): int
+    {
+        return min($this->shippingSettings->minimum_order_chronopost_ttc, $this->shippingSettings->minimum_order_pickup_ttc);
     }
 
     /** Remise du compte rattaché au panier ; 0 pour un panier invité. */
