@@ -29,3 +29,7 @@ Thumbs.db
 /modif/
 /.claude/settings.local.json
 /.claude/worktrees/
+
+# Sauvegardes automatiques de l'assistant
+.backups/
+.sync-tmp/
