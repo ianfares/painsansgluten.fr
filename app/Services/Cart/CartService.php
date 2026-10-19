@@ -227,12 +227,6 @@ class CartService
             : $this->shippingSettings->minimum_order_chronopost_ttc;
     }
 
-    /** Plus petit des deux minimums : en dessous, aucun mode de livraison n'est possible. */
-    public function lowestMinimumOrder(): int
-    {
-        return min($this->shippingSettings->minimum_order_chronopost_ttc, $this->shippingSettings->minimum_order_pickup_ttc);
-    }
-
     /** Remise du compte rattaché au panier ; 0 pour un panier invité. */
     public function discountPercent(Cart $cart): int
     {
