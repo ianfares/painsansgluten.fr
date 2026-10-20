@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\Pricing\CustomerPricing;
 use App\Services\Shipping\ShippingCostCalculator;
 use App\Services\Shipping\ShippingDateCalculator;
+use App\Settings\FreeGiftSettings;
 use App\Settings\ShippingSettings;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -29,6 +30,7 @@ class CartService
         private readonly ShippingSettings $shippingSettings,
         private readonly ShippingCostCalculator $shippingCostCalculator,
         private readonly ShippingDateCalculator $shippingDateCalculator,
+        private readonly FreeGiftSettings $freeGiftSettings,
     ) {}
 
     public function currentCart(): Cart
@@ -166,7 +168,8 @@ class CartService
      * @return array{count: int, subtotal_ttc: int, discount_percent: int, discount_ttc: int, shipping_ttc: int|null,
      *     total_ttc: int|null, planned_ship_date: ?CarbonImmutable, shipping_error: ?string,
      *     show_ht: bool, subtotal_ht: int, shipping_ht: int|null, total_ht: int|null, total_vat: int|null,
-     *     minimum_ttc: int, minimum_missing_ttc: int}
+     *     minimum_ttc: int, minimum_missing_ttc: int,
+     *     free_gift: array{active: bool, earned: bool, label: string, threshold_ttc: int, missing_ttc: int}}
      */
     public function totals(Cart $cart, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay): array
     {
@@ -177,6 +180,12 @@ class CartService
         $discount = $items->sum(fn (CartItem $item) => CustomerPricing::unitDiscount($item->product->price_ttc, $percent) * $item->quantity);
         $weight = $items->sum(fn (CartItem $item) => $item->product->shipping_weight_g * $item->quantity);
         $count = $items->sum('quantity');
+        $freeGift = $this->freeGift($subtotal);
+
+        // Le poids de la pâtisserie offerte compte dans le colis (tranche de port).
+        if ($freeGift['earned'] && $count > 0) {
+            $weight += $this->freeGiftSettings->weight_g;
+        }
 
         $shipping = null;
         $shippingError = null;
@@ -212,6 +221,29 @@ class CartService
             'total_vat' => $shippingHt !== null ? $subtotal + (int) $shipping - ((int) $subtotalHt + $shippingHt) : null,
             'minimum_ttc' => $this->minimumOrderFor($deliveryMethod),
             'minimum_missing_ttc' => max(0, $this->minimumOrderFor($deliveryMethod) - $subtotal),
+            'free_gift' => $freeGift,
+        ];
+    }
+
+    /**
+     * Pâtisserie offerte (20/10/2026) : gagnée dès que les produits (après
+     * remise, hors port — même assiette que le minimum) atteignent le seuil,
+     * pour tous les clients. Une seule par commande. Inactive tant que le
+     * seuil est à 0 (paramètre non renseigné).
+     *
+     * @return array{active: bool, earned: bool, label: string, threshold_ttc: int, missing_ttc: int}
+     */
+    public function freeGift(int $subtotalTtc): array
+    {
+        $threshold = $this->freeGiftSettings->threshold_ttc;
+        $active = $this->freeGiftSettings->enabled && $threshold > 0;
+
+        return [
+            'active' => $active,
+            'earned' => $active && $subtotalTtc > 0 && $subtotalTtc >= $threshold,
+            'label' => $this->freeGiftSettings->label,
+            'threshold_ttc' => $threshold,
+            'missing_ttc' => $active ? max(0, $threshold - $subtotalTtc) : 0,
         ];
     }
 

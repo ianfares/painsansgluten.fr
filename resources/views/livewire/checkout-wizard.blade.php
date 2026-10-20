@@ -169,6 +169,7 @@
                             @endif
                         </div>
                     @endforeach
+                    <x-cart.free-gift :gift="$totals['free_gift']" class="p-3" />
                 </div>
 
                 <div class="flex flex-col gap-1 text-sm">

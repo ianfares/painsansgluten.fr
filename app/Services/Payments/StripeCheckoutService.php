@@ -29,7 +29,9 @@ class StripeCheckoutService
     {
         $order->loadMissing('items');
 
-        $lineItems = $order->items->map(fn ($item) => [
+        // Pâtisserie offerte (ligne à 0 €) non transmise à Stripe : elle figure
+        // sur la commande, la facture et le bon de livraison.
+        $lineItems = $order->items->reject(fn ($item) => $item->is_free_gift)->map(fn ($item) => [
             'quantity' => $item->quantity,
             'price_data' => [
                 'currency' => 'eur',
@@ -40,7 +42,7 @@ class StripeCheckoutService
                     ? "{$item->product_name} (remise -{$order->discount_percent} %)"
                     : $item->product_name],
             ],
-        ])->all();
+        ])->values()->all();
 
         if ($order->shipping_ttc > 0) {
             $lineItems[] = [

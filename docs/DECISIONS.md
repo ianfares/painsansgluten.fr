@@ -504,3 +504,13 @@
 - **Contrôles** : panier (message + bouton « Passer commande » désactivé sous le plus petit des deux minimums), tunnel étape 2 (mode refusé si son minimum n'est pas atteint), et `CreateOrderAction` (exception `OrderBelowMinimum`) pour qu'aucun appel direct ne le contourne.
 - **Commande manuelle du BO** : non soumise au minimum (`enforceMinimum: false`) — l'admin décide ; à confirmer par Ian.
 - **Tests** : le minimum est mis à 0 par défaut dans `tests/Pest.php` pour les tests antérieurs (petits paniers) ; il est testé dans `tests/Feature/Checkout/MinimumOrderTest.php`.
+
+## 2026-10-20 — Pâtisserie offerte au-delà d'un montant d'achat
+- **Demande de Ian** : offrir une pâtisserie dès qu'un montant d'achat est atteint, visible sur le bon de commande comme un article offert à 0 €, activable/désactivable dans le BO (Paramètres > Pâtisserie offerte) avec le montant ; même règle pour particuliers et pros.
+- **Pâtisserie non précisée** (choix de Ian) : ligne générique (libellé réglable, « Pâtisserie offerte » par défaut), sans produit du catalogue (`product_id` null, référence `OFFERT`), repérée par `order_items.is_free_gift` (nouvelle migration).
+- **Assiette** : produits après remise client, hors frais de port (même calcul que le minimum de commande). Seuil inclus, une seule pâtisserie par commande. Inactive si désactivée ou seuil à 0.
+- **Poids** : le poids réglé dans le BO (g) s'ajoute à celui du colis et peut faire changer la tranche de port Chronopost (demande de Ian). Activation refusée dans le BO tant que montant et poids ne sont pas renseignés.
+- **Calcul serveur** : droit au cadeau recalculé dans `CartService::totals()` puis `CreateOrderAction` (rien ne vient du navigateur) ; la commande manuelle du BO passe par la même action, elle reçoit donc la pâtisserie automatiquement (demande de Ian).
+- **Stripe** : la ligne à 0 € n'est pas transmise à Checkout (aucun intérêt pour le paiement, évite tout risque de refus d'une ligne à 0 €) ; elle figure sur la commande, la facture, le bon de livraison, les emails, « Mon compte » et le BO.
+- **Facture** : ligne à 0 € affichée « (offert) », TVA « — » ; exclue du récapitulatif de TVA (pas de ligne de taux à 0 €).
+- **Écarté** : choix de la pâtisserie par le client (non demandé) ; ligne de panier réelle en base (la ligne serait modifiable/supprimable et à resynchroniser).

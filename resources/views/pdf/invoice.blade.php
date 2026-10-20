@@ -85,8 +85,8 @@
                 <td class="text-right">{{ $line['quantity'] }}</td>
                 <td class="text-right">{{ number_format($line['unit_price_ht'] / 100, 2, ',', ' ') }} €</td>
                 @if ($hasDiscount)<td class="text-right">{{ ($line['discount_percent'] ?? 0) > 0 ? '-'.$line['discount_percent'].' %' : '' }}</td>@endif
-                <td class="text-right">{{ $line['vat_rate'] }} %</td>
-                <td class="text-right">{{ number_format($line['total_ht'] / 100, 2, ',', ' ') }} €</td>
+                <td class="text-right">{{ ($line['free_gift'] ?? false) ? '—' : $line['vat_rate'].' %' }}</td>
+                <td class="text-right">{{ number_format($line['total_ht'] / 100, 2, ',', ' ') }} €{{ ($line['free_gift'] ?? false) ? ' (offert)' : '' }}</td>
             </tr>
         @endforeach
         @if (($s['shipping']['total_ttc'] ?? 0) !== 0)

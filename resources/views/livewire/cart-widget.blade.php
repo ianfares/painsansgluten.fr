@@ -40,9 +40,11 @@
                     </div>
                 </div>
             @endforeach
+            <x-cart.free-gift :gift="$totals['free_gift']" class="py-4" />
         </div>
 
         <div class="mt-4 flex flex-col gap-2 border-t border-line pt-4 text-sm">
+            <x-cart.free-gift :gift="$totals['free_gift']" mode="progress" />
             @if ($totals['shipping_error'] || ! $totals['show_ht'])
             <div class="flex justify-between"><span>Sous-total TTC</span><span>{{ number_format(($totals['subtotal_ttc'] + $totals['discount_ttc']) / 100, 2, ',', ' ') }} €</span></div>
             @if ($totals['discount_ttc'] > 0)
