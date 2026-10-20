@@ -53,7 +53,7 @@
             <tbody>
                 @foreach ($note['items'] as $item)
                     <tr>
-                        <td>{{ $item->product_name }}</td>
+                        <td>{{ $item->product_name }}{{ $item->is_free_gift ? ' (offert, 0 €)' : '' }}</td>
                         <td class="text-right">{{ $item->product?->formattedNetWeight() }}</td>
                         <td class="text-right">{{ $item->quantity }}</td>
                     </tr>

@@ -32,7 +32,7 @@
             @foreach ($order->items as $item)
                 <div class="flex items-center justify-between p-3 text-sm">
                     <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
-                    <span>{{ number_format($item->line_total_ttc / 100, 2, ',', ' ') }} €</span>
+                    <span>{{ number_format($item->line_total_ttc / 100, 2, ',', ' ') }} €{{ $item->is_free_gift ? ' (offert)' : '' }}</span>
                 </div>
             @endforeach
             @if ($order->discount_total_ttc > 0)

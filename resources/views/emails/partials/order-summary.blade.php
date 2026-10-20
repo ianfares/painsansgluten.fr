@@ -2,7 +2,7 @@
 | Produit | Qté | Total |
 |:--------|:---:|------:|
 @foreach ($order->items as $item)
-| {{ $item->product_name }} | {{ $item->quantity }} | {{ number_format($item->line_total_ttc / 100, 2, ',', ' ') }} € |
+| {{ $item->product_name }} | {{ $item->quantity }} | {{ number_format($item->line_total_ttc / 100, 2, ',', ' ') }} €{{ $item->is_free_gift ? ' (offert)' : '' }} |
 @endforeach
 @if ($order->discount_total_ttc > 0)
 | Remise client -{{ $order->discount_percent }} % (déjà déduite) | | -{{ number_format($order->discount_total_ttc / 100, 2, ',', ' ') }} € |

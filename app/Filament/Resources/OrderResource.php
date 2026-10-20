@@ -20,6 +20,7 @@ use App\Filament\Resources\OrderResource\DeliveryNoteActions;
 use App\Filament\Resources\OrderResource\ManualOrderForm;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Services\Orders\OrderStateMachine;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -300,7 +301,7 @@ class OrderResource extends Resource
                             TextEntry::make('product_name')->label('Produit'),
                             TextEntry::make('quantity')->label('Qté'),
                             TextEntry::make('line_total_ttc')->label('Total TTC')
-                                ->formatStateUsing(fn (int $state): string => number_format($state / 100, 2, ',', ' ').' €'),
+                                ->formatStateUsing(fn (int $state, OrderItem $record): string => number_format($state / 100, 2, ',', ' ').' €'.($record->is_free_gift ? ' (offert)' : '')),
                         ])
                         ->columns(3),
                 ]),

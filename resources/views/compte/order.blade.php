@@ -59,7 +59,7 @@
                     <tr class="border-b border-line">
                         <td class="p-3">{{ $item->product_name }}</td>
                         <td class="p-3 text-center">{{ $item->quantity }}</td>
-                        <td class="p-3 text-right">{{ number_format($item->line_total_ttc / 100, 2, ',', ' ') }} €</td>
+                        <td class="p-3 text-right">{{ number_format($item->line_total_ttc / 100, 2, ',', ' ') }} €{{ $item->is_free_gift ? ' (offert)' : '' }}</td>
                     </tr>
                 @endforeach
                 @if ($order->discount_total_ttc > 0)

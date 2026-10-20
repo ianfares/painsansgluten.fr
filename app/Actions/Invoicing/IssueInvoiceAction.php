@@ -57,7 +57,9 @@ class IssueInvoiceAction
 
         // Lignes produits + frais de port, regroupés par taux de TVA (le port a son propre taux).
         $shippingHt = (int) round($order->shipping_ttc / (1 + (float) $order->shipping_vat_rate / 100));
-        $vatLines = $order->items->map(fn ($item) => ['rate' => (float) $item->vat_rate, 'ht' => $item->line_total_ht, 'ttc' => $item->line_total_ttc]);
+        // La pâtisserie offerte (0 €) n'entre pas dans le récapitulatif de TVA.
+        $vatLines = $order->items->reject(fn ($item) => $item->is_free_gift)
+            ->map(fn ($item) => ['rate' => (float) $item->vat_rate, 'ht' => $item->line_total_ht, 'ttc' => $item->line_total_ttc]);
         if ($order->shipping_ttc > 0) {
             $vatLines->push(['rate' => (float) $order->shipping_vat_rate, 'ht' => $shippingHt, 'ttc' => $order->shipping_ttc]);
         }
@@ -100,6 +102,7 @@ class IssueInvoiceAction
                 'discount_percent' => $item->unit_discount_ttc > 0 ? $order->discount_percent : 0,
                 'vat_rate' => (float) $item->vat_rate,
                 'total_ht' => $item->line_total_ht,
+                'free_gift' => $item->is_free_gift,
             ])->all(),
             // Remise client (T27-L6) : produits seulement, totaux déjà après remise.
             'discount' => [

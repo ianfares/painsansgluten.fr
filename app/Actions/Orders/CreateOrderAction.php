@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\Cart\CartService;
 use App\Services\Pricing\CustomerPricing;
 use App\Services\Sequencing\SequenceGenerator;
+use App\Settings\FreeGiftSettings;
 use App\Settings\ShippingSettings;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,9 @@ use RuntimeException;
  */
 class CreateOrderAction
 {
+    /** Référence de la ligne « pâtisserie offerte » (aucun produit du catalogue). */
+    public const FREE_GIFT_REFERENCE = 'OFFERT';
+
     public function __construct(
         private readonly CartService $cartService,
         private readonly SequenceGenerator $sequenceGenerator,
@@ -134,6 +138,24 @@ class CreateOrderAction
                     'weight_g' => $item->product->shipping_weight_g,
                     'line_total_ttc' => $lineTtc,
                     'line_total_ht' => (int) round($lineTtc / (1 + (float) ($item->product->vat_rate ?? 0) / 100)),
+                ]);
+            }
+
+            // Pâtisserie offerte (20/10/2026) : ligne à 0 €, droit recalculé ici
+            // par CartService::totals() ; son poids est déjà compté dans le port.
+            if ($totals['free_gift']['earned']) {
+                $order->items()->create([
+                    'product_id' => null,
+                    'product_name' => $totals['free_gift']['label'],
+                    'product_reference' => self::FREE_GIFT_REFERENCE,
+                    'is_free_gift' => true,
+                    'unit_price_ttc' => 0,
+                    'unit_discount_ttc' => 0,
+                    'vat_rate' => 0,
+                    'quantity' => 1,
+                    'weight_g' => app(FreeGiftSettings::class)->weight_g,
+                    'line_total_ttc' => 0,
+                    'line_total_ht' => 0,
                 ]);
             }
 
