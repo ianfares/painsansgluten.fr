@@ -1220,3 +1220,18 @@ POINTS À RELIRE PAR UN HUMAIN : textes du panier ; la ligne offerte n'apparaît
 AJOUTÉ AU BACKLOG : rien.
 DÉPLOIEMENT (2026-10-20, sur ordre de Ian) : fichiers du serveur vérifiés identiques (SHA-256) à la version déployée le 19/10 ; 18 fichiers envoyés (app, database, resources ; ni docs ni tests) ; `php -l` OK ; `migrate --force` (2 migrations du jour seulement : colonne `order_items.is_free_gift` + paramètres `free_gift`, vérifiés : désactivé, seuil 0, poids 0) ; `optimize` ; `security:integrity-snapshot`. Pages /, /panier, /commande, /boutique : 200 ; page BO : 302 (connexion). Sauvegarde : ~/backups-ia/20261020-195732/ (13 fichiers + `settings-table.json`). Retour arrière : recopier les fichiers depuis cette sauvegarde, supprimer les 5 fichiers nouveaux, `optimize` (colonne et paramètres en base peuvent rester, inutilisés). Tag `deploy-20261020-195732`.
 PROCHAINE TÂCHE SUGGÉRÉE : Ian règle montant + poids dans Paramètres > Pâtisserie offerte puis active ; T11 Chronopost (recherche de points relais).
+
+## [2026-10-22 01:00] — Claude Opus 5.5 — Diagnostic DNS du domaine d'e-mails Stripe
+TÂCHE : diagnostic (demande de Ian, hors numérotation TXX) : alerte Stripe « Échec de la vérification » du domaine de messagerie personnalisé painsansgluten.fr (ajouté le 18/10 dans Stripe > Paramètres > E-mails des clients). Aucun code modifié.
+RÉSUMÉ : ne concerne que les e-mails envoyés par Stripe (reçus, remboursements) ; paiements et e-mails boutique (Brevo) non affectés. DNS public (Cloudflare) vérifié par `dig` : MX Infomaniak, SPF (Infomaniak + Brevo), DMARC, code Brevo présents ; `bounce.painsansgluten.fr` ABSENT → les enregistrements demandés par Stripe (CNAME DKIM `xxx._domainkey` + `bounce`) n'ont pas été créés.
+FICHIERS CRÉÉS / MODIFIÉS : docs/JOURNAL.md uniquement. Dossier `dns-capture/` (2 captures, non suivi par git) à supprimer une fois le sujet clos, pour ne pas le déployer.
+ANALYSE D'IMPACT : aucune sur le code. Ajouter les CNAME dans Cloudflare n'affecte ni MX ni SPF ni Brevo.
+SÉCURITÉ : aucun secret manipulé ; enregistrements DNS publics.
+PERFORMANCE : sans objet.
+TESTS : sans objet (pas de code).
+QUALITÉ : sans objet.
+DOCUMENTATION : docs/JOURNAL.md.
+À RENSEIGNER / QUESTIONS OUVERTES : Ian doit choisir : (a) copier la liste exacte des enregistrements affichée par Stripe et les créer dans Cloudflare en « DNS only » (nuage gris, sinon échec), puis relancer la vérification ; ou (b) supprimer le domaine personnalisé dans Stripe (reçus envoyés depuis stripe.com). Option (a) : Ian peut coller la liste, je vérifie la propagation par `dig` avant relance.
+POINTS À RELIRE PAR UN HUMAIN : proxy Cloudflare désactivé sur les nouveaux CNAME.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : finir le DNS Stripe (vérif `dig`), puis T11 Chronopost (recherche de points relais).
