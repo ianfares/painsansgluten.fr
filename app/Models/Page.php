@@ -11,7 +11,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Mews\Purifier\Facades\Purifier;
 
-#[Fillable(['title', 'slug', 'content', 'is_published', 'seo_title', 'seo_description'])]
+/**
+ * @property list<array{title: string, content: ?string, show_pickup_points: bool}>|null $tabs onglets (24/10/2026)
+ */
+#[Fillable(['title', 'slug', 'content', 'tabs', 'is_published', 'seo_title', 'seo_description'])]
 class Page extends Model
 {
     /** @use HasFactory<PageFactory> */
@@ -29,6 +32,7 @@ class Page extends Model
     {
         return [
             'is_published' => 'boolean',
+            'tabs' => 'array',
         ];
     }
 
@@ -41,5 +45,19 @@ class Page extends Model
         return Attribute::make(
             set: fn (?string $value): ?string => $value !== null ? Purifier::clean($value) : null,
         );
+    }
+
+    /**
+     * Onglets : texte de chaque onglet purifié à l'écriture, comme `content`.
+     *
+     * @param  array<array-key, array<string, mixed>>|null  $value  le Repeater Filament indexe par UUID
+     */
+    public function setTabsAttribute(?array $value): void
+    {
+        $this->attributes['tabs'] = $value === null ? null : json_encode(array_values(array_map(fn (array $tab): array => [
+            'title' => (string) ($tab['title'] ?? ''),
+            'content' => filled($tab['content'] ?? null) ? Purifier::clean((string) $tab['content']) : null,
+            'show_pickup_points' => (bool) ($tab['show_pickup_points'] ?? false),
+        ], $value)), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 }

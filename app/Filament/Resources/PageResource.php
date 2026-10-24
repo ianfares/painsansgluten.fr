@@ -6,6 +6,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PageResource\Pages;
 use App\Models\Page;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -50,7 +51,25 @@ class PageResource extends Resource
                 Toggle::make('is_published')->label('Publiée'),
             ])->columns(3),
 
-            RichEditor::make('content')->label('Contenu')->columnSpanFull(),
+            RichEditor::make('content')->label('Contenu')->helperText('Avec des onglets, ce texte s\'affiche au-dessus d\'eux.')->columnSpanFull(),
+
+            // Onglets (24/10/2026, « Où nous trouver ») : points de retrait, marchés, revendeurs…
+            Repeater::make('tabs')
+                ->label('Onglets')
+                ->helperText('Facultatif. Chaque onglet a son titre et son texte ; glissez-les pour changer l\'ordre.')
+                ->schema([
+                    TextInput::make('title')->label('Titre de l\'onglet')->required()->maxLength(60),
+                    RichEditor::make('content')->label('Texte de l\'onglet'),
+                    Toggle::make('show_pickup_points')
+                        ->label('Afficher automatiquement la liste des points de retrait')
+                        ->helperText('Sous le texte : points de retrait actifs, avec adresse, jour et plage de retrait (rubrique Points de retrait).'),
+                ])
+                ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                ->addActionLabel('Ajouter un onglet')
+                ->collapsible()
+                ->reorderableWithButtons()
+                ->defaultItems(0)
+                ->columnSpanFull(),
 
             Section::make('SEO')->schema([
                 TextInput::make('seo_title')->label('Title SEO')->maxLength(255),

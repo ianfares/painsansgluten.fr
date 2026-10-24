@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(['name', 'address_line1', 'postal_code', 'city', 'opening_hours', 'pickup_weekdays', 'pickup_from', 'pickup_until', 'instructions', 'latitude', 'longitude', 'is_active', 'position'])]
 class PickupPoint extends Model
 {
+    public const WEEKDAY_LABELS = ['monday' => 'lundi', 'tuesday' => 'mardi', 'wednesday' => 'mercredi', 'thursday' => 'jeudi', 'friday' => 'vendredi', 'saturday' => 'samedi', 'sunday' => 'dimanche'];
+
     /** @use HasFactory<PickupPointFactory> */
     use HasFactory;
 
@@ -67,6 +69,18 @@ class PickupPoint extends Model
         };
 
         return 'de '.$format($from).' à '.$format($until);
+    }
+
+    /** « le vendredi », « les mardi et vendredi », ou null si aucun jour de retrait n'est coché. */
+    public function pickupDaysLabel(): ?string
+    {
+        $days = array_values(array_intersect_key(self::WEEKDAY_LABELS, array_flip($this->pickup_weekdays ?? [])));
+
+        return match (count($days)) {
+            0 => null,
+            1 => 'le '.$days[0],
+            default => 'les '.implode(', ', array_slice($days, 0, -1)).' et '.end($days),
+        };
     }
 
     public function isGeocoded(): bool
