@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Actions\Orders\DeleteUnpaidOrderAction;
 use App\Actions\Orders\RefundOrderAction;
 use App\Actions\Orders\ResendOrderConfirmationAction;
 use App\Actions\Orders\SettleOrderByCreditAction;
@@ -15,6 +16,7 @@ use App\Enums\PaymentMethod;
 use App\Exceptions\Orders\BankTransferValidationNotAllowed;
 use App\Exceptions\Orders\InvalidOrderTransition;
 use App\Exceptions\Orders\ManualOrderNotAllowed;
+use App\Exceptions\Orders\OrderDeletionNotAllowed;
 use App\Exceptions\Orders\RefundNotAvailable;
 use App\Filament\Resources\OrderResource\DeliveryNoteActions;
 use App\Filament\Resources\OrderResource\ManualOrderForm;
@@ -22,6 +24,7 @@ use App\Filament\Resources\OrderResource\Pages;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\Orders\OrderStateMachine;
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -232,8 +235,43 @@ class OrderResource extends Resource
                             Notification::make()->title($e->getMessage())->danger()->send();
                         }
                     }),
+                self::deleteUnpaidAction(Tables\Actions\Action::class),
             ])
             ->bulkActions([DeliveryNoteActions::bulk()]);
+    }
+
+    /**
+     * « Supprimer » (24/10/2026) : commandes non réglées et sans facture
+     * uniquement ; partagé entre la liste et la fiche commande.
+     *
+     * @param  class-string<Tables\Actions\Action|Action>  $actionClass
+     */
+    public static function deleteUnpaidAction(string $actionClass): Tables\Actions\Action|Action
+    {
+        return $actionClass::make('deleteUnpaid')
+            ->label('Supprimer')
+            ->icon('heroicon-o-trash')
+            ->color('danger')
+            ->visible(fn (Order $record): bool => DeleteUnpaidOrderAction::isAvailableFor($record))
+            ->requiresConfirmation()
+            ->modalHeading(fn (Order $record): string => "Supprimer la commande {$record->number} ?")
+            ->modalDescription('Suppression définitive (commande de test ou jamais réglée). Si le client vous règle quand même ensuite, il faudra recréer la commande dans le back-office.')
+            ->modalSubmitActionLabel('Supprimer définitivement')
+            ->action(function (Order $record, DeleteUnpaidOrderAction $deleteUnpaidOrderAction, $livewire): void {
+                try {
+                    $deleteUnpaidOrderAction->execute($record, auth('admin')->id());
+                } catch (OrderDeletionNotAllowed $e) {
+                    Notification::make()->title($e->getMessage())->danger()->send();
+
+                    return;
+                }
+
+                Notification::make()->title('Commande supprimée.')->success()->send();
+
+                if ($livewire instanceof Pages\ViewOrder) {
+                    $livewire->redirect(self::getUrl('index'));
+                }
+            });
     }
 
     private static function transitionWithNotification(callable $transition, string $successMessage): void

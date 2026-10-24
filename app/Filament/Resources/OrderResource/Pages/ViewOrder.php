@@ -6,6 +6,7 @@ namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\OrderResource\DeliveryNoteActions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewOrder extends ViewRecord
@@ -14,6 +15,6 @@ class ViewOrder extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        return [DeliveryNoteActions::page()];
+        return [DeliveryNoteActions::page(), OrderResource::deleteUnpaidAction(Action::class)];
     }
 }
