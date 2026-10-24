@@ -1299,3 +1299,19 @@ DÉPLOIEMENT (2026-10-24, sur ordre de Ian) : fichiers serveur vérifiés identi
 POINTS À RELIRE PAR UN HUMAIN : rendu mobile des onglets.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T11 Chronopost dès réception des identifiants ; `git push origin develop`.
+
+## [2026-10-24 12:50] — Claude Opus 5.5 — « Retrait le » + points de retrait par onglet
+TÂCHE : retours de Ian / Angélique, hors numérotation TXX : (1) formulation « Retrait le vendredi » (et non « à partir du ») pour les commerçants ; (2) page « Où nous trouver » : choisir quels points de retrait apparaissent dans chaque onglet (partenaires / marchés).
+RÉSUMÉ : `DeliveryMethod::plannedDatePrefix()` (Chronopost « Expédition prévue le », commerçant « Retrait le », labo « Prête à retirer à partir du ») utilisé dans le tunnel (options + récap), e-mails confirmation et virement reçu, espace client. Onglets : champ `pickup_point_ids` (multi-sélection visible quand « Afficher automatiquement des points de retrait » est coché ; vide = tous les points actifs, compatible avec les onglets déjà saisis).
+FICHIERS CRÉÉS / MODIFIÉS : app/Enums/DeliveryMethod.php, app/Models/Page.php, app/Filament/Resources/PageResource.php, resources/views/content/page.blade.php, resources/views/livewire/checkout-wizard.blade.php, resources/views/emails/{order-confirmed,bank-transfer-paid}.blade.php, resources/views/compte/order.blade.php, tests/Feature/Content/PageTabsTest.php, tests/Feature/PickupPoints/PickupScheduleTest.php.
+ANALYSE D'IMPACT : texte seulement côté commandes ; aucun changement de calcul. Onglets existants sans `pickup_point_ids` → tous les points (inchangé).
+SÉCURITÉ : ids convertis en entiers à l'écriture ; filtrage sur la liste des points actifs déjà chargée (pas d'id brut en requête).
+PERFORMANCE : inchangée (une requête de points pour la page).
+TESTS : 1 nouveau + 2 adaptés ; suite 554/554.
+QUALITÉ : pint OK, phpstan 0 erreur. Pas de dépendance ajoutée.
+DOCUMENTATION : docs/JOURNAL.md.
+DÉPLOIEMENT (2026-10-24, sur ordre de Ian) : fichiers serveur vérifiés identiques à develop ; 8 fichiers envoyés ; `php -l` OK ; `optimize` ; `security:integrity-snapshot` ; pas de migration. /, /ou-nous-trouver, /panier, /commande 200 ; login admin 200 (local serveur). Sauvegarde : ~/backups-ia/20261024-124648/. Tag deploy-20261024-124648.
+À RENSEIGNER / QUESTIONS OUVERTES : un marché saisi comme point de retrait est aussi proposé au tunnel de commande ; si Ian veut des lieux « vitrine » non commandables, prévoir une option dédiée.
+POINTS À RELIRE PAR UN HUMAIN : rendu des onglets avec la sélection de points.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T11 Chronopost dès réception des identifiants ; `git push origin develop`.
