@@ -8,6 +8,7 @@ use App\Http\Controllers\Catalog\BoutiqueController;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Page;
+use App\Models\PickupPoint;
 use Illuminate\View\View;
 
 /**
@@ -30,6 +31,14 @@ class SlugController extends Controller
         $page = Page::query()->where('slug', $slug)->where('is_published', true)->first();
         abort_unless($page !== null, 404);
 
-        return view('content.page', ['page' => $page]);
+        // Onglet « points de retrait » (24/10/2026) : liste lue seulement s'il est demandé.
+        $showsPickupPoints = collect($page->tabs ?? [])->contains(fn (array $tab): bool => $tab['show_pickup_points']);
+
+        return view('content.page', [
+            'page' => $page,
+            'pickupPoints' => $showsPickupPoints
+                ? PickupPoint::query()->where('is_active', true)->orderBy('position')->orderBy('name')->get()
+                : collect(),
+        ]);
     }
 }

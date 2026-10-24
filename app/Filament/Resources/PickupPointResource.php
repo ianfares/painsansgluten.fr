@@ -38,8 +38,6 @@ class PickupPointResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Points de retrait';
 
-    private const WEEKDAYS = ['monday' => 'Lundi', 'tuesday' => 'Mardi', 'wednesday' => 'Mercredi', 'thursday' => 'Jeudi', 'friday' => 'Vendredi', 'saturday' => 'Samedi', 'sunday' => 'Dimanche'];
-
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -50,7 +48,7 @@ class PickupPointResource extends Resource
             Textarea::make('opening_hours')->label('Horaires d\'ouverture')->required()->rows(3)->maxLength(2000),
             CheckboxList::make('pickup_weekdays')
                 ->label('Jour(s) de retrait')
-                ->options(self::WEEKDAYS)
+                ->options(array_map('ucfirst', PickupPoint::WEEKDAY_LABELS))
                 ->columns(4)
                 ->helperText('Jours où les commandes sont disponibles chez ce commerçant. Le client se voit proposer le premier jour coché après la fabrication. Aucun jour coché : jours d\'expédition Chronopost.')
                 ->columnSpanFull(),
@@ -72,7 +70,7 @@ class PickupPointResource extends Resource
                 TextColumn::make('pickup_weekdays')
                     ->label('Retrait')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => self::WEEKDAYS[$state] ?? $state)
+                    ->formatStateUsing(fn (string $state): string => ucfirst(PickupPoint::WEEKDAY_LABELS[$state] ?? $state))
                     ->placeholder('Jours d\'expédition'),
                 IconColumn::make('geocoded')
                     ->label('Géocodé')
