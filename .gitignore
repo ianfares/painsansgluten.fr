@@ -33,3 +33,6 @@ Thumbs.db
 # Sauvegardes automatiques de l'assistant
 .backups/
 .sync-tmp/
+
+# Rapports du skill security-audit (jamais versionnés ni déployés)
+/security-audit/

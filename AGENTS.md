@@ -188,3 +188,12 @@ Boutique en ligne en production (paiements Stripe, données clients, commandes) 
 
 ### Traçabilité
 - Résumer en fin de tâche les commandes exécutées à distance qui ont modifié quelque chose.
+
+## Audit de sécurité avec le skill `security-audit` (Cloudflare)
+Skill installé globalement le 2026-10-23 (`~/.agents/skills/security-audit`, source `github.com/cloudflare/security-audit-skill`). Règles propres à ce projet :
+- **Dossier de sortie** : `security-audit/` à la racine du projet (choix explicite de l'utilisateur, remplace le défaut `~/security-audit-skill/`). Un audit = un sous-dossier `security-audit/run-<N>/`. Ce dossier est ignoré par git (`.gitignore`), condition exigée par le skill pour écrire dans le projet.
+- **Agents** : au maximum **5 sous-agents en même temps** pour ce skill (exception à la limite générale de 3). Modèle `sonnet` (`haiku` pour la simple lecture). Un sous-agent ne lance jamais d'autre sous-agent.
+- **Budget** : en mode audit complet, fixer un budget d'agents dans `run-metadata.json` et l'annoncer avant de lancer la reconnaissance.
+- **Jamais en ligne** : `security-audit/` ne doit jamais être déployé ni synchronisé vers le serveur (rapports de vulnérabilités). Ne jamais l'ajouter à une liste `--files-from` ni à un upload.
+- **Statique seulement** : aucune requête vers le site en ligne ou le serveur, aucune installation de dépendance, pas d'exécution du code du projet sans bac à sable (règle du skill). Les secrets trouvés sont signalés masqués (fichier, ligne, type), jamais recopiés dans les rapports.
+- Mode par défaut = conseil (pas de fichiers écrits). Le mode audit complet ne se lance que sur demande explicite.
