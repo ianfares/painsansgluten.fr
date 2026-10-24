@@ -57,6 +57,9 @@
             @elseif ($totals['show_ht'])
                 {{-- Compte professionnel : HT d'abord (15/10/2026). --}}
                 <x-cart.ht-summary :totals="$totals" />
+            @elseif (! $chronopostEnabled)
+                <x-ui.alert variant="info">Livraison Chronopost momentanément suspendue : retrait gratuit chez nos commerçants partenaires.</x-ui.alert>
+                <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
             @else
                 <div class="flex justify-between"><span>Frais de port</span><span>{{ $totals['shipping_ttc'] === 0 ? 'Offerts' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
                 <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>

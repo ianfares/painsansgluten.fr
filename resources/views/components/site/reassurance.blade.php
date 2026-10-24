@@ -8,7 +8,10 @@
         [
             'color' => '#9a4a35',
             'icon' => '<path d="M2.5 6.5h11v9.5h-11z"/><path d="M13.5 9.5h3.8l3.2 3.3v3.2h-7"/><circle cx="6.3" cy="17.4" r="1.7"/><circle cx="16.8" cy="17.4" r="1.7"/>',
-            'text' => 'Une livraison <strong>en point relais Chronopost</strong> en France métropolitaine (hors Corse)',
+            // Chronopost coupé dans le BO (24/10/2026) : seul le retrait est annoncé.
+            'text' => app(\App\Settings\ShippingSettings::class)->chronopost_enabled
+                ? 'Une livraison <strong>en point relais Chronopost</strong> en France métropolitaine (hors Corse)'
+                : 'Un <strong>retrait gratuit</strong> chez nos commerçants partenaires',
         ],
         [
             'color' => '#d9625a',

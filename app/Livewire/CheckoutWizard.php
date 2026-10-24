@@ -17,6 +17,7 @@ use App\Services\Analytics\Ecommerce;
 use App\Services\Cart\CartService;
 use App\Services\Mail\AdminMailer;
 use App\Services\Shipping\DeliveryOptions;
+use App\Settings\ShippingSettings;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -108,7 +109,7 @@ class CheckoutWizard extends Component
 
     public function mount(): void
     {
-        if ($this->cartIsPickupOnly()) {
+        if ($this->cartIsPickupOnly() || ! $this->chronopostEnabled()) {
             $this->deliveryChoice = ''; // Chronopost impossible : le client choisit un retrait
         }
 
@@ -246,6 +247,10 @@ class CheckoutWizard extends Component
             return $this->deliveryError('deliveryChoice', 'Votre panier contient un produit disponible uniquement en retrait : choisissez un point de retrait.');
         }
 
+        if ($this->selectedDeliveryMethod() === DeliveryMethod::ChronopostRelay && ! $this->chronopostEnabled()) {
+            return $this->deliveryError('deliveryChoice', 'La livraison Chronopost est momentanément indisponible : choisissez un point de retrait.');
+        }
+
         // Minimum de commande du mode choisi (19/10/2026), revérifié par CreateOrderAction.
         $cartService = app(CartService::class);
         $totals = $cartService->totals($cartService->currentCart(), $this->selectedDeliveryMethod());
@@ -277,6 +282,12 @@ class CheckoutWizard extends Component
 
         return $cartService->validItems($cartService->currentCart())['items']
             ->contains(fn (CartItem $item) => $item->product->isPickupOnly());
+    }
+
+    /** Interrupteur du BO (24/10/2026) : coupé, seul le retrait chez un commerçant est proposé. */
+    private function chronopostEnabled(): bool
+    {
+        return app(ShippingSettings::class)->chronopost_enabled;
     }
 
     /** @return array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}|null */
@@ -460,14 +471,16 @@ class CheckoutWizard extends Component
 
         $options = app(DeliveryOptions::class);
         $pickupOnly = $items->contains(fn (CartItem $item) => $item->product->isPickupOnly());
+        $chronopostEnabled = $this->chronopostEnabled();
         $deliveryMethod = $this->selectedDeliveryMethod();
-        if ($pickupOnly && $deliveryMethod === DeliveryMethod::ChronopostRelay) {
+        if (($pickupOnly || ! $chronopostEnabled) && $deliveryMethod === DeliveryMethod::ChronopostRelay) {
             $deliveryMethod = DeliveryMethod::MerchantPickup; // aucun port facturé tant que le retrait n'est pas choisi
         }
 
         return view('livewire.checkout-wizard', [
             'items' => $items,
             'pickupOnly' => $pickupOnly,
+            'chronopostEnabled' => $chronopostEnabled,
             'pickupOnlyNames' => $items->filter(fn (CartItem $item) => $item->product->isPickupOnly())->map(fn (CartItem $item) => $item->product->name)->values(),
             'totals' => $cartService->totals($cart, $deliveryMethod),
             'empty' => false,

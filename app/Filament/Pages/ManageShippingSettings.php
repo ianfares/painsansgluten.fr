@@ -47,6 +47,9 @@ class ManageShippingSettings extends SettingsPage
 
             Section::make('Chronopost')
                 ->schema([
+                    Toggle::make('chronopost_enabled')
+                        ->label('Livraison Chronopost Relais proposée aux clients')
+                        ->helperText('Désactivée : le client ne peut choisir qu\'un retrait chez un commerçant partenaire (dans le rayon défini plus bas). Les commandes saisies dans le back-office ne sont pas concernées.'),
                     TextInput::make('chronopost_product_code')->label('Code produit Chronopost')->maxLength(50),
                     TextInput::make('carrier_label')->label('Libellé du transporteur (affiché au client)')->maxLength(100),
                     TextInput::make('tracking_url_template')

@@ -95,7 +95,19 @@
                         <x-ui.alert variant="info">
                             {{ $pickupOnlyNames->join(', ', ' et ') }} : disponible uniquement en retrait, pas d'expédition Chronopost.
                             @if ($merchantOptions->isEmpty() && ! $labPickupAllowed)
-                                Aucun point de retrait n'est proposé près de votre adresse de livraison : retirez ce produit du panier pour être livré en point relais.
+                                @if ($chronopostEnabled)
+                                    Aucun point de retrait n'est proposé près de votre adresse de livraison : retirez ce produit du panier pour être livré en point relais.
+                                @else
+                                    Aucun point de retrait n'est proposé près de votre adresse de livraison.
+                                @endif
+                            @endif
+                        </x-ui.alert>
+                    @elseif (! $chronopostEnabled)
+                        {{-- Chronopost coupé dans le BO (24/10/2026) : retrait chez un commerçant uniquement. --}}
+                        <x-ui.alert :variant="$merchantOptions->isEmpty() && ! $labPickupAllowed ? 'warning' : 'info'">
+                            La livraison en point relais Chronopost est momentanément suspendue : nous vous proposons le retrait gratuit chez nos commerçants partenaires.
+                            @if ($merchantOptions->isEmpty() && ! $labPickupAllowed)
+                                Aucun point de retrait n'est proposé près de votre adresse de livraison : nous ne pouvons pas encore vous livrer. N'hésitez pas à nous contacter.
                             @endif
                         </x-ui.alert>
                     @else
