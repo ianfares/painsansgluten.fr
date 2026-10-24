@@ -1283,3 +1283,19 @@ DÉPLOIEMENT (2026-10-24, sur ordre de Ian) : fichiers serveur vérifiés identi
 POINTS À RELIRE PAR UN HUMAIN : libellé « Retrait à partir du » (le commerçant garde-t-il la commande après le jour de retrait ?).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T11 Chronopost dès réception des identifiants ; `git push origin develop`.
+
+## [2026-10-24 11:40] — Claude Opus 5.5 — Onglets de page (« Où nous trouver »)
+TÂCHE : demande de Ian, hors numérotation TXX : onglets « Nos points de retrait partenaires », « Nos marchés », « Nos revendeurs » sur la page « Où nous trouver » ; choix de Ian : onglets génériques + liste automatique des points de retrait.
+RÉSUMÉ : colonne `pages.tabs` (json, liste {title, content, show_pickup_points}) ; Repeater « Onglets » dans Contenus > Pages (titre, texte riche, case « liste automatique des points de retrait », ordre modifiable). Texte des onglets purifié à l'écriture (`Page::setTabsAttribute`, même liste blanche que `content`). Front `content/page.blade.php` : contenu principal en intro, onglets Alpine accessibles (role tablist/tab/tabpanel), ancre #slug ouvre l'onglet, sans JS tout s'affiche ; liste des points actifs (adresse, « Retrait le vendredi, de 9 h à 12 h 30 », horaires). `PickupPoint::WEEKDAY_LABELS` + `pickupDaysLabel()` (partagés avec le formulaire des points).
+FICHIERS CRÉÉS / MODIFIÉS : database/migrations/2026_10_24_130000_add_tabs_to_pages_table.php, app/Models/Page.php, app/Models/PickupPoint.php, app/Filament/Resources/PageResource.php, app/Filament/Resources/PickupPointResource.php, app/Http/Controllers/Content/SlugController.php, resources/views/content/page.blade.php, tests/Feature/Content/PageTabsTest.php.
+ANALYSE D'IMPACT : pages sans onglets inchangées (testé). Description SEO : repli sur le texte du 1er onglet si le contenu est vide. Classes Tailwind déjà présentes dans le build (pas de rebuild) ; remarque : la classe `prose` n'existe pas dans le CSS compilé (pré-existant, non traité).
+SÉCURITÉ : HTML des onglets purifié (test `<script>` retiré) ; titres échappés ; identifiants d'onglet via Str::slug + @js.
+PERFORMANCE : requête des points de retrait seulement si un onglet la demande.
+TESTS : 5 nouveaux ; suite 553/553.
+QUALITÉ : pint OK, phpstan 0 erreur. Pas de dépendance ajoutée.
+DOCUMENTATION : docs/JOURNAL.md.
+DÉPLOIEMENT (2026-10-24, sur ordre de Ian) : fichiers serveur vérifiés identiques à develop ; 7 fichiers envoyés ; `php -l` OK ; `migrate --force` (colonne vérifiée) ; `optimize` ; `security:integrity-snapshot`. /, /ou-nous-trouver, /mentions-legales, /boutique 200 ; login admin 200 (local serveur). Sauvegarde : ~/backups-ia/20261024-113842/ (6 fichiers + pages-table.json). Tag deploy-20261024-113842.
+À RENSEIGNER / QUESTIONS OUVERTES : Ian saisit les onglets et déplace les textes existants ; formulation « Retrait à partir du » vs « Retrait le » (tunnel) toujours en attente.
+POINTS À RELIRE PAR UN HUMAIN : rendu mobile des onglets.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T11 Chronopost dès réception des identifiants ; `git push origin develop`.
