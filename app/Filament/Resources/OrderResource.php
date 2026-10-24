@@ -75,7 +75,7 @@ class OrderResource extends Resource
                     ->label('Total')
                     ->formatStateUsing(fn (int $state): string => number_format($state / 100, 2, ',', ' ').' €'),
                 TextColumn::make('planned_ship_date')
-                    ->label('Expédition prévue')
+                    ->label('Expédition / retrait')
                     ->date('d/m/Y'),
                 TextColumn::make('delivery_method')
                     ->label('Livraison')
@@ -295,7 +295,7 @@ class OrderResource extends Resource
                     TextEntry::make('status')->label('Statut')->badge()->formatStateUsing(fn (OrderStatus $state): string => $state->label()),
                     TextEntry::make('payment_method')->label('Paiement')->formatStateUsing(fn (PaymentMethod $state): string => $state->label()),
                     TextEntry::make('created_at')->label('Créée le')->dateTime('d/m/Y H:i'),
-                    TextEntry::make('planned_ship_date')->label('Expédition prévue')->date('d/m/Y'),
+                    TextEntry::make('planned_ship_date')->label('Expédition / retrait prévu')->date('d/m/Y'),
                     TextEntry::make('tracking_number')->label('N° de suivi')->placeholder('—'),
                 ]),
             InfolistSection::make('Client')

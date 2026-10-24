@@ -45,7 +45,7 @@ class ValidateBankTransferPaymentAction
                 throw BankTransferValidationNotAllowed::notPending();
             }
 
-            $locked->planned_ship_date = Carbon::instance($this->shippingDateCalculator->forInstant(CarbonImmutable::now()));
+            $locked->planned_ship_date = Carbon::instance($this->shippingDateCalculator->forOrder($locked, CarbonImmutable::now()));
             $locked->save();
 
             return $this->orderStateMachine->transition(

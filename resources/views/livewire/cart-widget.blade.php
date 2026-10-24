@@ -64,7 +64,8 @@
                 <div class="flex justify-between"><span>Frais de port</span><span>{{ $totals['shipping_ttc'] === 0 ? 'Offerts' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
                 <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
             @endif
-            @if (! $totals['shipping_error'] && $totals['planned_ship_date'])
+            {{-- Retrait seul : la date dépend du commerçant, affichée dans le tunnel. --}}
+            @if (! $totals['shipping_error'] && $totals['planned_ship_date'] && $chronopostEnabled)
                 <p class="text-xs text-ink-muted">📦 Expédition prévue le {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
             @endif
 

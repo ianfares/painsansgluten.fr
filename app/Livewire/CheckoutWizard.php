@@ -8,16 +8,20 @@ use App\Actions\Orders\CreateOrderAction;
 use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
 use App\Exceptions\Orders\OrderBelowMinimum;
+use App\Exceptions\Shipping\ShippingNotConfigured;
 use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Mail\Admin\NewBankTransferOrderMail;
 use App\Mail\BankTransferInstructionsMail;
 use App\Models\CartItem;
+use App\Models\PickupPoint;
 use App\Models\User;
 use App\Services\Analytics\Ecommerce;
 use App\Services\Cart\CartService;
 use App\Services\Mail\AdminMailer;
 use App\Services\Shipping\DeliveryOptions;
+use App\Services\Shipping\ShippingDateCalculator;
 use App\Settings\ShippingSettings;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -284,6 +288,34 @@ class CheckoutWizard extends Component
             ->contains(fn (CartItem $item) => $item->product->isPickupOnly());
     }
 
+    /**
+     * Jours de retrait du commerçant choisi (24/10/2026), pour la date
+     * affichée au récapitulatif ; recalculés par CreateOrderAction au paiement.
+     *
+     * @return list<string>|null
+     */
+    private function selectedPickupWeekdays(DeliveryMethod $deliveryMethod): ?array
+    {
+        $id = $this->selectedPickupPointId();
+        if ($deliveryMethod !== DeliveryMethod::MerchantPickup || $id === null) {
+            return null;
+        }
+
+        $weekdays = PickupPoint::query()->find($id)?->pickup_weekdays;
+
+        return $weekdays ?: null;
+    }
+
+    /** Premier jour de retrait possible chez ce commerçant ; null si les réglages d'expédition sont incomplets. */
+    private function pickupDate(PickupPoint $point): ?CarbonImmutable
+    {
+        try {
+            return app(ShippingDateCalculator::class)->forInstant(CarbonImmutable::now(), $point->pickup_weekdays ?: null);
+        } catch (ShippingNotConfigured) {
+            return null;
+        }
+    }
+
     /** Interrupteur du BO (24/10/2026) : coupé, seul le retrait chez un commerçant est proposé. */
     private function chronopostEnabled(): bool
     {
@@ -482,11 +514,14 @@ class CheckoutWizard extends Component
             'pickupOnly' => $pickupOnly,
             'chronopostEnabled' => $chronopostEnabled,
             'pickupOnlyNames' => $items->filter(fn (CartItem $item) => $item->product->isPickupOnly())->map(fn (CartItem $item) => $item->product->name)->values(),
-            'totals' => $cartService->totals($cart, $deliveryMethod),
+            'totals' => $cartService->totals($cart, $deliveryMethod, $this->selectedPickupWeekdays($deliveryMethod)),
             'empty' => false,
             'deliveryMethodValue' => $deliveryMethod,
             'merchantOptions' => $this->step === 2
-                ? $options->merchantPointsNear(...array_values($this->deliveryAddress()))
+                ? $options->merchantPointsNear(...array_values($this->deliveryAddress()))->map(fn (array $option) => $option + [
+                    'pickup_date' => $this->pickupDate($option['point']),
+                    'pickup_hours' => PickupPoint::formatPickupHours($option['point']->pickup_from, $option['point']->pickup_until),
+                ])
                 : collect(),
             'labPickupAllowed' => $options->labPickupAllowed(Auth::user()),
             'bankTransferAllowed' => $this->bankTransferAllowed(),

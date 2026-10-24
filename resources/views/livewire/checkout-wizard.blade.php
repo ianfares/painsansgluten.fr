@@ -124,6 +124,7 @@
                                 <strong>Retrait gratuit chez {{ $option['point']->name }}</strong>
                                 <span class="text-ink-muted">· {{ number_format($option['distance_km'], 1, ',', ' ') }} km</span><br>
                                 <span class="text-ink-muted">{{ $option['point']->address_line1 }}, {{ $option['point']->postal_code }} {{ $option['point']->city }}</span>
+                                @if ($option['pickup_date'])<br><span class="font-medium text-sage-dark">🧺 Retrait à partir du {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($option['pickup_date']).($option['pickup_hours'] ? ', '.$option['pickup_hours'] : '') }}</span>@endif
                                 @if ($option['point']->opening_hours)<br><span class="text-ink-muted">Horaires : {{ $option['point']->opening_hours }}</span>@endif
                             </span>
                         </label>

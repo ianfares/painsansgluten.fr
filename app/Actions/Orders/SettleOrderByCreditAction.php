@@ -49,7 +49,7 @@ class SettleOrderByCreditAction
             $locked->forceFill([
                 'payment_method' => PaymentMethod::CreditSettlement,
                 'settlement_reference' => mb_substr($reference, 0, 150),
-                'planned_ship_date' => Carbon::instance($this->shippingDateCalculator->forInstant(CarbonImmutable::now())),
+                'planned_ship_date' => Carbon::instance($this->shippingDateCalculator->forOrder($locked, CarbonImmutable::now())),
             ])->save();
 
             Payment::query()->create([

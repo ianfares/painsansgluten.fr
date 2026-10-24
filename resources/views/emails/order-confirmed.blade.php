@@ -9,7 +9,7 @@ Votre paiement a bien été reçu : votre commande **{{ $order->number }}** est 
 
 @if ($order->planned_ship_date)
 @if ($order->delivery_method->isPickup())
-🧺 {{ $order->delivery_method->label() }} : **{{ $order->relay_name }}**, prête à partir du **{{ $order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM') }}**. Vous recevrez un email dès qu'elle vous attend.
+🧺 {{ $order->delivery_method->label() }} : **{{ $order->relay_name }}**, prête à partir du **{{ $order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM') }}**{{ ! empty($order->relay_snapshot['pickup_hours']) ? ', '.$order->relay_snapshot['pickup_hours'] : '' }}. Vous recevrez un email dès qu'elle vous attend.
 @else
 📦 Expédition prévue le **{{ $order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM') }}**, en point relais Chronopost : **{{ $order->relay_name }}**.
 @endif

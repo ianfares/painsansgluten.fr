@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Shipping;
 
+use App\Enums\DeliveryMethod;
 use App\Exceptions\Shipping\ShippingNotConfigured;
 use App\Models\ClosedDate;
+use App\Models\Order;
 use App\Settings\ShippingSettings;
 use Carbon\CarbonImmutable;
 
@@ -27,10 +29,16 @@ class ShippingDateCalculator
     public function __construct(private readonly ShippingSettings $settings) {}
 
     /**
+     * `$pickupWeekdays` (24/10/2026) : jours de retrait d'un commerçant, qui
+     * remplacent les jours d'expédition ; même heure limite, même délai de
+     * fabrication, mêmes jours fermés. Vide ou null = jours d'expédition.
+     *
+     * @param  list<string>|null  $pickupWeekdays
+     *
      * @throws ShippingNotConfigured si aucun jour d'expédition ou aucune
      *                               heure limite n'est renseigné(e).
      */
-    public function forInstant(CarbonImmutable $at): CarbonImmutable
+    public function forInstant(CarbonImmutable $at, ?array $pickupWeekdays = null): CarbonImmutable
     {
         $weekdays = $this->settings->shipping_weekdays;
         $cutoff = $this->settings->order_cutoff_time;
@@ -39,6 +47,8 @@ class ShippingDateCalculator
         if ($weekdays === [] || blank($cutoff) || $leadDays === null) {
             throw new ShippingNotConfigured('Les paramètres de date d\'expédition ne sont pas renseignés.');
         }
+
+        $weekdays = $pickupWeekdays ?: $weekdays;
 
         $at = $at->setTimezone('Europe/Paris');
 
@@ -61,6 +71,19 @@ class ShippingDateCalculator
         }
 
         return $date;
+    }
+
+    /**
+     * Date prévue d'une commande (calcul au paiement) : jours de retrait du
+     * commerçant figés dans le snapshot à la commande, sinon jours d'expédition.
+     */
+    public function forOrder(Order $order, CarbonImmutable $at): CarbonImmutable
+    {
+        $pickupWeekdays = $order->delivery_method === DeliveryMethod::MerchantPickup
+            ? ($order->relay_snapshot['pickup_weekdays'] ?? null)
+            : null;
+
+        return $this->forInstant($at, is_array($pickupWeekdays) ? array_values($pickupWeekdays) : null);
     }
 
     public function formatFrench(CarbonImmutable $date): string

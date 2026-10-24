@@ -60,7 +60,7 @@ class ProductionToDo extends Page implements HasForms
             ->statePath('data')
             ->schema([
                 Grid::make(['default' => 1, 'md' => 3])->schema([
-                    DatePicker::make('from')->label('Expédition prévue du')->live()->native(false)->displayFormat('d/m/Y'),
+                    DatePicker::make('from')->label('Expédition / retrait du')->live()->native(false)->displayFormat('d/m/Y'),
                     DatePicker::make('to')->label('au')->live()->native(false)->displayFormat('d/m/Y'),
                     Select::make('delivery_methods')
                         ->label('Mode de livraison')

@@ -85,6 +85,8 @@ class DeliveryOptions
                 'postal_code' => $point->postal_code,
                 'city' => $point->city,
                 'opening_hours' => $point->opening_hours,
+                'pickup_weekdays' => $point->pickup_weekdays ?: null,
+                'pickup_hours' => PickupPoint::formatPickupHours($point->pickup_from, $point->pickup_until),
                 'instructions' => $point->instructions,
                 'distance_km' => round($distanceKm, 1),
             ],

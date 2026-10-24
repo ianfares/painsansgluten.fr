@@ -7,8 +7,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PickupPointResource\Pages;
 use App\Models\PickupPoint;
 use App\Services\Geo\AddressGeocoder;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -36,6 +38,8 @@ class PickupPointResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Points de retrait';
 
+    private const WEEKDAYS = ['monday' => 'Lundi', 'tuesday' => 'Mardi', 'wednesday' => 'Mercredi', 'thursday' => 'Jeudi', 'friday' => 'Vendredi', 'saturday' => 'Samedi', 'sunday' => 'Dimanche'];
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -44,6 +48,14 @@ class PickupPointResource extends Resource
             TextInput::make('postal_code')->label('Code postal')->required()->maxLength(10),
             TextInput::make('city')->label('Ville')->required()->maxLength(255),
             Textarea::make('opening_hours')->label('Horaires d\'ouverture')->required()->rows(3)->maxLength(2000),
+            CheckboxList::make('pickup_weekdays')
+                ->label('Jour(s) de retrait')
+                ->options(self::WEEKDAYS)
+                ->columns(4)
+                ->helperText('Jours où les commandes sont disponibles chez ce commerçant. Le client se voit proposer le premier jour coché après la fabrication. Aucun jour coché : jours d\'expédition Chronopost.')
+                ->columnSpanFull(),
+            TimePicker::make('pickup_from')->label('Retrait à partir de')->seconds(false)->requiredWith('pickup_until'),
+            TimePicker::make('pickup_until')->label('Retrait jusqu\'à')->seconds(false)->requiredWith('pickup_from')->after('pickup_from'),
             Textarea::make('instructions')->label('Instructions de retrait')->rows(3)->maxLength(2000),
             Toggle::make('is_active')->label('Actif')->default(true),
             TextInput::make('position')->label('Position')->numeric()->minValue(0)->default(0),
@@ -57,6 +69,11 @@ class PickupPointResource extends Resource
                 TextColumn::make('name')->label('Nom')->searchable(),
                 TextColumn::make('city')->label('Ville')->searchable(),
                 TextColumn::make('postal_code')->label('Code postal'),
+                TextColumn::make('pickup_weekdays')
+                    ->label('Retrait')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => self::WEEKDAYS[$state] ?? $state)
+                    ->placeholder('Jours d\'expédition'),
                 IconColumn::make('geocoded')
                     ->label('Géocodé')
                     ->boolean()
