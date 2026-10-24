@@ -55,6 +55,9 @@ class ShippingSettings extends Settings
     /** Minimum de commande (centimes TTC, produits hors port, après remise) en retrait (commerçant, labo) ; 0 = aucun. */
     public int $minimum_order_pickup_ttc;
 
+    /** Chronopost Relais proposé dans le tunnel ; coupé = retrait chez un commerçant uniquement (24/10/2026). */
+    public bool $chronopost_enabled;
+
     public static function group(): string
     {
         return 'shipping';

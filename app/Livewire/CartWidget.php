@@ -9,6 +9,7 @@ use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Models\CartItem;
 use App\Services\Analytics\Ecommerce;
 use App\Services\Cart\CartService;
+use App\Settings\ShippingSettings;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -78,7 +79,9 @@ class CartWidget extends Component
             $this->removedNotice = true;
         }
 
-        $totals = $cartService->totals($cart);
+        // Chronopost coupé dans le BO (24/10/2026) : panier chiffré en retrait (port nul, minimum retrait).
+        $chronopostEnabled = app(ShippingSettings::class)->chronopost_enabled;
+        $totals = $cartService->totals($cart, $chronopostEnabled ? DeliveryMethod::ChronopostRelay : DeliveryMethod::MerchantPickup);
 
         // Met à jour le compteur de l'en-tête (rendu serveur au chargement).
         $this->dispatch('cart-count', count: $totals['count']);
@@ -86,7 +89,8 @@ class CartWidget extends Component
         return view('livewire.cart-widget', [
             'items' => $items,
             'totals' => $totals,
-            'minimumChronopost' => $cartService->minimumOrderFor(DeliveryMethod::ChronopostRelay),
+            'chronopostEnabled' => $chronopostEnabled,
+            'minimumChronopost' => $cartService->minimumOrderFor($chronopostEnabled ? DeliveryMethod::ChronopostRelay : DeliveryMethod::MerchantPickup),
             'minimumPickup' => $cartService->minimumOrderFor(DeliveryMethod::MerchantPickup),
         ]);
     }
