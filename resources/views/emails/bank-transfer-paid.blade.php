@@ -6,7 +6,7 @@ Bonjour {{ $order->first_name }},
 Nous avons bien reçu votre virement pour la commande **{{ $order->number }}**. Elle va maintenant être préparée.
 
 @if ($order->planned_ship_date)
-{{ $order->delivery_method->isPickup() ? '🧺 Prête à retirer à partir du' : '📦 Expédition prévue le' }} **{{ $order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM') }}**{{ ! empty($order->relay_snapshot['pickup_hours']) ? ', '.$order->relay_snapshot['pickup_hours'] : '' }}.
+{{ $order->delivery_method->isPickup() ? '🧺' : '📦' }} {{ $order->delivery_method->plannedDatePrefix() }} **{{ $order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM') }}**{{ ! empty($order->relay_snapshot['pickup_hours']) ? ', '.$order->relay_snapshot['pickup_hours'] : '' }}.
 @endif
 
 @if ($invoiceUrl)

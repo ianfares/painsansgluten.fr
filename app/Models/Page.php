@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Mews\Purifier\Facades\Purifier;
 
 /**
- * @property list<array{title: string, content: ?string, show_pickup_points: bool}>|null $tabs onglets (24/10/2026)
+ * @property list<array{title: string, content: ?string, show_pickup_points: bool, pickup_point_ids: list<int>}>|null $tabs onglets (24/10/2026)
  */
 #[Fillable(['title', 'slug', 'content', 'tabs', 'is_published', 'seo_title', 'seo_description'])]
 class Page extends Model
@@ -58,6 +58,8 @@ class Page extends Model
             'title' => (string) ($tab['title'] ?? ''),
             'content' => filled($tab['content'] ?? null) ? Purifier::clean((string) $tab['content']) : null,
             'show_pickup_points' => (bool) ($tab['show_pickup_points'] ?? false),
+            // Points choisis pour cet onglet ; vide = tous les points actifs.
+            'pickup_point_ids' => array_values(array_map('intval', (array) ($tab['pickup_point_ids'] ?? []))),
         ], $value)), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 }

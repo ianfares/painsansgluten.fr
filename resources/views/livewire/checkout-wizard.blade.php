@@ -124,7 +124,7 @@
                                 <strong>Retrait gratuit chez {{ $option['point']->name }}</strong>
                                 <span class="text-ink-muted">· {{ number_format($option['distance_km'], 1, ',', ' ') }} km</span><br>
                                 <span class="text-ink-muted">{{ $option['point']->address_line1 }}, {{ $option['point']->postal_code }} {{ $option['point']->city }}</span>
-                                @if ($option['pickup_date'])<br><span class="font-medium text-sage-dark">🧺 Retrait à partir du {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($option['pickup_date']).($option['pickup_hours'] ? ', '.$option['pickup_hours'] : '') }}</span>@endif
+                                @if ($option['pickup_date'])<br><span class="font-medium text-sage-dark">🧺 Retrait le {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($option['pickup_date']).($option['pickup_hours'] ? ', '.$option['pickup_hours'] : '') }}</span>@endif
                                 @if ($option['point']->opening_hours)<br><span class="text-ink-muted">Horaires : {{ $option['point']->opening_hours }}</span>@endif
                             </span>
                         </label>
@@ -200,7 +200,7 @@
                         <x-cart.ht-summary :totals="$totals" :pickup="$deliveryMethodValue->isPickup()"
                             :shipping-label="$deliveryMethodValue->isPickup() ? $deliveryMethodValue->label() : (app(\App\Settings\ShippingSettings::class)->carrier_label ?: 'Frais de port')" />
                         @if ($totals['planned_ship_date'])
-                            <p class="text-xs text-ink-muted">{{ $deliveryMethodValue->isPickup() ? '🧺 Prête à retirer à partir du' : '📦 Expédition prévue le' }} {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
+                            <p class="text-xs text-ink-muted">{{ $deliveryMethodValue->isPickup() ? '🧺' : '📦' }} {{ $deliveryMethodValue->plannedDatePrefix() }} {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
                         @endif
                     @else
                         @if ($deliveryMethodValue->isPickup())
@@ -210,7 +210,7 @@
                         @endif
                         <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
                         @if ($totals['planned_ship_date'])
-                            <p class="text-xs text-ink-muted">{{ $deliveryMethodValue->isPickup() ? '🧺 Prête à retirer à partir du' : '📦 Expédition prévue le' }} {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
+                            <p class="text-xs text-ink-muted">{{ $deliveryMethodValue->isPickup() ? '🧺' : '📦' }} {{ $deliveryMethodValue->plannedDatePrefix() }} {{ app(\App\Services\Shipping\ShippingDateCalculator::class)->formatFrench($totals['planned_ship_date']) }}</p>
                         @endif
                     @endif
                 </div>
