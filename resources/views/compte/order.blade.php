@@ -25,7 +25,7 @@
                 <p>Point relais Chronopost : <strong>{{ $order->relay_name }}</strong></p>
             @endif
             @if ($order->planned_ship_date)
-                <p class="mt-1">Expédition prévue le <strong>{{ $order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM') }}</strong></p>
+                <p class="mt-1">{{ $order->delivery_method->isPickup() ? 'Prête à retirer à partir du' : 'Expédition prévue le' }} <strong>{{ $order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM') }}</strong>{{ ! empty($order->relay_snapshot['pickup_hours']) ? ', '.$order->relay_snapshot['pickup_hours'] : '' }}</p>
             @endif
             @if ($order->tracking_number)
                 <p class="mt-1">N° de suivi : <strong>{{ $order->tracking_number }}</strong></p>

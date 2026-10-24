@@ -9,6 +9,10 @@ Votre commande **{{ $order->number }}** vous attend : {{ $order->delivery_method
 **{{ $point['name'] ?? $order->relay_name }}**<br>
 {{ $point['address_line1'] ?? '' }}<br>
 {{ $point['postal_code'] ?? '' }} {{ $point['city'] ?? '' }}
+@if (! empty($point['pickup_hours']))
+
+**Retrait :** {{ $point['pickup_hours'] }}
+@endif
 @if (! empty($point['opening_hours']))
 
 **Horaires :** {{ $point['opening_hours'] }}

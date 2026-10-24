@@ -69,7 +69,9 @@ class CreateOrderAction
                 throw new RuntimeException('Un produit de la commande est disponible uniquement en retrait : choisissez un point de retrait.');
             }
 
-            $totals = $this->cartService->totals($cart, $deliveryMethod);
+            // Jours de retrait du commerçant : snapshot construit côté serveur (DeliveryOptions).
+            $pickupWeekdays = $relay['relay_snapshot']['pickup_weekdays'] ?? null;
+            $totals = $this->cartService->totals($cart, $deliveryMethod, is_array($pickupWeekdays) ? array_values($pickupWeekdays) : null);
 
             if ($totals['shipping_error'] !== null) {
                 throw new RuntimeException($totals['shipping_error']);

@@ -36,7 +36,7 @@
 <div class="page-break"></div>
 <h2>Détail par commande</h2>
 <table>
-    <thead><tr><th>Expédition prévue</th><th>N° commande</th><th>Client</th><th>Livraison</th><th>Produit</th><th class="text-right">Qté</th></tr></thead>
+    <thead><tr><th>Expédition / retrait</th><th>N° commande</th><th>Client</th><th>Livraison</th><th>Produit</th><th class="text-right">Qté</th></tr></thead>
     <tbody>
     @forelse ($details as $row)
         <tr>

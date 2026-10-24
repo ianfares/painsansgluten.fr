@@ -13,8 +13,12 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Point de retrait chez un commerçant partenaire (T27-L7a). Non proposable
  * tant que ses coordonnées (géocodage) sont absentes.
+ *
+ * @property list<string>|null $pickup_weekdays jours de retrait (24/10/2026) ; vide = jours d'expédition
+ * @property string|null $pickup_from
+ * @property string|null $pickup_until
  */
-#[Fillable(['name', 'address_line1', 'postal_code', 'city', 'opening_hours', 'instructions', 'latitude', 'longitude', 'is_active', 'position'])]
+#[Fillable(['name', 'address_line1', 'postal_code', 'city', 'opening_hours', 'pickup_weekdays', 'pickup_from', 'pickup_until', 'instructions', 'latitude', 'longitude', 'is_active', 'position'])]
 class PickupPoint extends Model
 {
     /** @use HasFactory<PickupPointFactory> */
@@ -28,6 +32,7 @@ class PickupPoint extends Model
         return [
             'latitude' => 'float',
             'longitude' => 'float',
+            'pickup_weekdays' => 'array',
             'is_active' => 'boolean',
             'position' => 'integer',
         ];
@@ -46,6 +51,22 @@ class PickupPoint extends Model
             ->whereNotNull('longitude')
             ->orderBy('position')
             ->orderBy('id');
+    }
+
+    /** « de 9 h à 12 h 30 », ou null si la plage n'est pas renseignée (aussi pour le snapshot d'une commande). */
+    public static function formatPickupHours(?string $from, ?string $until): ?string
+    {
+        if (blank($from) || blank($until)) {
+            return null;
+        }
+
+        $format = function (string $time): string {
+            [$hour, $minute] = array_map('intval', explode(':', $time));
+
+            return $hour.' h'.($minute > 0 ? ' '.str_pad((string) $minute, 2, '0', STR_PAD_LEFT) : '');
+        };
+
+        return 'de '.$format($from).' à '.$format($until);
     }
 
     public function isGeocoded(): bool

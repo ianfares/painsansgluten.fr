@@ -37,7 +37,7 @@ class Expeditions extends Page implements HasTable
             ->columns([
                 TextColumn::make('number')->label('N°'),
                 TextColumn::make('planned_ship_date')
-                    ->label('Expédition prévue')
+                    ->label('Expédition / retrait')
                     ->date('d/m/Y')
                     ->badge()
                     ->color(function (Order $record): string {

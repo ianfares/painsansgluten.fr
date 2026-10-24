@@ -160,18 +160,22 @@ class CartService
      * payé ; `discount_ttc` = remise totale ; le seuil de port offert porte sur
      * le montant remisé. La remise vient du compte du panier, jamais du navigateur.
      * Retrait (commerçant, labo — T27-L7b) : frais de port à 0, même date de préparation.
+     * `$pickupWeekdays` (24/10/2026) : jours de retrait du commerçant choisi,
+     * qui remplacent les jours d'expédition pour la date prévue.
      *
      * HT (affichage pro, 15/10/2026) : même calcul que la commande et la
      * facture (HT de chaque ligne à son taux + HT du port) ; `show_ht` vrai
      * pour un compte professionnel.
      *
+     *
+     * @param  list<string>|null  $pickupWeekdays
      * @return array{count: int, subtotal_ttc: int, discount_percent: int, discount_ttc: int, shipping_ttc: int|null,
      *     total_ttc: int|null, planned_ship_date: ?CarbonImmutable, shipping_error: ?string,
      *     show_ht: bool, subtotal_ht: int, shipping_ht: int|null, total_ht: int|null, total_vat: int|null,
      *     minimum_ttc: int, minimum_missing_ttc: int,
      *     free_gift: array{active: bool, earned: bool, label: string, threshold_ttc: int, missing_ttc: int}}
      */
-    public function totals(Cart $cart, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay): array
+    public function totals(Cart $cart, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay, ?array $pickupWeekdays = null): array
     {
         ['items' => $items] = $this->validItems($cart);
 
@@ -194,7 +198,7 @@ class CartService
         if ($count > 0) {
             try {
                 $shipping = $deliveryMethod->isPickup() ? 0 : $this->shippingCostCalculator->forWeight($weight, $subtotal);
-                $plannedShipDate = $this->shippingDateCalculator->forInstant(CarbonImmutable::now());
+                $plannedShipDate = $this->shippingDateCalculator->forInstant(CarbonImmutable::now(), $deliveryMethod === DeliveryMethod::MerchantPickup ? $pickupWeekdays : null);
             } catch (ShippingNotConfigured|WeightOutOfRange $e) {
                 $shippingError = $e->getMessage();
             }

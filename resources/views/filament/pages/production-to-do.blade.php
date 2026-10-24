@@ -3,7 +3,7 @@
     $totals = $plan->totalsByProduct();
     $details = $plan->details($this->sortBy, $this->sortDirection);
     $columns = [
-        'planned_ship_date' => 'Expédition prévue',
+        'planned_ship_date' => 'Expédition / retrait',
         'order_number' => 'N° commande',
         'customer' => 'Client',
         'delivery_method' => 'Livraison',

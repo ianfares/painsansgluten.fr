@@ -135,7 +135,7 @@ class HandleStripeWebhookAction
         // Le paiement est réel : il doit être enregistré même si les réglages
         // d'expédition sont incomplets (date à fixer à la main dans ce cas).
         try {
-            $order->planned_ship_date = Carbon::instance($this->shippingDateCalculator->forInstant(CarbonImmutable::now()));
+            $order->planned_ship_date = Carbon::instance($this->shippingDateCalculator->forOrder($order, CarbonImmutable::now()));
             $order->save();
         } catch (ShippingNotConfigured) {
             Log::error('Stripe : commande payée sans date d\'expédition (paramètres d\'expédition incomplets).', ['order' => $order->number]);
