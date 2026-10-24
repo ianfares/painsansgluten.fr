@@ -1235,3 +1235,35 @@ DOCUMENTATION : docs/JOURNAL.md.
 POINTS À RELIRE PAR UN HUMAIN : proxy Cloudflare désactivé sur les nouveaux CNAME.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : finir le DNS Stripe (vérif `dig`), puis T11 Chronopost (recherche de points relais).
+
+## [2026-10-24 10:10] — Claude Opus 5.5 — Notification demande pro + interrupteur Chronopost
+TÂCHE : demandes de Ian, hors numérotation TXX. (1) Diagnostic : pas d'e-mail admin à la réception d'une demande de compte pro. (2) Ouvrir la boutique en retrait uniquement en attendant les identifiants Chronopost (T11).
+RÉSUMÉ : (1) cause : réglage `admin_notification_email` (Paramètres > Boutique > Emails) vide → `AdminMailer` n'envoie rien, sans erreur (vaut aussi pour les alertes commandes/anomalies). Queue OK (scheduler `queue:work` chaque minute), 0 job en échec. Ian a renseigné l'adresse dans le BO ; aucun code modifié. (2) Nouveau réglage `shipping.chronopost_enabled` (défaut true) + interrupteur dans Paramètres > Expédition > Chronopost. Coupé : Chronopost masqué dans le tunnel, refusé côté serveur (`resolveDelivery`), message « momentanément suspendue », avertissement si aucun commerçant dans le rayon ; panier chiffré en retrait (port 0, minimum retrait) ; bandeau de réassurance « retrait gratuit ». Commandes saisies en BO non concernées.
+FICHIERS CRÉÉS / MODIFIÉS : app/Settings/ShippingSettings.php, database/settings/2026_10_24_120000_add_chronopost_enabled_to_shipping_settings.php, app/Filament/Pages/ManageShippingSettings.php, app/Livewire/CheckoutWizard.php, app/Livewire/CartWidget.php, resources/views/livewire/checkout-wizard.blade.php, resources/views/livewire/cart-widget.blade.php, resources/views/components/site/reassurance.blade.php, tests/Feature/Checkout/ChronopostToggleTest.php.
+ANALYSE D'IMPACT : interrupteur activé par défaut → aucun changement tant que Ian ne le coupe pas. Pas de garde dans `CreateOrderAction` (volontaire : le BO manuel garde Chronopost) ; le tunnel revalide à `goToStep(3)` et à `pay()`. Textes FAQ, meta boutique, llms.txt, CGV mentionnent encore Chronopost (non modifiés).
+SÉCURITÉ : choix Chronopost envoyé par le navigateur refusé côté serveur quand coupé (testé). Aucun secret manipulé.
+PERFORMANCE : une lecture de réglage (en cache) par rendu.
+TESTS : 6 nouveaux ; suite 529/529.
+QUALITÉ : pint OK, phpstan 0 erreur. Pas de dépendance ajoutée.
+DOCUMENTATION : docs/JOURNAL.md.
+DÉPLOIEMENT (2026-10-24, sur ordre de Ian) : sync serveur → local non exécutée (seul code différent : aucun ; le dossier serveur contient aussi `.ssh`, caches de config avec secrets, sauvegardes : ne pas faire de rsync réel sans exclusions supplémentaires) ; 8 fichiers envoyés (tests exclus, `public/build` inchangé) ; `php -l` OK ; `migrate --force` (réglage chronopost_enabled=true vérifié) ; `optimize` ; `security:integrity-snapshot`. Pages /, /panier, /commande, /boutique, /professionnels : 200. Sauvegarde : ~/backups-ia/20261024-100056/ (fichiers + settings-table.json). Tag deploy-20261024-100056.
+À RENSEIGNER / QUESTIONS OUVERTES : Ian doit couper l'interrupteur et passer `pickup_max_distance_km` de 25 à 20 km (souhait exprimé : 20 km).
+POINTS À RELIRE PAR UN HUMAIN : textes publics mentionnant Chronopost pendant la coupure.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : voir entrée suivante.
+
+## [2026-10-24 10:12] — Claude Opus 5.5 — Suppression des commandes non réglées (BO)
+TÂCHE : demande de Ian, hors numérotation TXX : bouton pour supprimer des commandes (commandes de test, commandes passées sans règlement).
+RÉSUMÉ : action « Supprimer » (liste + fiche commande) visible pour PendingPayment, PaymentFailed, Cancelled. `DeleteUnpaidOrderAction` revérifie sous verrou : statut, absence de facture (facture immuable, CLAUDE.md §4), et pour une carte en attente un délai `session_expires_minutes` + 15 min (session Stripe encore payable → encaissement sans commande sinon). Lignes, paiements, historique supprimés en cascade (FK existantes). Log : numéro + statut + admin_id, aucune donnée personnelle.
+FICHIERS CRÉÉS / MODIFIÉS : app/Actions/Orders/DeleteUnpaidOrderAction.php, app/Exceptions/Orders/OrderDeletionNotAllowed.php, app/Filament/Resources/OrderResource.php, app/Filament/Resources/OrderResource/Pages/ViewOrder.php, tests/Feature/Orders/DeleteUnpaidOrderTest.php.
+ANALYSE D'IMPACT : numéros de commande avec trous possibles (sans effet légal ; numérotation des factures intacte). Virement en attente supprimé puis réglé par le client : à recréer manuellement (rappel dans la modale).
+SÉCURITÉ : partie critique (commandes) ; suppression réservée au guard admin ; refus serveur pour commande payée/facturée (testé). Risques résiduels : webhook Stripe d'une commande supprimée → simple warning « commande introuvable » (pas d'e-mail admin).
+PERFORMANCE : visibilité calculée sans requête ; contrôle facture uniquement à l'exécution.
+TESTS : 13 nouveaux ; suite 542/542.
+QUALITÉ : pint OK, phpstan 0 erreur. Pas de dépendance ajoutée.
+DOCUMENTATION : docs/JOURNAL.md.
+DÉPLOIEMENT (2026-10-24, sur ordre de Ian) : fichiers serveur vérifiés identiques à develop avant envoi ; 4 fichiers envoyés ; `php -l` OK ; `optimize` ; `security:integrity-snapshot` ; aucune migration. Pages publiques 200, login admin 200 en local serveur (403 depuis le serveur via Cloudflare, attendu). Sauvegarde : ~/backups-ia/20261024-100758/. Tag deploy-20261024-100758. Retour arrière : recopier les 2 fichiers sauvegardés, supprimer les 2 nouveaux, `optimize`.
+À RENSEIGNER / QUESTIONS OUVERTES : aucune.
+POINTS À RELIRE PAR UN HUMAIN : délai de 45 min pour les commandes carte en attente.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : T11 Chronopost dès réception des identifiants ; `git push origin develop` (commits locaux non poussés).
