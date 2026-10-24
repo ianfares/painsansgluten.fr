@@ -36,7 +36,7 @@
 
                         @if ($tab['show_pickup_points'])
                             <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                                @forelse ($pickupPoints as $point)
+                                @forelse (empty($tab['pickup_point_ids']) ? $pickupPoints : $pickupPoints->whereIn('id', $tab['pickup_point_ids']) as $point)
                                     <div class="rounded-card border border-line bg-white p-4 text-sm">
                                         <p class="font-semibold text-ink">{{ $point->name }}</p>
                                         <p class="text-ink-muted">{{ $point->address_line1 }}, {{ $point->postal_code }} {{ $point->city }}</p>

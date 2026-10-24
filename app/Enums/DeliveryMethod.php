@@ -24,6 +24,19 @@ enum DeliveryMethod: string
         };
     }
 
+    /**
+     * Début de phrase devant la date prévue (24/10/2026, Angélique) : chez un
+     * commerçant, la commande se retire le jour de retrait du point.
+     */
+    public function plannedDatePrefix(): string
+    {
+        return match ($this) {
+            self::ChronopostRelay => 'Expédition prévue le',
+            self::MerchantPickup => 'Retrait le',
+            self::LabPickup => 'Prête à retirer à partir du',
+        };
+    }
+
     public function isPickup(): bool
     {
         return $this !== self::ChronopostRelay;

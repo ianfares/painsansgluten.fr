@@ -76,10 +76,10 @@ test('tunnel : date et plage affichées sous le commerçant, commande datée du 
         ->set('email', 'retrait@example.com')->set('first_name', 'Jeanne')->set('last_name', 'Dupont')->set('phone', '0612345678')
         ->set('billing_line1', '1 rue du Pain')->set('billing_postal_code', '50300')->set('billing_city', 'Avranches')
         ->call('goToStep', 2)
-        ->assertSee('Retrait à partir du vendredi 30 octobre, de 9 h à 12 h 30');
+        ->assertSee('Retrait le vendredi 30 octobre, de 9 h à 12 h 30');
 
     $component->set('deliveryChoice', 'merchant_pickup:'.$this->point->id)
-        ->call('goToStep', 3)->assertSee('vendredi 30 octobre')
+        ->call('goToStep', 3)->assertSee('Retrait le vendredi 30 octobre')
         ->call('goToStep', 4)->set('cgvAccepted', true)->set('paymentMethod', 'stripe')
         ->call('pay')->assertHasNoErrors();
 

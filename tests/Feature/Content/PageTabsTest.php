@@ -78,3 +78,23 @@ test('admin : création d\'une page avec onglets', function () {
         ->and($tabs[0]['show_pickup_points'])->toBeTrue()
         ->and($tabs[1]['title'])->toBe('Nos marchés');
 });
+
+test('chaque onglet n\'affiche que les points choisis (vide = tous)', function () {
+    $shop = PickupPoint::factory()->create(['name' => 'Épicerie de Granville', 'is_active' => true]);
+    $market = PickupPoint::factory()->create(['name' => 'Marché de Villedieu', 'is_active' => true]);
+
+    $page = findUsPage([
+        ['title' => 'Nos points de retrait', 'content' => null, 'show_pickup_points' => true, 'pickup_point_ids' => [$shop->id]],
+        ['title' => 'Nos marchés', 'content' => null, 'show_pickup_points' => true, 'pickup_point_ids' => [(string) $market->id]],
+        ['title' => 'Tous', 'content' => null, 'show_pickup_points' => true],
+    ]);
+
+    expect($page->fresh()->tabs[1]['pickup_point_ids'])->toBe([$market->id]);
+
+    $html = $this->get(route('content.show', $page))->assertOk()->getContent();
+    $panel = fn (string $id): string => str($html)->after('id="panel-'.$id.'"')->before('</section>')->toString();
+
+    expect($panel('nos-points-de-retrait'))->toContain('Épicerie de Granville')->not->toContain('Marché de Villedieu')
+        ->and($panel('nos-marches'))->toContain('Marché de Villedieu')->not->toContain('Épicerie de Granville')
+        ->and($panel('tous'))->toContain('Épicerie de Granville')->toContain('Marché de Villedieu');
+});

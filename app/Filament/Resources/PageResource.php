@@ -6,12 +6,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PageResource\Pages;
 use App\Models\Page;
+use App\Models\PickupPoint;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -61,8 +64,15 @@ class PageResource extends Resource
                     TextInput::make('title')->label('Titre de l\'onglet')->required()->maxLength(60),
                     RichEditor::make('content')->label('Texte de l\'onglet'),
                     Toggle::make('show_pickup_points')
-                        ->label('Afficher automatiquement la liste des points de retrait')
-                        ->helperText('Sous le texte : points de retrait actifs, avec adresse, jour et plage de retrait (rubrique Points de retrait).'),
+                        ->label('Afficher automatiquement des points de retrait')
+                        ->helperText('Sous le texte : adresse, jour et plage de retrait de chaque point (rubrique Points de retrait).')
+                        ->live(),
+                    Select::make('pickup_point_ids')
+                        ->label('Points de retrait à afficher dans cet onglet')
+                        ->helperText('Laissez vide pour afficher tous les points actifs.')
+                        ->multiple()
+                        ->options(fn (): array => PickupPoint::query()->orderBy('position')->orderBy('name')->pluck('name', 'id')->all())
+                        ->visible(fn (Get $get): bool => (bool) $get('show_pickup_points')),
                 ])
                 ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
                 ->addActionLabel('Ajouter un onglet')
