@@ -1315,3 +1315,18 @@ DÉPLOIEMENT (2026-10-24, sur ordre de Ian) : fichiers serveur vérifiés identi
 POINTS À RELIRE PAR UN HUMAIN : rendu des onglets avec la sélection de points.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : T11 Chronopost dès réception des identifiants ; `git push origin develop`.
+
+## [2026-10-25 21:20] — Claude Opus 5.5 — Serveur : Node.js inutile, mises à jour automatiques
+TÂCHE : questions de Ian sur le serveur de prod (hors numérotation TXX) ; aucun code applicatif modifié.
+RÉSUMÉ : (1) Node.js 24 (dépôt NodeSource) est installé sur le VPS depuis le setup du 2026-10-07 mais inutile : les assets sont compilés en local (`npm run build`) et `public/build/` est envoyé par rsync (DECISIONS 2026-10-08 « Mise en ligne préprod : version la plus simple »). Aucun processus Node actif. Commandes de suppression (`apt purge nodejs`, retrait de `nodesource.sources` et de sa clé) données à Ian, pas exécutées. (2) `unattended-upgrades` déjà installé et actif (Debian + Debian-Security, pas de redémarrage auto). Proposé : fichier `/etc/apt/apt.conf.d/52unattended-upgrades-local` ajoutant `origin=deb.sury.org` (correctifs PHP 8.4), `Automatic-Reboot "false"`, nettoyage des anciens noyaux. Ian a lancé un dry-run : aucune mise à jour en attente.
+FICHIERS CRÉÉS / MODIFIÉS : docs/JOURNAL.md uniquement. Sur le serveur : rien de modifié par l'IA (lecture seule : `dpkg -l`, `which node`, config apt).
+ANALYSE D'IMPACT : le VPS héberge aussi azyme.fr (vu dans le prompt de Ian) : vérifier qu'il n'utilise pas Node avant suppression. Mise à jour Sury = redémarrage PHP-FPM (1–2 s de coupure).
+SÉCURITÉ : moins de paquets = moins de surface ; correctifs PHP automatisés si Sury ajouté. Debian 12 est désormais `oldstable` (support LTS jusqu'à mi-2028) : migration Debian 13 à planifier, non urgente.
+PERFORMANCE : sans objet.
+TESTS : sans objet (aucun code).
+QUALITÉ : sans objet.
+DOCUMENTATION : docs/JOURNAL.md. `docs/DECISIONS.md` à compléter une fois les actions confirmées par Ian (retrait Node, Sury en mises à jour auto).
+À RENSEIGNER / QUESTIONS OUVERTES : Ian doit confirmer (a) que azyme.fr n'utilise pas Node puis la suppression ; (b) que `unattended-upgrade --dry-run --debug | grep -i "allowed origins"` contient `o=deb.sury.org`. Redémarrage noyau : vérifier `/var/run/reboot-required` ~1 fois/mois, reboot manuel la nuit.
+POINTS À RELIRE PAR UN HUMAIN : contenu du fichier 52unattended-upgrades-local sur le serveur.
+AJOUTÉ AU BACKLOG : rien (migration Debian 13 proposée, non ajoutée sans accord).
+PROCHAINE TÂCHE SUGGÉRÉE : consigner dans DECISIONS.md le retrait de Node + Sury en mises à jour auto après confirmation de Ian ; T11 Chronopost dès réception des identifiants ; `git push origin develop`.
