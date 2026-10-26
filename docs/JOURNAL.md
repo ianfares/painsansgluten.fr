@@ -1330,3 +1330,18 @@ DOCUMENTATION : docs/JOURNAL.md. `docs/DECISIONS.md` à compléter une fois les 
 POINTS À RELIRE PAR UN HUMAIN : contenu du fichier 52unattended-upgrades-local sur le serveur.
 AJOUTÉ AU BACKLOG : rien (migration Debian 13 proposée, non ajoutée sans accord).
 PROCHAINE TÂCHE SUGGÉRÉE : consigner dans DECISIONS.md le retrait de Node + Sury en mises à jour auto après confirmation de Ian ; T11 Chronopost dès réception des identifiants ; `git push origin develop`.
+
+## [2026-10-26 09:25] — Claude Opus 5.5 — Date de retrait sur le bon de livraison
+TÂCHE : demande de Ian (hors numérotation TXX) : faire apparaître la date de retrait sur le bon de livraison. Facture : volontairement inchangée (choix de Ian, la facture reste comptable).
+RÉSUMÉ : `DeliveryNotePdf::plannedDateLine()` → « Retrait le vendredi 30 octobre 2026, 16h–19h » (commerçant, plage horaire du snapshot du point), « Prête à retirer à partir du … » (labo), « Expédition prévue le … » (Chronopost, sans plage). Affichée en gras sous l'adresse du bloc « Livraison ». QR code inchangé (format scanette). Vérifié : l'e-mail de confirmation contient déjà la date de retrait.
+FICHIERS CRÉÉS / MODIFIÉS : app/Services/Documents/DeliveryNotePdf.php, resources/views/pdf/delivery-note.blade.php, tests/Feature/Orders/DeliveryNoteTest.php.
+ANALYSE D'IMPACT : le bon est généré à la volée → toutes les commandes payées en profitent, anciennes comprises. Aucune migration, aucun changement de calcul.
+SÉCURITÉ : affichage échappé (`{{ }}`), document réservé aux admins (inchangé).
+PERFORMANCE : inchangée.
+TESTS : 3 ajoutés (commerçant avec plage, Chronopost, sans date) ; suite 557/557.
+QUALITÉ : pint OK, phpstan 0 erreur. Pas de dépendance ajoutée.
+DOCUMENTATION : docs/JOURNAL.md.
+À RENSEIGNER / QUESTIONS OUVERTES : aucune.
+POINTS À RELIRE PAR UN HUMAIN : rendu PDF réel (mise en page du bloc Livraison).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : déploiement sur ordre de Ian (2 fichiers : service + vue) ; T11 Chronopost.
