@@ -1,0 +1,113 @@
+GUIDE RAPIDE — LIVRAISON CHRONOPOST RELAIS
+Mon Sans Gluten by Angélique — back-office de la boutique
+
+==================================================
+1. CE QUI A CHANGÉ
+==================================================
+
+- Vos clients choisissent eux-mêmes leur point relais Chronopost sur le site, dans une liste officielle Chronopost.
+- Vous générez l'étiquette Chronopost directement depuis le back-office, en un clic : plus besoin de recopier l'adresse dans l'outil Chronopost.
+- Le numéro de suivi est rempli automatiquement quand vous expédiez la commande.
+
+Produit utilisé : Chrono Relais 13H, livraison du lundi au vendredi (pas de livraison le samedi).
+Rythme prévu : expédition le jeudi, livraison au relais le vendredi.
+
+
+==================================================
+2. CÔTÉ CLIENT (ce que voit l'acheteur)
+==================================================
+
+1. Dans le tunnel de commande, étape « Livraison », il choisit « Chronopost Relais ».
+2. Le code postal et la ville sont pré-remplis avec son adresse ; il clique « Rechercher ».
+3. La liste des points relais s'affiche (nom, adresse, distance, horaires). Il en choisit un.
+   Les consignes automatiques (casiers) ne sont jamais proposées : seulement des commerçants.
+4. Il paie. Le relais choisi est enregistré dans la commande.
+
+Si Chronopost ne répond pas, le client voit un message et peut réessayer quelques instants plus tard, ou choisir un retrait chez un commerçant partenaire.
+
+
+==================================================
+3. VOTRE ROUTINE POUR CHAQUE COMMANDE CHRONOPOST
+==================================================
+
+Menu « Commandes ». Les boutons sont sur la ligne de la commande ou en haut de la fiche commande.
+
+ÉTAPE 1 — (facultatif) « Marquer en préparation »
+   Quand vous commencez la commande.
+
+ÉTAPE 2 — « Générer l'étiquette Chronopost »
+   - Confirmez : le colis est créé chez Chronopost et le PDF de l'étiquette se télécharge.
+   - Le statut de la commande ne change pas à ce moment-là.
+   - Le poids est calculé automatiquement à partir du poids des produits.
+     (Vérifiez que chaque produit a le bon poids dans sa fiche.)
+
+ÉTAPE 3 — Imprimer l'étiquette
+   - Imprimante classique, feuille A4, à 100 % (sans « ajuster à la page »).
+   - La feuille contient 2 parties :
+       • à droite : l'ÉTIQUETTE, à coller bien à plat sur le carton, code-barres lisible,
+         sans scotch par-dessus le code-barres ;
+       • à gauche : la PREUVE DE DÉPÔT, à garder (à faire tamponner au dépôt du colis).
+   - Besoin de la réimprimer ? Bouton « Étiquette Chronopost (PDF) ».
+
+ÉTAPE 4 — Déposer le colis (le jeudi)
+   Selon votre contrat Chronopost (dépôt ou enlèvement : à confirmer avec Chronopost).
+
+ÉTAPE 5 — « Expédier »
+   - Le numéro de suivi est déjà rempli : vérifiez-le et validez.
+   - La commande passe en « Expédiée » et le client reçoit un email avec son lien de suivi.
+   - Cliquez « Expédier » le jour où le colis part vraiment (pas avant).
+
+ÉTAPE 6 — (plus tard) « Marquer livrée »
+   Quand le colis a été livré.
+
+
+==================================================
+4. EN CAS DE PROBLÈME
+==================================================
+
+ERREUR SUR UNE ÉTIQUETTE (mauvais colis, commande modifiée…)
+   - Bouton « Annuler l'étiquette » (rouge), AVANT d'avoir déposé le colis.
+   - Puis « Générer l'étiquette Chronopost » pour en refaire une.
+   - Ne déposez jamais un colis avec une étiquette annulée.
+   - Une commande remboursée ou annulée avant l'envoi : pensez aussi à annuler son étiquette.
+
+LE BOUTON « GÉNÉRER L'ÉTIQUETTE » AFFICHE UNE ERREUR
+   Le message dit pourquoi. Les cas les plus courants :
+   - « Livraison Chronopost désactivée » → voir partie 5.
+   - « Coordonnées de l'expéditeur incomplètes » → Paramètres > Boutique.
+   - « Le relais n'a pas été choisi dans la liste Chronopost » → commande saisie à la main
+     dans le back-office : créez le colis dans votre outil Chronopost habituel, puis cliquez
+     « Expédier » en tapant le numéro de suivi vous-même.
+   - « Chronopost est injoignable » → réessayez quelques minutes plus tard.
+   - « Chronopost a refusé la demande : … » → le message de Chronopost est affiché
+     (souvent un téléphone ou une adresse invalide) : corrigez si possible, sinon contactez Ian.
+
+CLIC EN DOUBLE
+   Pas de risque : un double clic ne crée pas deux colis.
+
+
+==================================================
+5. RÉGLAGES (à ne modifier qu'en cas de besoin)
+==================================================
+
+Paramètres > Expédition
+   - « Livraison Chronopost Relais proposée aux clients » : interrupteur général.
+     Éteint = les clients ne peuvent choisir que le retrait, et les étiquettes sont bloquées.
+   - « Code produit Chronopost » : 86 (ne pas changer).
+   - « Modèle d'URL de suivi » : lien de suivi envoyé au client (doit contenir {tracking}).
+   - Jours d'expédition, heure limite, délai de fabrication, jours fermés : ils servent à
+     calculer la date d'expédition affichée au client.
+
+Paramètres > Boutique
+   - Nom, adresse, téléphone, email : ce sont les coordonnées EXPÉDITEUR imprimées sur
+     chaque étiquette. Toute modification s'applique aux étiquettes suivantes.
+
+
+==================================================
+6. À SAVOIR
+==================================================
+
+- Les identifiants Chronopost sont gérés par Ian (jamais à saisir dans le site).
+- Les étiquettes sont conservées dans le back-office (y compris celles annulées).
+- Le bon de livraison (bouton « Bon de livraison (PDF) ») reste disponible comme avant,
+  à glisser dans le colis si vous le souhaitez.
