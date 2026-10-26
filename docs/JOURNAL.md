@@ -1344,4 +1344,5 @@ DOCUMENTATION : docs/JOURNAL.md.
 À RENSEIGNER / QUESTIONS OUVERTES : aucune.
 POINTS À RELIRE PAR UN HUMAIN : rendu PDF réel (mise en page du bloc Livraison).
 AJOUTÉ AU BACKLOG : rien.
-PROCHAINE TÂCHE SUGGÉRÉE : déploiement sur ordre de Ian (2 fichiers : service + vue) ; T11 Chronopost.
+DÉPLOIEMENT (2026-10-26, sur ordre de Ian) : fichiers serveur vérifiés identiques à develop avant modif ; 2 fichiers envoyés (service + vue) ; `php -l` OK ; `optimize` ; `security:integrity-snapshot` ; pas de migration. /, /ou-nous-trouver, /panier, /admin/login 200 (depuis le poste local ; le curl depuis le serveur reçoit 403 de Cloudflare). Sauvegarde : ~/backups-ia/20261026-093439/ (home du compte painsansgluten = /var/www/painsansgluten, hors public/). Tag deploy-20261026-093439. Retour arrière : recopier les 2 fichiers depuis la sauvegarde puis `php artisan optimize`.
+PROCHAINE TÂCHE SUGGÉRÉE : vérifier un bon de livraison réel dans le BO ; T11 Chronopost ; côté serveur (Ian) : retrait Node + Sury dans unattended-upgrades puis DECISIONS.md ; `git push origin develop`.
