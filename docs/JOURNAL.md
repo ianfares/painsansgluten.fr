@@ -1346,3 +1346,18 @@ POINTS À RELIRE PAR UN HUMAIN : rendu PDF réel (mise en page du bloc Livraison
 AJOUTÉ AU BACKLOG : rien.
 DÉPLOIEMENT (2026-10-26, sur ordre de Ian) : fichiers serveur vérifiés identiques à develop avant modif ; 2 fichiers envoyés (service + vue) ; `php -l` OK ; `optimize` ; `security:integrity-snapshot` ; pas de migration. /, /ou-nous-trouver, /panier, /admin/login 200 (depuis le poste local ; le curl depuis le serveur reçoit 403 de Cloudflare). Sauvegarde : ~/backups-ia/20261026-093439/ (home du compte painsansgluten = /var/www/painsansgluten, hors public/). Tag deploy-20261026-093439. Retour arrière : recopier les 2 fichiers depuis la sauvegarde puis `php artisan optimize`.
 PROCHAINE TÂCHE SUGGÉRÉE : vérifier un bon de livraison réel dans le BO ; T11 Chronopost ; côté serveur (Ian) : retrait Node + Sury dans unattended-upgrades puis DECISIONS.md ; `git push origin develop`.
+
+## [2026-10-26 11:05] — Claude Opus 5.5 — Diagnostic : notification commande C2026-00005 non reçue sur commandes@
+TÂCHE : question de Ian (hors numérotation TXX) : pas de mail reçu sur commandes@painsansgluten.fr pour la commande C2026-00005 (payée Stripe). Aucun code modifié.
+RÉSUMÉ : la notification admin part vers le réglage « Email de notification admin » (`AdminMailer`), qui valait contact@painsansgluten.fr. Logs Brevo (fournis par Ian) : mail « Nouvelle commande payée — C2026-00005 » envoyé à contact@ et ouvert. Fonctionnement normal. Ian a remplacé le réglage par commandes@painsansgluten.fr dans le BO. Formulaire de contact : va à « Email de contact » (repli sur l'email admin s'il est vide), donc non concerné.
+FICHIERS CRÉÉS / MODIFIÉS : docs/JOURNAL.md uniquement.
+ANALYSE D'IMPACT : toutes les notifications admin (commande payée, virement en attente, demande pro, compte pro à valider, suppression de compte, anomalie Stripe) arrivent désormais sur commandes@.
+SÉCURITÉ : lecture de la base de prod (tinker) refusée par le classifieur auto de Claude Code ; non contournée. Vérifications faites sans base : crontab (scheduler chaque minute OK), noms des fichiers de log (aucun depuis le 20/10, contenu non lu).
+PERFORMANCE : sans objet.
+TESTS : sans objet.
+QUALITÉ : sans objet.
+DOCUMENTATION : docs/JOURNAL.md.
+À RENSEIGNER / QUESTIONS OUVERTES : proposé (non demandé à ce stade) : accepter plusieurs adresses séparées par des virgules dans « Email de notification admin ».
+POINTS À RELIRE PAR UN HUMAIN : rien.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : vérifier un bon de livraison réel (date de retrait) ; T11 Chronopost ; serveur (Ian) : retrait Node + Sury dans unattended-upgrades puis DECISIONS.md ; `git push origin develop`.
