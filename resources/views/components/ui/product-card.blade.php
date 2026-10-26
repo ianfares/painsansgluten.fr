@@ -25,7 +25,7 @@
     </a>
 
     <div class="flex flex-1 flex-col gap-2 p-4">
-        <span class="text-xs uppercase tracking-wide text-ochre">{{ $product->category->name }}</span>
+        <span class="text-xs uppercase tracking-wide text-ochre-dark">{{ $product->category->name }}</span>
         <a href="{{ $url }}" class="font-medium text-ink hover:text-sage">{{ $product->name }}</a>
 
         <div class="mt-auto flex flex-wrap items-center justify-between gap-2">

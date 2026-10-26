@@ -22,6 +22,8 @@
     --color-sage: #5d6e41;
     --color-sage-dark: #4a5733;
     --color-ochre: #b47c38;
+    /* Ocre foncé pour les petits textes : contraste ≥ 4,5:1 sur fond blanc (WCAG AA, audit du 26/10/2026). */
+    --color-ochre-dark: #8a5d26;
     --color-line: #dfdfdf;
 
     --radius-field: 4px;

@@ -9,6 +9,7 @@
     name="{{ $name }}"
     id="{{ $name }}"
     value="{{ $value }}"
+    @error($name) aria-invalid="true" aria-describedby="{{ $name }}-error" @enderror
     {{ $attributes->except('value')->merge([
         'class' => 'w-full rounded-field border px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-sage '
             .($errors->has($name) ? 'border-red-400' : 'border-line'),

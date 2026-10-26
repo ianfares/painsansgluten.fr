@@ -31,3 +31,19 @@
   6. Minimum de commande pour les pros ?
   7. Les pros commandent-ils les mêmes produits que les particuliers, ou un catalogue dédié (formats pro, pâte à pizza crue) ?
   8. Faut-il masquer certains produits aux particuliers (produits réservés aux pros) ?
+
+## Audit du 2026-10-26 — points mis de côté par Ian
+Détail dans `security-audit/run-1/synthese.md` (hors git). Traités le 26/10 : 1-4, 6, 7, 9, 11, 12, 16, 18, 21 (sans toucher aux composants Livewire), 24.
+- **5 — Limitation de débit inscription / mot de passe oublié** : risque accepté par Ian (Turnstile protège ces formulaires).
+- **8** — Masquer le jeton de commande invité (`/commande/confirmation/{token}`) dans les URL envoyées à GA4 (GTM).
+- **10** — Virement : rappel et annulation la même heure si « annuler après » = 1 jour (vérifier la valeur en prod).
+- **13** — Réduire `Order::$fillable` (status, user_id, token, totaux) par prévention.
+- **14** — `AddToCartButton::$product` en `#[Locked]`.
+- **15** — Formats Chronopost : téléphone « +33 (0)6… » / « 0033 », email > 80 caractères, adresse relais coupée à 38 caractères au milieu d'un mot, poids < 5 g.
+- **17** — Textes SEO à saisir dans le BO : descriptions produits, catégories (Biscuits = Pâtisseries, Apéritif vide), titre/description de l'accueil.
+- **19** — Redirections 301 des anciennes URL Shopify (si la Search Console en montre encore).
+- **20** — Données structurées : shippingDetails, hasMerchantReturnPolicy.
+- **22** — Images : srcset, lazy sur les premières cartes, dimensions/fetchpriority de la bannière et du logo.
+- **23** — 24 composants Livewire sur /boutique : **ne pas toucher** (choix de Ian : risque de régression).
+- **25** — DNS (Ian) : DMARC p=quarantine, CAA, TXT orphelin « 1|www… », HSTS includeSubDomains (vérifier les sous-domaines), security.txt.
+- **26** — Mineurs : canonical avec ?page=N, og:image:alt, llms.txt (sauts de ligne), sitemap/robots en no-cache, sitemap fait main (écart CLAUDE.md à documenter), X-Robots-Tag sur PDF, relais vide en cache 1 h, avoir qui ne ferme pas la session Stripe, CheckoutWizard trop volumineux.

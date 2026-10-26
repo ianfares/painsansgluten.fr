@@ -13,6 +13,6 @@
     @endif
 
     @error($name)
-        <p class="text-xs text-red-600">{{ $message }}</p>
+        <p id="{{ $name }}-error" class="text-xs text-red-600">{{ $message }}</p>
     @enderror
 </div>

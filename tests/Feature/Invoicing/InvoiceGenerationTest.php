@@ -7,12 +7,16 @@ use App\Actions\Invoicing\IssueInvoiceAction;
 use App\Enums\InvoiceType;
 use App\Events\Orders\OrderPaid;
 use App\Listeners\Orders\GenerateInvoiceOnOrderPaid;
+use App\Mail\OrderConfirmedMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
 use App\Settings\BillingSettings;
+use Illuminate\Mail\MailManager;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Testing\Fakes\MailFake;
 
 beforeEach(function () {
     Storage::fake('local');
@@ -102,4 +106,21 @@ test('un invité peut télécharger via une URL signée', function () {
     $url = URL::temporarySignedRoute('invoices.download', now()->addDays(30), ['invoice' => $invoice->id]);
 
     $this->get($url)->assertOk();
+});
+
+test('si l\'email ne peut pas être mis en file, la facture est annulée aussi et le rejeu refait les deux', function () {
+    $order = Order::factory()->create();
+    OrderItem::factory()->for($order)->create();
+
+    // 1er passage : la mise en file de l'email échoue (base indisponible, etc.).
+    Mail::shouldReceive('to')->once()->andThrow(new RuntimeException('file d\'attente indisponible'));
+    expect(fn () => (new GenerateInvoiceOnOrderPaid)->handle(new OrderPaid($order)))->toThrow(RuntimeException::class);
+    expect($order->invoices()->count())->toBe(0);
+
+    // Rejeu du job : facture émise ET email mis en file.
+    Mail::swap(new MailFake(new MailManager(app())));
+    (new GenerateInvoiceOnOrderPaid)->handle(new OrderPaid($order));
+
+    expect($order->invoices()->count())->toBe(1);
+    Mail::assertQueued(OrderConfirmedMail::class);
 });

@@ -22,8 +22,18 @@ class CancelShippingLabelAction
 
     public static function isAvailableFor(Order $order): bool
     {
+        return self::statusAllowsCancel($order) && $order->activeShippingLabel !== null;
+    }
+
+    /**
+     * Colis pas encore parti : commande payée / en préparation, ou remboursée /
+     * annulée AVANT expédition (audit du 26/10/2026 : l'étiquette d'une commande
+     * remboursée restait active sans moyen de l'annuler).
+     */
+    private static function statusAllowsCancel(Order $order): bool
+    {
         return in_array($order->status, [OrderStatus::Paid, OrderStatus::Preparing], true)
-            && $order->activeShippingLabel !== null;
+            || (in_array($order->status, [OrderStatus::Refunded, OrderStatus::Cancelled], true) && $order->shipped_at === null);
     }
 
     /**
@@ -41,7 +51,7 @@ class CancelShippingLabelAction
             $fresh = Order::query()->findOrFail($order->id);
             $label = $fresh->activeShippingLabel()->first();
 
-            if ($label === null || ! in_array($fresh->status, [OrderStatus::Paid, OrderStatus::Preparing], true)) {
+            if ($label === null || ! self::statusAllowsCancel($fresh)) {
                 throw new ShippingLabelFailed('Aucune étiquette annulable pour cette commande (déjà annulée ou colis expédié).');
             }
 

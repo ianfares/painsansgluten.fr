@@ -85,7 +85,14 @@ class ProductResource extends Resource
                                         $set('slug', Str::slug((string) $state));
                                     }
                                 }),
-                            TextInput::make('slug')->label('Slug (URL)')->required()->unique(ignoreRecord: true)->maxLength(255),
+                            TextInput::make('slug')->label('Slug (URL)')->required()->unique(ignoreRecord: true)->maxLength(255)
+                                // Toujours en minuscules, sans accent ni espace (audit du 26/10/2026) ;
+                                // l'ancienne adresse est redirigée automatiquement (ProductSlugRedirect).
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (?string $state, Set $set) => $set('slug', Str::slug((string) $state)))
+                                ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
+                                ->validationMessages(['regex' => 'Le slug ne doit contenir que des minuscules, des chiffres et des tirets.'])
+                                ->helperText('Adresse de la fiche : changer le slug redirige automatiquement l\'ancienne adresse.'),
                             TextInput::make('reference')->label('Référence')->required()->unique(ignoreRecord: true)->maxLength(255),
                             TextInput::make('price_ttc')
                                 ->label('Prix TTC (€)')

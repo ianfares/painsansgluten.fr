@@ -12,6 +12,7 @@ use App\Models\Admin;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use Stripe\ApiRequestor;
@@ -127,4 +128,27 @@ test('sans paiement Stripe connu, le remboursement est refusé et la commande in
         ->toThrow(RefundNotAvailable::class);
 
     expect($this->order->fresh()->status)->toBe(OrderStatus::Paid);
+});
+
+test('deux ouvertures simultanées du lien de paiement ne créent pas deux sessions Stripe', function () {
+    $lock = Cache::lock("stripe-session:order:{$this->order->id}", 30);
+    $lock->get(); // une autre requête est en train de créer la session
+
+    try {
+        $this->get(route('checkout.stripe.start', $this->order))
+            ->assertRedirect(route('checkout.confirmation', $this->order))
+            ->assertSessionHas('payment_error');
+    } finally {
+        $lock->release();
+    }
+
+    expect($this->stripeHttp->requests)->toBe([]);
+});
+
+test('le lien de paiement est limité à 10 ouvertures par minute', function () {
+    foreach (range(1, 10) as $i) {
+        $this->get(route('checkout.stripe.start', $this->order))->assertRedirect();
+    }
+
+    $this->get(route('checkout.stripe.start', $this->order))->assertStatus(429);
 });

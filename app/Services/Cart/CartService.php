@@ -151,7 +151,7 @@ class CartService
     {
         $removedNames = [];
 
-        $items = $cart->items()->with('product')->get()->filter(function (CartItem $item) use (&$removedNames) {
+        $items = $cart->items()->with('product.media')->get()->filter(function (CartItem $item) use (&$removedNames) {
             $product = $item->product;
 
             // Produit supprimé depuis l'ajout au panier : ligne retirée sans erreur.
