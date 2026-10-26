@@ -40,7 +40,7 @@ function transferCheckout(): Testable
         ->set('email', 'client@example.com')->set('first_name', 'Jeanne')->set('last_name', 'Dupont')->set('phone', '0612345678')
         ->set('billing_line1', '1 rue du Pain')->set('billing_postal_code', '50300')->set('billing_city', 'Avranches')
         ->call('goToStep', 2)
-        ->set('relay_postal_code', '50300')->set('relay_name', 'Relais Avranches')
+        ->set('relay_postal_code', '33000')->set('relay_city', 'BORDEAUX')->call('searchRelays')->set('relay_id', '8339S')
         ->call('goToStep', 3)->call('goToStep', 4);
 }
 

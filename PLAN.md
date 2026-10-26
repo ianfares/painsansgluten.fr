@@ -256,10 +256,10 @@ Un bloc vide n'est pas affiché.
 ## 8. Livraison
 
 ### 8.1 Chronopost Relais
-- Service : Chronopost Relais (code produit Chronopost du contrat : `À RENSEIGNER`).
+- Service : **Chrono Relais 13H**, code produit **86** (réglage BO), service 0 = semaine (pas de samedi : expédition le jeudi, livraison le vendredi). Relais commerçants uniquement, **sans consignes automatiques** (`type=C`, décision du 26/10/2026).
 - Zone : France métropolitaine **hors Corse** (contrôle du code postal : refuser 20xxx).
 - **Sélection du relais obligatoire** dans le tunnel :
-  - saisie code postal (+ ville optionnelle) → appel au **web service officiel Chronopost de recherche de points relais** (identifiant à confirmer dans la documentation fournie avec le contrat) ;
+  - saisie code postal + ville (**ville obligatoire** pour Chronopost, pré-remplie avec l'adresse de livraison) → méthode SOAP `recherchePointChronopostInter` (T11, livrée le 26/10/2026) ;
   - liste des relais : nom, adresse, distance, horaires ; sélection d'un relais ;
   - le relais choisi (ID Chronopost, nom, adresse complète) est **copié dans la commande** (snapshot).
 - Carte : **non** en V1 (liste uniquement) → BACKLOG.
@@ -268,10 +268,11 @@ Un bloc vide n'est pas affiché.
 - ⚠️ Cache des résultats de recherche relais (par code postal, 1 h) pour limiter les appels.
 - ⚠️ Timeout court (5 s) + message d'erreur clair + log si le WS est indisponible : le client ne doit pas rester bloqué sur un écran vide.
 
-### 8.2 Expédition (V1 : manuelle)
-- La cliente crée le colis sur son outil Chronopost habituel, puis saisit le **numéro de suivi** dans la commande (BO) → statut « Expédiée » → email au client avec lien de suivi.
+### 8.2 Expédition
+- ⚠️ **Décision du 26/10/2026** : l'étiquetage par API passe en V1 (Chronopost exige des étiquettes de test validées avant de fournir les identifiants de prod). Méthodes : `shippingMultiParcelV4` (étiquette PDF + numéro de suivi), `cancelListSkybill` (annulation). Poids seul (carton variable). Voir docs/DECISIONS.md.
+- En attendant : la cliente crée le colis sur son outil Chronopost habituel, puis saisit le **numéro de suivi** dans la commande (BO) → statut « Expédiée » → email au client avec lien de suivi.
 - URL de suivi : modèle paramétrable en BO (`À RENSEIGNER`, ex. `https://www.chronopost.fr/tracking-no-cms/suivi-page?listeNumerosLT={tracking}` — **à vérifier**).
-- Génération d'étiquettes par API → V2.
+- ~~Génération d'étiquettes par API → V2.~~ Avancée en V1 (voir ci-dessus).
 
 ### 8.3 Frais de port
 - Table `shipping_rates` : tranches de **poids d'expédition total** du panier (min g, max g, **prix HT** centimes — saisie en HT depuis T26). Prix client TTC = HT × (1 + TVA du port), arrondi au centime.

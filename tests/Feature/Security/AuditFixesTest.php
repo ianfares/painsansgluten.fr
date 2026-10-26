@@ -68,10 +68,11 @@ function auditWizard(array $overrides = []): Testable
     foreach (array_merge([
         'email' => 'cliente@example.com', 'first_name' => 'Jeanne', 'last_name' => 'Dupont', 'phone' => '0612345678',
         'billing_line1' => '1 rue du Pain', 'billing_postal_code' => '50300', 'billing_city' => 'Avranches',
-        'relay_postal_code' => '50300', 'relay_name' => 'Relais Avranches', 'cgvAccepted' => true, 'paymentMethod' => 'stripe',
+        'relay_postal_code' => '33000', 'relay_city' => 'BORDEAUX', 'cgvAccepted' => true, 'paymentMethod' => 'stripe',
     ], $overrides) as $field => $value) {
         $component->set($field, $value);
     }
+    $component->call('searchRelays')->set('relay_id', '8339S');
 
     return $component;
 }
@@ -85,7 +86,7 @@ test('appeler « payer » directement revalide les coordonnées : pas de command
 });
 
 test('appeler « payer » directement ne permet pas de livrer en Corse', function () {
-    auditWizard(['relay_postal_code' => '20000'])->call('pay')->assertHasErrors('relay_postal_code');
+    auditWizard(['relay_postal_code' => '20000'])->call('pay')->assertHasErrors('relay_id');
 
     expect(Order::query()->count())->toBe(0);
 });

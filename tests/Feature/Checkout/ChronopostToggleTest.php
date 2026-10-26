@@ -86,7 +86,7 @@ test('coupé : un choix Chronopost envoyé par le navigateur est refusé, aucune
 
     $component = toggleCheckoutAtStep2()
         ->set('deliveryChoice', 'chronopost_relay')
-        ->set('relay_postal_code', '50300')->set('relay_name', 'Relais Avranches');
+        ->set('relay_postal_code', '33000')->set('relay_city', 'BORDEAUX')->call('searchRelays')->set('relay_id', '8339S');
 
     togglePay($component)->assertHasErrors('deliveryChoice');
 

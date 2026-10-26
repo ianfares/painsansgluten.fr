@@ -8,6 +8,7 @@ use App\Actions\Orders\CreateOrderAction;
 use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
 use App\Exceptions\Orders\OrderBelowMinimum;
+use App\Exceptions\Shipping\RelayServiceUnavailable;
 use App\Exceptions\Shipping\ShippingNotConfigured;
 use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Mail\Admin\NewBankTransferOrderMail;
@@ -17,6 +18,8 @@ use App\Models\PickupPoint;
 use App\Models\User;
 use App\Services\Analytics\Ecommerce;
 use App\Services\Cart\CartService;
+use App\Services\Chronopost\RelayPoint;
+use App\Services\Chronopost\RelayPointClient;
 use App\Services\Mail\AdminMailer;
 use App\Services\Shipping\DeliveryOptions;
 use App\Services\Shipping\ShippingDateCalculator;
@@ -38,10 +41,9 @@ use RuntimeException;
  * « Payer »** (jamais avant), via `CreateOrderAction` (CLAUDE.md §4 :
  * recalcul serveur, jamais de confiance dans le navigateur).
  *
- * ⚠️ Étape "Relais" provisoire (PLAN.md §8.1, T11 non livrée faute des
- * identifiants Chronopost) : saisie manuelle d'un nom de relais au lieu
- * de la recherche réelle. N'invente aucun comportement Chronopost — à
- * remplacer dès que T11 est faite (voir docs/DECISIONS.md).
+ * Étape "Relais" (T11, PLAN.md §8.1) : recherche des relais Chronopost par
+ * code postal + ville, puis choix dans la liste. Seul l'identifiant choisi
+ * vient du navigateur : le relais est relu côté serveur au moment de valider.
  */
 class CheckoutWizard extends Component
 {
@@ -50,6 +52,10 @@ class CheckoutWizard extends Component
     /** Modifiée uniquement côté serveur (goToStep), jamais par le navigateur. */
     #[Locked]
     public int $step = 1;
+
+    private const RELAY_SEARCHES_PER_MINUTE = 10;
+
+    private const RELAY_SERVICE_DOWN_MESSAGE = 'Service de points relais momentanément indisponible, réessayez dans quelques instants.';
 
     #[Validate('required|email|max:255')]
     public string $email = '';
@@ -87,11 +93,28 @@ class CheckoutWizard extends Component
 
     public string $shipping_city = '';
 
-    #[Validate('required|string|max:5|regex:/^[0-9]{5}$/')]
     public string $relay_postal_code = '';
 
-    #[Validate('required|string|max:255')]
-    public string $relay_name = '';
+    public string $relay_city = '';
+
+    /** Identifiant Chronopost du relais choisi ; revérifié contre la recherche en cache. */
+    public string $relay_id = '';
+
+    /**
+     * Résultats affichés (RelayPoint::toArray). Verrouillés : le navigateur ne
+     * peut pas injecter un faux relais, et la sélection est relue côté serveur.
+     *
+     * @var list<array<string, mixed>>
+     */
+    #[Locked]
+    public array $relayResults = [];
+
+    /** Code postal + ville de la dernière recherche réussie (relecture du cache au paiement). */
+    #[Locked]
+    public string $relaySearchPostalCode = '';
+
+    #[Locked]
+    public string $relaySearchCity = '';
 
     /**
      * Choix de l'étape 2 (T27-L7b) : « chronopost_relay », « lab_pickup » ou
@@ -149,6 +172,7 @@ class CheckoutWizard extends Component
     {
         if ($step === 2) {
             $this->validate($this->customerRules());
+            $this->prefillRelaySearch();
         }
 
         if ($step === 3 && $this->resolveDelivery() === null) {
@@ -196,24 +220,93 @@ class CheckoutWizard extends Component
             : ['line1' => $this->shipping_line1, 'postal_code' => $this->shipping_postal_code, 'city' => $this->shipping_city];
     }
 
+    /**
+     * Recherche les relais Chronopost (bouton « Rechercher »). Les erreurs du
+     * service sont affichées sans bloquer les autres modes de livraison.
+     */
+    public function searchRelays(): void
+    {
+        $this->relayResults = [];
+        $this->relay_id = '';
+        $this->relaySearchPostalCode = '';
+        $this->relaySearchCity = '';
+
+        $this->validate($this->relaySearchRules(), $this->relaySearchMessages());
+        if ($this->relayOutsideMainland()) {
+            return;
+        }
+
+        // Anti-abus : chaque recherche appelle Chronopost (hors cache).
+        $limiterKey = 'relay-search:'.request()->ip();
+        if (RateLimiter::tooManyAttempts($limiterKey, self::RELAY_SEARCHES_PER_MINUTE)) {
+            $this->addError('relay_postal_code', 'Trop de recherches en peu de temps. Merci de réessayer dans une minute.');
+
+            return;
+        }
+        RateLimiter::hit($limiterKey, 60);
+
+        try {
+            $points = app(RelayPointClient::class)->search($this->relay_postal_code, $this->relay_city);
+        } catch (RelayServiceUnavailable) {
+            $this->addError('relay_postal_code', self::RELAY_SERVICE_DOWN_MESSAGE);
+
+            return;
+        }
+
+        if ($points === []) {
+            $this->addError('relay_postal_code', 'Aucun point relais trouvé pour ce code postal et cette ville. Vérifiez l\'orthographe de la ville ou essayez une commune voisine.');
+
+            return;
+        }
+
+        $this->relayResults = array_map(fn (RelayPoint $point): array => $point->toArray(), $points);
+        $this->relaySearchPostalCode = $this->relay_postal_code;
+        $this->relaySearchCity = $this->relay_city;
+    }
+
+    /** Recherche pré-remplie avec l'adresse de livraison, sans écraser une saisie. */
+    private function prefillRelaySearch(): void
+    {
+        if ($this->relay_postal_code === '' && $this->relay_city === '') {
+            $address = $this->deliveryAddress();
+            $this->relay_postal_code = $address['postal_code'];
+            $this->relay_city = $address['city'];
+        }
+    }
+
     /** @return array<string, mixed> */
-    private function relayRules(): array
+    private function relaySearchRules(): array
     {
         return [
             'relay_postal_code' => 'required|regex:/^[0-9]{5}$/',
-            'relay_name' => 'required|string|max:255',
+            'relay_city' => 'required|string|max:50',
         ];
     }
 
-    private function relayIsInCorsica(): bool
+    /** @return array<string, string> */
+    private function relaySearchMessages(): array
     {
-        if (! str_starts_with($this->relay_postal_code, '20')) {
-            return false;
+        return [
+            'relay_postal_code.required' => 'Indiquez le code postal où chercher un relais.',
+            'relay_postal_code.regex' => 'Le code postal doit comporter 5 chiffres.',
+            'relay_city.required' => 'Indiquez la ville où chercher un relais.',
+        ];
+    }
+
+    /** Corse (20xxx) et outre-mer (97xxx, 98xxx) : pas de livraison (PLAN.md §8.1). */
+    private function relayOutsideMainland(): bool
+    {
+        $message = match (true) {
+            str_starts_with($this->relay_postal_code, '20') => 'La livraison en Corse n\'est pas disponible (France métropolitaine uniquement).',
+            str_starts_with($this->relay_postal_code, '97'), str_starts_with($this->relay_postal_code, '98') => 'La livraison est disponible uniquement en France métropolitaine (hors Corse).',
+            default => null,
+        };
+
+        if ($message !== null) {
+            $this->addError('relay_postal_code', $message);
         }
 
-        $this->addError('relay_postal_code', 'La livraison en Corse n\'est pas disponible (France métropolitaine uniquement).');
-
-        return true;
+        return $message !== null;
     }
 
     private function selectedDeliveryMethod(): DeliveryMethod
@@ -322,22 +415,39 @@ class CheckoutWizard extends Component
         return app(ShippingSettings::class)->chronopost_enabled;
     }
 
-    /** @return array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}|null */
+    /**
+     * Relais choisi, relu dans la recherche Chronopost en cache (jamais repris
+     * du navigateur) puis copié dans la commande (snapshot, PLAN.md §8.1).
+     *
+     * @return array{relay_id: string, relay_name: string, relay_snapshot: array<string, mixed>}|null
+     */
     private function resolveChronopostRelay(): ?array
     {
-        $this->validate($this->relayRules());
+        if ($this->relay_id === '' || $this->relaySearchPostalCode === '') {
+            return $this->deliveryError('relay_id', 'Recherchez puis choisissez un point relais.');
+        }
 
-        if ($this->relayIsInCorsica()) {
-            return null;
+        try {
+            $point = app(RelayPointClient::class)->find($this->relaySearchPostalCode, $this->relaySearchCity, $this->relay_id);
+        } catch (RelayServiceUnavailable) {
+            return $this->deliveryError('relay_id', self::RELAY_SERVICE_DOWN_MESSAGE);
+        }
+
+        if ($point === null) {
+            return $this->deliveryError('relay_id', 'Ce point relais n\'est plus disponible : relancez la recherche et choisissez-en un autre.');
         }
 
         return [
-            'relay_id' => 'MANUEL-'.now()->timestamp,
-            'relay_name' => $this->relay_name,
+            'relay_id' => $point->id,
+            'relay_name' => $point->name,
             'relay_snapshot' => [
-                'name' => $this->relay_name,
-                'postal_code' => $this->relay_postal_code,
-                'note' => 'Saisie manuelle provisoire (T11 non livrée)',
+                'name' => $point->name,
+                'address_line1' => $point->addressLine1,
+                'postal_code' => $point->postalCode,
+                'city' => $point->city,
+                'chronopost_id' => $point->id,
+                'opening_hours' => $point->openingHoursLabel(),
+                'closures' => $point->closures,
             ],
         ];
     }
@@ -526,6 +636,7 @@ class CheckoutWizard extends Component
             'labPickupAllowed' => $options->labPickupAllowed(Auth::user()),
             'bankTransferAllowed' => $this->bankTransferAllowed(),
             'labSnapshot' => $options->labSnapshot()['relay_snapshot'],
+            'relayDayLabels' => RelayPoint::DAY_LABELS,
         ]);
     }
 }

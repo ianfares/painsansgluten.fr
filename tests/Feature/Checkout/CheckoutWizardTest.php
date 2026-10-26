@@ -46,8 +46,7 @@ function fillStep1(Testable $component): Testable
 function fillStep2(Testable $component): Testable
 {
     return $component
-        ->set('relay_postal_code', '50300')
-        ->set('relay_name', 'Relais Avranches Centre');
+        ->set('relay_postal_code', '33000')->set('relay_city', 'BORDEAUX')->call('searchRelays')->set('relay_id', '8339S');
 }
 
 test('un invité peut finaliser une commande (carte : redirection vers le paiement Stripe)', function () {
@@ -71,7 +70,10 @@ test('un invité peut finaliser une commande (carte : redirection vers le paieme
         ->and($order->email)->toBe('cliente@example.com')
         ->and($order->payment_method->value)->toBe('stripe')
         ->and($order->status->value)->toBe('pending_payment')
-        ->and($order->relay_name)->toBe('Relais Avranches Centre')
+        ->and($order->relay_id)->toBe('8339S')
+        ->and($order->relay_name)->toBe('LA POSTE CARREPRO MERIADECK')
+        ->and($order->relay_snapshot['address_line1'])->toBe('5 rue père dieuzaide')
+        ->and($order->relay_snapshot['postal_code'])->toBe('33000')
         ->and($order->items)->toHaveCount(1);
 
     $component->assertRedirect(route('checkout.stripe.start', $order));
@@ -123,7 +125,7 @@ test('impossible d\'avancer à l\'étape récapitulatif sans indiquer de relais'
     fillStep1($component)->call('goToStep', 2);
 
     $component->call('goToStep', 3)
-        ->assertHasErrors(['relay_postal_code', 'relay_name'])
+        ->assertHasErrors(['relay_id'])
         ->assertSet('step', 2);
 });
 
@@ -137,9 +139,11 @@ test('la livraison en Corse n\'est pas disponible', function () {
 
     $component
         ->set('relay_postal_code', '20000')
-        ->set('relay_name', 'Relais Ajaccio')
-        ->call('goToStep', 3)
+        ->set('relay_city', 'Ajaccio')
+        ->call('searchRelays')
         ->assertHasErrors(['relay_postal_code'])
+        ->assertSet('relayResults', [])
+        ->call('goToStep', 3)
         ->assertSet('step', 2);
 });
 

@@ -66,12 +66,14 @@ test('commande : adresse de livraison reprise du compte, enregistrée sur la com
         ->assertSet('billing_city', 'Avranches')
         ->set('phone', '0612345678')
         ->call('goToStep', 2)
-        ->assertSee('Épicerie de Caen');
+        ->assertSee('Épicerie de Caen')
+        ->assertSet('relay_postal_code', '14000')
+        ->assertSet('relay_city', 'Caen');
 
     // La recherche des points proches part de l'adresse de LIVRAISON (Caen), pas de la facturation.
     Http::assertSent(fn ($request) => str_contains($request->url(), 'postcode=14000'));
 
-    $component->set('deliveryChoice', 'chronopost_relay')->set('relay_postal_code', '14000')->set('relay_name', 'Relais Caen')
+    $component->set('deliveryChoice', 'chronopost_relay')->set('relay_postal_code', '33000')->set('relay_city', 'BORDEAUX')->call('searchRelays')->set('relay_id', '8339S')
         ->call('goToStep', 3)->call('goToStep', 4)
         ->set('cgvAccepted', true)->set('paymentMethod', 'stripe')
         ->call('pay')->assertHasNoErrors();

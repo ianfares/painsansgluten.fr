@@ -83,7 +83,7 @@ test('adresse client introuvable ou BAN injoignable : aucun commerçant, la comm
     $this->ban->whenEmpty(Http::response([], 500));
 
     $component = pickupCheckout()->assertDontSee('Épicerie de Granville')
-        ->set('relay_postal_code', '50300')->set('relay_name', 'Relais Avranches');
+        ->set('relay_postal_code', '33000')->set('relay_city', 'BORDEAUX')->call('searchRelays')->set('relay_id', '8339S');
     payNow($component)->assertHasNoErrors();
 
     expect(Order::query()->sole()->delivery_method)->toBe(DeliveryMethod::ChronopostRelay);
