@@ -47,12 +47,20 @@ return [
 
     // Chronopost Web Services (T11, PLAN.md §8.1). Compte de test en local,
     // identifiants du contrat en prod (fournis par Chronopost après validation).
-    // Le code produit est un réglage du back-office (Paramètres > Livraison).
+    // Le code produit est un réglage du back-office (Paramètres > Expédition).
     'chronopost' => [
         'account_number' => env('CHRONOPOST_ACCOUNT_NUMBER'),
         'password' => env('CHRONOPOST_WS_PASSWORD'),
         // WSDL embarqué dans le dépôt : pas de téléchargement à chaque appel.
         'relay_wsdl' => resource_path('chronopost/PointRelaisServiceWS.wsdl'),
+        'shipping_wsdl' => resource_path('chronopost/ShippingServiceWS.wsdl'),
+        'tracking_wsdl' => resource_path('chronopost/TrackingServiceWS.wsdl'),
+        // Étiquette PDF A4 avec preuve de dépôt (imprimante classique, décision de Ian du 26/10/2026).
+        'label_mode' => 'PDF',
+        // Service 0 = livraison en semaine (expédition le jeudi, livraison le vendredi ; pas de samedi).
+        'label_service' => '0',
+        // Délai plus long que la recherche de relais : génération d'un PDF côté Chronopost.
+        'label_timeout_seconds' => 15,
         'timeout_seconds' => 5,
         'relay_cache_minutes' => 60,
         'relay_max_results' => 10,
