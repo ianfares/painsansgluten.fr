@@ -524,7 +524,19 @@
 - **La ville est obligatoire** pour Chronopost (erreur 700 sans elle) : le tunnel demande code postal + ville, pré-remplis avec l'adresse de livraison.
 - **Sécurité** : la liste affichée est une propriété Livewire verrouillée ; le navigateur n'envoie que l'identifiant du relais, relu dans la recherche en cache (code postal + ville verrouillés) au passage à l'étape 3 et au paiement. Le snapshot de la commande vient donc toujours de Chronopost. Rate limiting : 10 recherches/minute/IP. Corse (20xxx) et outre-mer (97xxx, 98xxx) refusés.
 - **Résilience** : timeout 5 s (connexion + lecture), cache 1 h par code postal + ville, échec jamais mis en cache, message « Service de points relais momentanément indisponible… » ; les retraits commerçants restent proposés.
-- **Code produit** : lu dans le réglage BO existant (Paramètres > Livraison, « Code produit Chronopost »), déjà surveillé par `ConfigurationStatus`. La variable `CHRONOPOST_PRODUCT_CODE` du `.env` n'est donc pas utilisée et a été retirée de `.env.example`.
+- **Code produit** : lu dans le réglage BO existant (Paramètres > Expédition, « Code produit Chronopost »), déjà surveillé par `ConfigurationStatus`. La variable `CHRONOPOST_PRODUCT_CODE` du `.env` n'est donc pas utilisée et a été retirée de `.env.example`.
 - **Tests** : `tests/Pest.php` remplace Chronopost par une réponse enregistrée (exemple officiel, relais de Bordeaux) pour TOUS les tests Feature : aucun appel réel possible.
 - **Commande de diagnostic** : `php artisan chronopost:test-relays {cp} {ville}` (lecture seule, sans cache) pour vérifier identifiants et code produit, en local comme en prod.
 - **Écarté** : HTTP brut + XML fait main (échappement manuel, risque d'injection XML) ; WSDL distant à chaque appel (latence, dépendance supplémentaire) ; filtrage des consignes par le préfixe/suffixe de l'identifiant (non documenté).
+
+## 2026-10-26 — T28 : étiquettes Chronopost depuis le back-office
+- **Choix de Ian** : PDF A4 (imprimante classique, mode `PDF` avec preuve de dépôt) ; générer l'étiquette **ne change pas le statut** (la cliente clique « Expédier » le jeudi, n° de suivi pré-rempli, email au client à ce moment) ; **pas d'assurance** ad valorem (`insuredValue` 0) ; service 0 ; poids seul (dimensions à 0, autorisé par la doc).
+- **Table `shipping_labels`** (et non des colonnes sur `orders`) : garde l'historique des étiquettes annulées ; numéro de LT unique en BDD ; au plus une étiquette active par commande, garanti sous verrou (`lockForUpdate` de la commande) — un double clic renvoie l'étiquette existante sans rappeler Chronopost.
+- **Appel Chronopost dans la transaction** (verrou tenu ≤ 15 s) : action admin ponctuelle, c'est ce qui empêche deux étiquettes payantes pour un même colis. Un refus/panne n'écrit rien.
+- **PDF stocké sur le disque privé** (`storage/app/private/shipping-labels/{commande}/{LT}.pdf`), servi uniquement par une action Filament (admin authentifié), comme le bon de livraison.
+- **Relais saisi à la main** (commandes manuelles du BO, anciennes commandes avec saisie provisoire) : étiquette refusée (pas de code relais Chronopost) → outil Chronopost habituel. Vérification : `relay_snapshot.chronopost_id` = `relay_id`.
+- **Textes envoyés sans accents** (`Str::ascii`) et tronqués aux longueurs de la doc ; téléphones en chiffres seuls (+33 → 0).
+- **`shipDate`/`shipHour`** : date/heure de génération (valeur par défaut de la doc ; le WSDL exige les éléments).
+- **WSDL embarqués** : `resources/chronopost/ShippingServiceWS.wsdl`, `TrackingServiceWS.wsdl`.
+- **Essai réel** (compte de test, 26/10) : étiquette XS496898265FR conforme (relais, « à l'attention de », 13H REL, poids), annulation OK.
+- **Écarté** : statut « Expédiée » à la génération (Ian préfère garder le clic d'expédition le jour du dépôt) ; format thermique (pas d'imprimante d'étiquettes) ; dimensions saisies (carton variable).

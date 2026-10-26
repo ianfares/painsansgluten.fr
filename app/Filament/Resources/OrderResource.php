@@ -21,6 +21,7 @@ use App\Exceptions\Orders\RefundNotAvailable;
 use App\Filament\Resources\OrderResource\DeliveryNoteActions;
 use App\Filament\Resources\OrderResource\ManualOrderForm;
 use App\Filament\Resources\OrderResource\Pages;
+use App\Filament\Resources\OrderResource\ShippingLabelActions;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\Orders\OrderStateMachine;
@@ -38,12 +39,13 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-
 /**
  * Vue BO des commandes (PLAN.md §14, T15 puis T17) : liste, recherche,
  * filtres, détail complet (lignes, relais, historique, facture), actions de
  * transition de statut avec confirmation.
  */
+use Illuminate\Database\Eloquent\Builder;
+
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
@@ -58,6 +60,8 @@ class OrderResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            // Étiquette active préchargée : les boutons « étiquette » ne font pas une requête par ligne.
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('activeShippingLabel'))
             ->columns([
                 TextColumn::make('number')->label('N°')->searchable(),
                 TextColumn::make('first_name')
@@ -174,12 +178,15 @@ class OrderResource extends Resource
                         fn () => $orderStateMachine->transition($record, OrderStatus::Preparing, 'admin', auth('admin')->id()),
                         'Commande passée en préparation.',
                     )),
+                ...ShippingLabelActions::all(Tables\Actions\Action::class),
                 Tables\Actions\Action::make('ship')
                     ->label('Expédier')
                     ->icon('heroicon-o-truck')
                     ->visible(fn (Order $record): bool => $record->status === OrderStatus::Preparing && ! $record->delivery_method->isPickup())
                     ->form([
-                        TextInput::make('tracking_number')->label('N° de suivi Chronopost')->required(),
+                        TextInput::make('tracking_number')->label('N° de suivi Chronopost')->required()
+                            // Pré-rempli avec l'étiquette générée dans le BO (T28), modifiable.
+                            ->default(fn (Order $record): ?string => $record->activeShippingLabel?->skybill_number),
                     ])
                     ->requiresConfirmation()
                     ->action(function (Order $record, array $data, ShipOrderAction $shipOrderAction): void {
