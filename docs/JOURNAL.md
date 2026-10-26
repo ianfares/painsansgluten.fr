@@ -1406,3 +1406,18 @@ DOCUMENTATION : docs/DECISIONS.md.
 POINTS À RELIRE PAR UN HUMAIN : après déploiement, parcourir le site ET le back-office (console du navigateur) pour vérifier qu'aucune ressource n'est bloquée par la CSP.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : point 5 de la synthèse (limitation de débit inscription / mot de passe oublié), puis la suite ; déploiement T11 + T28 + corrections avec Chronopost désactivé.
+
+## [2026-10-26 20:00] — [IA : Claude Opus 5.5] — Audit lot 2
+TÂCHE : corrections de l'audit choisies par Ian : 6, 7, 9, 11, 12, 16, 18, 21 (prudent, sans toucher aux composants Livewire), 24 ; reste mis au backlog (5 = risque accepté, Turnstile).
+RÉSUMÉ : limites de commandes (commandes créées seulement, email + IP), annulation d'étiquette sur commande remboursée/annulée non expédiée, verrou de file d'attente 5 min, lien Stripe verrouillé + limité, facture et email de confirmation atomiques, slugs produits normalisés + redirections 301 (table product_slug_redirects, commande catalog:normalize-slugs), titre SEO sans nom en double, préchargements (≈11 requêtes sur /boutique quel que soit le catalogue), jours fermés en une requête, accessibilité (focus piégé/restauré, aria, contraste).
+FICHIERS CRÉÉS / MODIFIÉS : app/Livewire/CheckoutWizard.php, app/Actions/Shipping/CancelShippingLabelAction.php, routes/console.php, routes/web.php, app/Http/Controllers/Checkout/CheckoutController.php, app/Listeners/Orders/GenerateInvoiceOnOrderPaid.php, app/Models/{Product,ProductSlugRedirect}.php, migration 2026_10_26_130000_create_product_slug_redirects_table, app/Http/Controllers/Catalog/{Product,Boutique,Home}Controller.php, app/Filament/Resources/ProductResource.php, app/Console/Commands/NormalizeProductSlugsCommand.php, app/Services/Cart/CartService.php, app/Services/Shipping/ShippingDateCalculator.php, vues (layout, header, drawer, field, input, product-card, add-to-cart-button), resources/css/app.css, tests (AuditFixes, ShippingLabel, Schedule, StripeCheckout, InvoiceGeneration, Seo, ProductSlug, QueryCount), docs/DECISIONS.md, docs/BACKLOG.md.
+ANALYSE D'IMPACT : route produit : binding inchangé + `missing()` (ancien slug) + 301 de casse ; liens existants intacts. Message de limite de commande modifié (test mis à jour, règle changée avec accord). Panier : préchargement media ajouté (1 requête) sur validItems.
+SÉCURITÉ : moins d'abus possibles (commandes par IP, sessions Stripe) ; aucune nouvelle surface.
+PERFORMANCE : N+1 supprimés sur les listes ; date d'expédition en une requête.
+TESTS : 618 passés / 0 échec ; tests qui échouent sans correctif vérifiés pour le délai SOAP, l'email de confirmation et le N+1.
+QUALITÉ : pint OK, phpstan 0 erreur.
+DOCUMENTATION : docs/DECISIONS.md, docs/BACKLOG.md.
+À RENSEIGNER / QUESTIONS OUVERTES : lancer `catalog:normalize-slugs` en prod (simulation puis --apply avec dump, accord de Ian) ; migrations à jouer en prod (shipping_labels, product_slug_redirects) au déploiement.
+POINTS À RELIRE PAR UN HUMAIN : tiroir panier et menu mobile (x-trap) non vérifiés en navigateur (extension Chrome instable) : à tester en local ou après déploiement (ouvrir/fermer, Tab, Échap) ; couleur ocre foncé des libellés de catégorie.
+AJOUTÉ AU BACKLOG : points 8, 10, 13, 14, 15, 17, 19, 20, 22, 23 (ne pas toucher), 25, 26 + 5 (risque accepté).
+PROCHAINE TÂCHE SUGGÉRÉE : guide Chronopost pour Angélique ; vérif visuelle tiroir/menu ; déploiement (T11, T28, audit) avec Chronopost désactivé.
