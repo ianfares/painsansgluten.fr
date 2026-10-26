@@ -33,7 +33,8 @@ test('analyse la réponse Chronopost : identifiant, nom, adresse, distance et ho
         ->and($first->distanceMeters)->toBe(218)
         ->and(array_keys($first->openingHours))->toBe([1, 2, 3, 4, 5, 6])
         ->and($first->openingHours[6])->toBe('08:15-12:00')
-        ->and($first->openingHoursLabel())->toStartWith('Lun. 08:15-12:00 12:00-17:00 · ');
+        ->and($first->openingHours[1])->toBe('08:15-17:00')
+        ->and($first->openingHoursLabel())->toStartWith('Lun. 08:15-17:00 · ');
 });
 
 test('garde les fermetures à venir et ignore celles déjà passées', function () {
@@ -105,4 +106,18 @@ test('sans identifiants ou sans code produit, aucun appel n\'est fait', function
 
     expect(fn () => app(RelayPointClient::class)->search('33000', 'Bordeaux'))->toThrow(RelayServiceUnavailable::class)
         ->and($fake->requests)->toBe([]);
+});
+
+test('fusionne les plages horaires qui se touchent mais garde les vraies coupures', function () {
+    $xml = str_replace(
+        ['<horairesAsString>08:15-12:00 12:00-17:00</horairesAsString>', '<horairesAsString>08:15-12:00</horairesAsString>'],
+        ['<horairesAsString>08:15-12:00 12:00-17:00</horairesAsString>', '<horairesAsString>09:30-12:30 14:00-19:00</horairesAsString>'],
+        FakeChronopostSoapClientFactory::fixture('relay-search-ok.xml'),
+    );
+    fakeChronopost($xml);
+
+    $first = app(RelayPointClient::class)->search('33000', 'Bordeaux')[0];
+
+    expect($first->openingHours[1])->toBe('08:15-17:00')
+        ->and($first->openingHours[6])->toBe('09:30-12:30 14:00-19:00');
 });

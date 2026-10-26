@@ -145,7 +145,7 @@ class RelayPointClient
     {
         $hours = [];
         foreach ((array) ($raw->listeHoraireOuverture ?? []) as $day) {
-            $label = trim((string) ($day->horairesAsString ?? ''));
+            $label = self::mergeContiguousRanges(trim((string) ($day->horairesAsString ?? '')));
             if (is_object($day) && $label !== '' && isset($day->jour)) {
                 $hours[(int) $day->jour] = $label;
             }
@@ -179,6 +179,27 @@ class RelayPointClient
             openingHours: $hours,
             closures: $closures,
         );
+    }
+
+    /**
+     * Fusionne les plages qui se touchent : Chronopost renvoie souvent
+     * « 07:30-12:00 12:00-20:00 » pour un relais ouvert sans coupure, ce qui
+     * laisserait croire à une fermeture à midi. Les vraies coupures sont gardées.
+     */
+    private static function mergeContiguousRanges(string $hours): string
+    {
+        $merged = [];
+        foreach (preg_split('/\s+/', $hours, -1, PREG_SPLIT_NO_EMPTY) ?: [] as $range) {
+            $bounds = explode('-', $range, 2);
+            $last = array_key_last($merged);
+            if (count($bounds) === 2 && $last !== null && $merged[$last][1] === $bounds[0]) {
+                $merged[$last][1] = $bounds[1];
+            } else {
+                $merged[] = count($bounds) === 2 ? $bounds : [$range, null];
+            }
+        }
+
+        return implode(' ', array_map(fn (array $b): string => $b[1] === null ? $b[0] : $b[0].'-'.$b[1], $merged));
     }
 
     /** @param  array<string, mixed>  $row */
