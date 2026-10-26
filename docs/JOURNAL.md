@@ -1391,3 +1391,18 @@ DOCUMENTATION : docs/DECISIONS.md, tasks/T28-etiquettes-chronopost.md, PLAN.md �
 POINTS À RELIRE PAR UN HUMAIN : rendu de l'étiquette PDF (A4 paysage, preuve de dépôt à gauche) ; libellés des boutons BO ; comportement si Angélique annule une étiquette déjà déposée.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : préparer et envoyer le dossier de validation à Chronopost ; fusion T28 dans develop ; déploiement (T11 + T28) avec Chronopost désactivé ; activation après réception des identifiants de prod.
+
+## [2026-10-26 19:40] — [IA : Claude Opus 5.5] — Audit + corrections 1 à 4
+TÂCHE : audit complet demandé par Ian (sécurité, bugs, SEO/perf, résultats web-check) et corrections des points 1 à 4.
+RÉSUMÉ : 3 agents d'audit en lecture seule (rapports + synthèse priorisée de 26 points hors git dans `security-audit/run-1/`). Aucune faille critique ni haute ; composer/npm audit propres. Corrigés : (1) délai de lecture SOAP Chronopost réellement borné (TimedSoapClient), (2) étiquettes : appel Chronopost hors transaction avec verrou applicatif et nettoyage si l'enregistrement échoue, (3) CSP passée en mode bloquant après vérification des ressources chargées en prod (+ fonts.bunny.net pour le BO), (4) plus de panier créé en base pour une simple visite. Coordonnées expéditeur réelles enregistrées dans les réglages locaux ; dossier de validation Chronopost prêt dans `chronopost-docs/validation/` (hors git) + brouillon d'email donné à Ian.
+FICHIERS CRÉÉS / MODIFIÉS : app/Services/Chronopost/{TimedSoapClient (créé),SoapClientFactory}.php, app/Actions/Shipping/{Generate,Cancel}ShippingLabelAction.php, app/Http/Middleware/SecurityHeaders.php, app/Services/Cart/CartService.php, tests (SoapTimeoutTest + fixture slow-server, ShippingLabelTest, CartServiceTest, CreateOrderActionTest, CookieConsentTest, AuditFixesTest), docs/DECISIONS.md.
+ANALYSE D'IMPACT : currentCart() ne crée plus de panier → tous les appelants en lecture vérifiés (compteur, tiroir, panier, tunnel) ; seul add() écrit (cartForWrite) ; tests qui lisaient le panier avant l'ajout adaptés (justification : comportement voulu changé). CSP : tests mis à jour (report-only → bloquante, décision de Ian du 26/10).
+SÉCURITÉ : CSP bloquante (frame-ancestors, object-src, base-uri, form-action désormais appliqués). Risque résiduel : back-office non vérifié en prod avec la CSP bloquante → contrôler la console après déploiement.
+PERFORMANCE : moins d'écritures BDD (paniers) ; délai Chronopost borné (5 s / 15 s).
+TESTS : 601 passés / 0 échec (+ test de délai SOAP qui échoue sans le correctif, PDF/LT orphelins, opération concurrente, appel hors transaction, visite sans panier, CSP bloquante).
+QUALITÉ : pint OK, phpstan 0 erreur.
+DOCUMENTATION : docs/DECISIONS.md.
+À RENSEIGNER / QUESTIONS OUVERTES : points 5 à 26 de la synthèse à traiter un par un avec Ian ; Ian envoie l'email de validation à Chronopost.
+POINTS À RELIRE PAR UN HUMAIN : après déploiement, parcourir le site ET le back-office (console du navigateur) pour vérifier qu'aucune ressource n'est bloquée par la CSP.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : point 5 de la synthèse (limitation de débit inscription / mot de passe oublié), puis la suite ; déploiement T11 + T28 + corrections avec Chronopost désactivé.
