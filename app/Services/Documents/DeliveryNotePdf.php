@@ -52,6 +52,7 @@ class DeliveryNotePdf
                 return [
                     'order' => $order,
                     'address' => $this->deliveryAddress($order),
+                    'plannedDate' => $this->plannedDateLine($order),
                     'items' => $order->items,
                     'totalQuantity' => (int) $order->items->sum('quantity'),
                     'qr' => $this->qrSvgDataUri($this->qrText($order)),
@@ -67,6 +68,22 @@ class DeliveryNotePdf
             'shopAddress' => trim(($shop->address_line1 ?? '').' '.($shop->postal_code ?? '').' '.($shop->city ?? '')),
             'shopPhone' => $shop->contact_phone,
         ];
+    }
+
+    /** Date de retrait / d'expédition prévue, avec la plage horaire du point de retrait s'il y en a une. */
+    public function plannedDateLine(Order $order): ?string
+    {
+        if ($order->planned_ship_date === null) {
+            return null;
+        }
+
+        $line = $order->delivery_method->plannedDatePrefix().' '
+            .$order->planned_ship_date->locale('fr')->isoFormat('dddd D MMMM YYYY');
+        $hours = $order->relay_snapshot['pickup_hours'] ?? null;
+
+        return $order->delivery_method->isPickup() && is_string($hours) && trim($hours) !== ''
+            ? $line.', '.trim($hours)
+            : $line;
     }
 
     /** Adresse de livraison en une ligne (point relais, commerçant ou labo). */

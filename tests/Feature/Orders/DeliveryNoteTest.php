@@ -43,6 +43,33 @@ test('le bon de livraison contient commande, client, produits et quantités, san
     }
 });
 
+test('le bon de livraison indique la date de retrait et la plage horaire du point', function () {
+    $order = paidOrderWithItems([
+        'delivery_method' => DeliveryMethod::MerchantPickup,
+        'planned_ship_date' => '2026-10-30',
+        'relay_snapshot' => ['name' => 'Commerce test', 'pickup_hours' => '16h–19h'],
+    ]);
+
+    $html = view('pdf.delivery-note', app(DeliveryNotePdf::class)->viewData([$order]))->render();
+
+    expect($html)->toContain('Retrait le vendredi 30 octobre 2026, 16h–19h');
+});
+
+test('Chronopost : le bon de livraison indique la date d\'expédition prévue, sans plage horaire', function () {
+    $order = paidOrderWithItems([
+        'delivery_method' => DeliveryMethod::ChronopostRelay,
+        'planned_ship_date' => '2026-10-30',
+    ]);
+
+    expect(app(DeliveryNotePdf::class)->plannedDateLine($order))->toBe('Expédition prévue le vendredi 30 octobre 2026');
+});
+
+test('sans date prévue, aucune ligne de date', function () {
+    $order = paidOrderWithItems(['planned_ship_date' => null]);
+
+    expect(app(DeliveryNotePdf::class)->plannedDateLine($order))->toBeNull();
+});
+
 test('le PDF est généré (en-tête %PDF) pour une ou plusieurs commandes', function () {
     $orders = [paidOrderWithItems(), paidOrderWithItems()];
 

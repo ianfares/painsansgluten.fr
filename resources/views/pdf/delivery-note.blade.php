@@ -38,6 +38,9 @@
                     <strong>Livraison</strong><br>
                     {{ $order->delivery_method->label() }}<br>
                     {{ $note['address'] }}
+                    @if ($note['plannedDate'])
+                        <br><strong>{{ $note['plannedDate'] }}</strong>
+                    @endif
                 </td>
             </tr>
         </table>
