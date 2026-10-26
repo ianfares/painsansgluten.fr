@@ -3,7 +3,7 @@
     // $homepageSettings, $shopSettings, $headerCategories.
 @endphp
 
-<header x-data="{ mobileOpen: false }">
+<header x-data="{ mobileOpen: false }" x-on:keydown.escape.window="mobileOpen = false">
     @if ($homepageSettings->announcement_active && $homepageSettings->announcement_text)
         <div class="bg-sage px-4 py-2 text-center text-sm text-white">
             {{ $homepageSettings->announcement_text }}
@@ -17,6 +17,8 @@
                 type="button"
                 class="lg:hidden"
                 aria-label="Ouvrir le menu"
+                aria-controls="mobile-menu"
+                x-bind:aria-expanded="mobileOpen"
                 x-on:click="mobileOpen = true"
             >
                 <span aria-hidden="true" class="text-2xl">☰</span>
@@ -110,7 +112,7 @@
         aria-label="Menu"
     >
         <div class="absolute inset-0 bg-black/40" x-on:click="mobileOpen = false"></div>
-        <nav class="relative flex h-full w-64 flex-col gap-4 bg-white p-6" aria-label="Navigation mobile">
+        <nav id="mobile-menu" x-trap.noscroll="mobileOpen" class="relative flex h-full w-64 flex-col gap-4 bg-white p-6" aria-label="Navigation mobile">
             <button type="button" class="self-end text-ink-muted" x-on:click="mobileOpen = false" aria-label="Fermer le menu">✕</button>
             <a href="{{ route('home') }}" class="text-ink hover:text-sage">Accueil</a>
             <a href="{{ route('boutique.index') }}" class="text-ink hover:text-sage">Boutique</a>

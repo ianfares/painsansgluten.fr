@@ -12,7 +12,10 @@
         wire:click="add"
         wire:loading.attr="disabled"
         class="btn btn-sm"
+        {{-- Nom du produit dans le libellé : 24 boutons identiques sinon pour un lecteur d'écran. --}}
+        aria-label="{{ ($added ? 'Ajouté au panier : ' : 'Ajouter au panier : ').$product->name }}"
     >
         {{ $added ? 'Ajouté ✓' : 'Ajouter au panier' }}
     </button>
+    <span class="sr-only" role="status" aria-live="polite">{{ $added ? $product->name.' ajouté au panier.' : '' }}</span>
 </div>

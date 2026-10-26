@@ -57,16 +57,20 @@ class ShippingDateCalculator
 
         $date = $at->greaterThan($cutoffToday) ? $at->addDay()->startOfDay() : $at->startOfDay();
 
+        // Jours fermés chargés en UNE requête pour toute la fenêtre de recherche
+        // (avant : une requête par jour testé, à chaque rendu du panier — audit du 26/10/2026).
+        $closedPeriods = $this->closedPeriodsBetween($date, $date->addDays(self::MAX_SEARCH_DAYS + 1));
+
         $remainingLeadDays = $leadDays;
         $steps = 0;
         while ($remainingLeadDays > 0) {
             $date = $this->nextDay($date, $steps);
-            if (! $this->isClosed($date)) {
+            if (! $this->isClosed($date, $closedPeriods)) {
                 $remainingLeadDays--;
             }
         }
 
-        while (! $this->isShippingDay($date, $weekdays) || $this->isClosed($date)) {
+        while (! $this->isShippingDay($date, $weekdays) || $this->isClosed($date, $closedPeriods)) {
             $date = $this->nextDay($date, $steps);
         }
 
@@ -105,11 +109,33 @@ class ShippingDateCalculator
         return in_array(self::WEEKDAY_NAMES[$date->dayOfWeekIso - 1], $weekdays, true);
     }
 
-    private function isClosed(CarbonImmutable $date): bool
+    /**
+     * @return list<array{0: string, 1: string}> périodes fermées [début, fin] (Y-m-d, bornes incluses)
+     */
+    private function closedPeriodsBetween(CarbonImmutable $from, CarbonImmutable $to): array
     {
         return ClosedDate::query()
-            ->whereDate('start_date', '<=', $date->toDateString())
-            ->whereDate('end_date', '>=', $date->toDateString())
-            ->exists();
+            ->whereDate('end_date', '>=', $from->toDateString())
+            ->whereDate('start_date', '<=', $to->toDateString())
+            ->get(['start_date', 'end_date'])
+            ->map(fn (ClosedDate $closed): array => [
+                CarbonImmutable::parse($closed->start_date)->toDateString(),
+                CarbonImmutable::parse($closed->end_date)->toDateString(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /** @param  list<array{0: string, 1: string}>  $closedPeriods */
+    private function isClosed(CarbonImmutable $date, array $closedPeriods): bool
+    {
+        $day = $date->toDateString();
+        foreach ($closedPeriods as [$start, $end]) {
+            if ($start <= $day && $day <= $end) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

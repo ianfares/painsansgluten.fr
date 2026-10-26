@@ -18,7 +18,7 @@ class BoutiqueController extends Controller
     {
         return view('catalog.boutique', [
             'title' => 'Boutique sans gluten',
-            'products' => Product::query()->published()->with('category')->orderBy('position')->paginate(24),
+            'products' => Product::query()->published()->with(['category', 'media'])->orderBy('position')->paginate(24),
             'categories' => Category::query()->where('is_active', true)->orderBy('position')->get(),
             'activeCategory' => null,
         ]);
@@ -30,7 +30,7 @@ class BoutiqueController extends Controller
 
         return view('catalog.boutique', [
             'title' => $category->name,
-            'products' => $category->products()->published()->with('category')->orderBy('position')->paginate(24),
+            'products' => $category->products()->published()->with(['category', 'media'])->orderBy('position')->paginate(24),
             'categories' => Category::query()->where('is_active', true)->orderBy('position')->get(),
             'activeCategory' => $category,
         ]);

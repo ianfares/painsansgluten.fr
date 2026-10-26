@@ -23,12 +23,13 @@ class HomeController extends Controller
         $featured = Product::query()
             ->published()
             ->whereIn('id', $homepage->featured_product_ids)
+            ->with(['category', 'media'])
             ->get()
             ->sortBy(fn (Product $product) => array_search($product->id, $homepage->featured_product_ids))
             ->values();
 
         if ($featured->isEmpty()) {
-            $featured = Product::query()->published()->where('is_available', true)->inRandomOrder()->limit(4)->get();
+            $featured = Product::query()->published()->where('is_available', true)->with(['category', 'media'])->inRandomOrder()->limit(4)->get();
         }
 
         return view('catalog.home', [

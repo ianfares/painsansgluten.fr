@@ -32,6 +32,7 @@ class ProductController extends Controller
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('is_available', true)
+            ->with(['category', 'media'])
             ->inRandomOrder()
             ->limit(4)
             ->get();

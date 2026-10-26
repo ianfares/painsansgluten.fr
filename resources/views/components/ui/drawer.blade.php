@@ -22,8 +22,10 @@
         class="absolute inset-0 bg-black/40"
     ></div>
 
+    {{-- x-trap : le focus reste dans le tiroir ouvert et revient au bouton déclencheur à la fermeture. --}}
     <div
         x-show="open"
+        x-trap.noscroll="open"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="translate-x-full"
         x-transition:enter-end="translate-x-0"
