@@ -9,7 +9,6 @@ use App\Exceptions\Shipping\ShippingLabelFailed;
 use App\Models\Order;
 use App\Models\ShippingLabel;
 use App\Services\Chronopost\ShippingLabelClient;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Action BO « Annuler l'étiquette » (T28) : annule la LT chez Chronopost
@@ -32,21 +31,28 @@ class CancelShippingLabelAction
      */
     public function execute(Order $order): ShippingLabel
     {
-        return DB::transaction(function () use ($order): ShippingLabel {
-            /** @var Order $locked */
-            $locked = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
-            $label = $locked->activeShippingLabel()->first();
+        // Même verrou que la génération ; pas de transaction pendant l'appel réseau (audit du 26/10/2026).
+        $lock = GenerateShippingLabelAction::lockFor($order);
+        if (! $lock->get()) {
+            throw new ShippingLabelFailed('Une opération sur l\'étiquette de cette commande est déjà en cours : patientez quelques secondes.');
+        }
 
-            if ($label === null || ! in_array($locked->status, [OrderStatus::Paid, OrderStatus::Preparing], true)) {
+        try {
+            $fresh = Order::query()->findOrFail($order->id);
+            $label = $fresh->activeShippingLabel()->first();
+
+            if ($label === null || ! in_array($fresh->status, [OrderStatus::Paid, OrderStatus::Preparing], true)) {
                 throw new ShippingLabelFailed('Aucune étiquette annulable pour cette commande (déjà annulée ou colis expédié).');
             }
 
-            $this->client->cancel($label->skybill_number, $locked);
+            $this->client->cancel($label->skybill_number, $fresh);
 
             $label->cancelled_at = now();
             $label->save();
 
             return $label;
-        });
+        } finally {
+            $lock->release();
+        }
     }
 }

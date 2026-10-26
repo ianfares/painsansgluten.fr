@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\AddToCartButton;
 use App\Livewire\CartWidget;
+use App\Models\Cart;
 use App\Models\Product;
 use App\Models\ShippingRate;
 use App\Services\Cart\CartService;
@@ -83,4 +84,25 @@ test('le panier mène au tunnel de commande et propose connexion ou création de
 
     Livewire::test(CartWidget::class)->assertSee('Passer commande')->assertSee('Voir mon panier');
     Livewire::test(CartWidget::class, ['onCartPage' => true])->assertDontSee('Voir mon panier');
+});
+
+test('afficher le site ne crée ni panier en base ni identifiant de session (robots, simples visites)', function () {
+    $this->get('/')->assertOk();
+    $this->get('/boutique')->assertOk();
+
+    expect(Cart::query()->count())->toBe(0)
+        ->and(session()->has('cart_session_id'))->toBeFalse();
+});
+
+test('le panier est créé au premier ajout et retrouvé ensuite', function () {
+    $product = Product::factory()->create();
+    $cartService = app(CartService::class);
+
+    expect($cartService->currentCart()->exists)->toBeFalse();
+
+    $cartService->add($product, 1);
+
+    expect(Cart::query()->count())->toBe(1)
+        ->and($cartService->currentCart()->exists)->toBeTrue()
+        ->and($cartService->totals($cartService->currentCart())['count'])->toBe(1);
 });

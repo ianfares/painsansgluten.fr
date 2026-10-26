@@ -540,3 +540,10 @@
 - **WSDL embarqués** : `resources/chronopost/ShippingServiceWS.wsdl`, `TrackingServiceWS.wsdl`.
 - **Essai réel** (compte de test, 26/10) : étiquette XS496898265FR conforme (relais, « à l'attention de », 13H REL, poids), annulation OK.
 - **Écarté** : statut « Expédiée » à la génération (Ian préfère garder le clic d'expédition le jour du dépôt) ; format thermique (pas d'imprimante d'étiquettes) ; dimensions saisies (carton variable).
+
+## 2026-10-26 — Corrections de l'audit (points 1 à 4)
+Audit complet du 26/10 (sécurité, bugs, SEO/perf ; synthèse hors git dans `security-audit/run-1/`). Aucune faille critique ni haute. Points traités, avec l'accord de Ian :
+1. **Délai de lecture SOAP Chronopost réellement appliqué** : `connection_timeout` ne couvre que la connexion et l'option `http.timeout` du stream_context est ignorée par SoapClient (lecture = `default_socket_timeout`, 60 s). `TimedSoapClient` pose `default_socket_timeout` le temps de l'appel puis le restaure. Test avec un faux serveur lent (échoue sans le correctif).
+2. **Étiquettes : appel Chronopost hors transaction BDD.** Verrou applicatif par commande (`Cache::lock`, partagé génération/annulation, 60 s) au lieu d'un verrou de ligne tenu pendant l'appel réseau. Si l'enregistrement échoue après la création chez Chronopost : PDF supprimé + LT annulée chez Chronopost (journal `critical` si l'annulation échoue aussi).
+3. **CSP bloquante** (était en Report-Only). Ressources chargées vérifiées sur le site en production (accueil, boutique, contact : domaine + Turnstile) ; ajout de `fonts.bunny.net` (police du BO Filament). `'unsafe-inline'`/`'unsafe-eval'` conservés (Livewire/Alpine). Toute nouvelle balise GTM vers un autre domaine devra être ajoutée à `SecurityHeaders`. Risque résiduel : BO non vérifié en production (à contrôler après déploiement : console du navigateur sans erreur CSP).
+4. **Plus de panier en base pour une simple visite** : `CartService::currentCart()` est en lecture (panier existant ou panier vide non enregistré, aucun identifiant de session créé) ; `cartForWrite()` crée le panier au premier ajout. Avant : chaque visiteur, robots compris, créait une ligne `carts`.

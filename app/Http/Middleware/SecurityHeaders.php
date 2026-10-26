@@ -10,9 +10,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * En-têtes de sécurité sur toutes les réponses (T23, PLAN.md §20).
- * La CSP est en mode « report-only » : elle ne bloque rien, le navigateur
- * signale seulement en console ce qu'elle bloquerait. T22 : GTM / GA4 autorisés ci-dessous ;
- * passage en mode bloquant à décider après observation en production (docs/DECISIONS.md).
+ * La CSP est BLOQUANTE depuis l'audit du 26/10/2026 (elle était en
+ * « report-only ») : ressources réellement chargées en production vérifiées
+ * (site public : domaine + Turnstile ; BO : polices fonts.bunny.net de Filament ;
+ * GTM / GA4 après consentement). Tout nouveau service tiers (balise GTM vers
+ * un autre domaine, widget…) doit être ajouté ici, sinon le navigateur le bloque.
+ * 'unsafe-inline' et 'unsafe-eval' restent nécessaires (Livewire/Alpine,
+ * Filament) : un nonce désactiverait 'unsafe-inline' et casserait les scripts
+ * inline de Livewire (docs/DECISIONS.md, T22).
  */
 class SecurityHeaders
 {
@@ -20,8 +25,9 @@ class SecurityHeaders
         "default-src 'self'",
         // Livewire/Alpine évaluent des expressions : 'unsafe-eval' nécessaire.
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://*.google-analytics.com",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' data: https://fonts.gstatic.com",
+        // fonts.bunny.net : police par défaut du back-office Filament.
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
+        "font-src 'self' data: https://fonts.gstatic.com https://fonts.bunny.net",
         "img-src 'self' data: blob: https:",
         "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net",
         'frame-src https://challenges.cloudflare.com https://www.googletagmanager.com',
@@ -45,7 +51,7 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
-        $response->headers->set('Content-Security-Policy-Report-Only', implode('; ', self::CSP));
+        $response->headers->set('Content-Security-Policy', implode('; ', self::CSP));
 
         // Hors production (préprod…) : jamais indexé, même si un lien fuit (PLAN.md §17).
         if (! app()->environment('production')) {
