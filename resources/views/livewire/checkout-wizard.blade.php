@@ -150,16 +150,50 @@
                 </fieldset>
 
                 @if ($deliveryMethodValue->value === 'chronopost_relay' && ! $pickupOnly)
-                    <x-ui.alert variant="warning">
-                        La recherche de points relais est en cours de finalisation. Indiquez ci-dessous le relais Chronopost de votre choix (nom et ville) : nous vous confirmerons sa disponibilité par email avant expédition.
-                    </x-ui.alert>
+                    <fieldset class="flex flex-col gap-3">
+                        <legend class="mb-2 font-semibold text-ink">Choisissez votre point relais</legend>
+                        <form wire:submit="searchRelays" class="flex flex-col gap-3 sm:flex-row sm:items-start">
+                            <x-ui.field name="relay_postal_code" label="Code postal" class="sm:w-32">
+                                <x-ui.input name="relay_postal_code" wire:model="relay_postal_code" inputmode="numeric" maxlength="5" autocomplete="postal-code" />
+                            </x-ui.field>
+                            <x-ui.field name="relay_city" label="Ville" class="flex-1">
+                                <x-ui.input name="relay_city" wire:model="relay_city" maxlength="50" autocomplete="address-level2" />
+                            </x-ui.field>
+                            <x-ui.button type="submit" variant="outline" class="justify-center sm:mt-6" wire:loading.attr="disabled" wire:target="searchRelays">
+                                <span wire:loading.remove wire:target="searchRelays">Rechercher</span>
+                                <span wire:loading wire:target="searchRelays">Recherche…</span>
+                            </x-ui.button>
+                        </form>
 
-                    <x-ui.field name="relay_postal_code" label="Code postal du relais">
-                        <x-ui.input name="relay_postal_code" wire:model="relay_postal_code" />
-                    </x-ui.field>
-                    <x-ui.field name="relay_name" label="Nom et ville du relais souhaité">
-                        <x-ui.input name="relay_name" wire:model="relay_name" />
-                    </x-ui.field>
+                        @if ($relayResults !== [])
+                            <div class="flex flex-col gap-2" role="radiogroup" aria-label="Points relais Chronopost">
+                                @foreach ($relayResults as $relay)
+                                    <label class="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-white p-3 has-[:checked]:border-sage" wire:key="relay-{{ $relay['id'] }}">
+                                        <input type="radio" name="relay_id" wire:model="relay_id" value="{{ $relay['id'] }}" class="mt-1 text-sage focus:ring-sage">
+                                        <span class="text-sm">
+                                            <strong>{{ $relay['name'] }}</strong>
+                                            <span class="text-ink-muted">· {{ number_format($relay['distance_m'] / 1000, 1, ',', ' ') }} km</span><br>
+                                            <span class="text-ink-muted">{{ $relay['address_line1'] }}, {{ $relay['postal_code'] }} {{ $relay['city'] }}</span>
+                                            @if ($relay['opening_hours'] !== [])
+                                                <details class="mt-1 text-ink-muted">
+                                                    <summary class="cursor-pointer">Horaires</summary>
+                                                    <ul class="mt-1">
+                                                        @foreach ($relay['opening_hours'] as $day => $hours)
+                                                            <li>{{ $relayDayLabels[$day] ?? '' }} : {{ $hours }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </details>
+                                            @endif
+                                            @foreach ($relay['closures'] as $closure)
+                                                <br><span class="text-amber-700">Fermé du {{ \Carbon\CarbonImmutable::parse($closure['from'])->format('d/m/Y') }} au {{ \Carbon\CarbonImmutable::parse($closure['to'])->format('d/m/Y') }}</span>
+                                            @endforeach
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @endif
+                        @error('relay_id')<p class="text-sm text-red-700">{{ $message }}</p>@enderror
+                    </fieldset>
                 @endif
 
                 <div class="mt-2 flex gap-3">

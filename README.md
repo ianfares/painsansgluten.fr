@@ -40,6 +40,12 @@ php artisan make:admin   # crée un compte back-office (guard "admin", table adm
 php artisan serve
 ```
 
+Prérequis : extension PHP **SOAP** (`php8.x-soap`) pour Chronopost. Vérifier les identifiants Chronopost du `.env` et le code produit du back-office (lecture seule, aucun cache) :
+
+```bash
+php artisan chronopost:test-relays 50300 Avranches
+```
+
 Back-office : `http://localhost:8000/{ADMIN_PATH}` (`admin` par défaut, voir `.env`).
 
 ## Commandes utiles

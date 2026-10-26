@@ -64,7 +64,7 @@ test('tunnel : Chronopost non proposé, retrait chez le commerçant accepté san
         ->assertSee('Retrait gratuit chez Épicerie de Granville');
 
     // Chronopost forcé par une requête trafiquée : refusé.
-    $component->set('deliveryChoice', 'chronopost_relay')->set('relay_postal_code', '50300')->set('relay_name', 'Relais Avranches')
+    $component->set('deliveryChoice', 'chronopost_relay')->set('relay_postal_code', '33000')->set('relay_city', 'BORDEAUX')->call('searchRelays')->set('relay_id', '8339S')
         ->call('goToStep', 3)->assertHasErrors('deliveryChoice');
 
     $component->set('deliveryChoice', 'merchant_pickup:'.$this->point->id)->call('goToStep', 3)->call('goToStep', 4)

@@ -36,3 +36,6 @@ Thumbs.db
 
 # Rapports du skill security-audit (jamais versionnés ni déployés)
 /security-audit/
+
+# Documentation Chronopost (contient les identifiants du compte de test)
+/chronopost-docs/

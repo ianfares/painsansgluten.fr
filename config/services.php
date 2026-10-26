@@ -45,6 +45,20 @@ return [
         'session_expires_minutes' => 30,
     ],
 
+    // Chronopost Web Services (T11, PLAN.md §8.1). Compte de test en local,
+    // identifiants du contrat en prod (fournis par Chronopost après validation).
+    // Le code produit est un réglage du back-office (Paramètres > Livraison).
+    'chronopost' => [
+        'account_number' => env('CHRONOPOST_ACCOUNT_NUMBER'),
+        'password' => env('CHRONOPOST_WS_PASSWORD'),
+        // WSDL embarqué dans le dépôt : pas de téléchargement à chaque appel.
+        'relay_wsdl' => resource_path('chronopost/PointRelaisServiceWS.wsdl'),
+        'timeout_seconds' => 5,
+        'relay_cache_minutes' => 60,
+        'relay_max_results' => 10,
+        'relay_max_distance_km' => 40,
+    ],
+
     // Cloudflare Turnstile (anti-robot du formulaire de contact).
     'turnstile' => [
         'site_key' => env('TURNSTILE_SITE_KEY'),

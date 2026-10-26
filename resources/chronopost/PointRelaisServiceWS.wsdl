@@ -1,0 +1,985 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions name="PointRelaisServiceWSService" targetNamespace="http://cxf.rechercheBt.soap.chronopost.fr/" xmlns:ns1="http://cxf.apache.org/bindings/xformat" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://cxf.rechercheBt.soap.chronopost.fr/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:types>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://cxf.rechercheBt.soap.chronopost.fr/" xmlns:tns="http://cxf.rechercheBt.soap.chronopost.fr/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="getAllChronopostAgences" type="tns:getAllChronopostAgences" />
+<xs:element name="getAllChronopostAgencesResponse" type="tns:getAllChronopostAgencesResponse" />
+<xs:element name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDate" type="tns:rechercheBtAvecPFParCodeproduitEtCodepostalEtDate" />
+<xs:element name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDateResponse" type="tns:rechercheBtAvecPFParCodeproduitEtCodepostalEtDateResponse" />
+<xs:element name="rechercheBtAvecPFParIdChronopostA2Pas" type="tns:rechercheBtAvecPFParIdChronopostA2Pas" />
+<xs:element name="rechercheBtAvecPFParIdChronopostA2PasResponse" type="tns:rechercheBtAvecPFParIdChronopostA2PasResponse" />
+<xs:element name="rechercheBtParCodeproduitEtCodepostalEtDate" type="tns:rechercheBtParCodeproduitEtCodepostalEtDate" />
+<xs:element name="rechercheBtParCodeproduitEtCodepostalEtDateResponse" type="tns:rechercheBtParCodeproduitEtCodepostalEtDateResponse" />
+<xs:element name="rechercheBtParIdChronopostA2Pas" type="tns:rechercheBtParIdChronopostA2Pas" />
+<xs:element name="rechercheBtParIdChronopostA2PasResponse" type="tns:rechercheBtParIdChronopostA2PasResponse" />
+<xs:element name="rechercheDetailPointChronopost" type="tns:rechercheDetailPointChronopost" />
+<xs:element name="rechercheDetailPointChronopostInter" type="tns:rechercheDetailPointChronopostInter" />
+<xs:element name="rechercheDetailPointChronopostInterResponse" type="tns:rechercheDetailPointChronopostInterResponse" />
+<xs:element name="rechercheDetailPointChronopostResponse" type="tns:rechercheDetailPointChronopostResponse" />
+<xs:element name="recherchePointChronopost" type="tns:recherchePointChronopost" />
+<xs:element name="recherchePointChronopostAvecCoordParId" type="tns:recherchePointChronopostAvecCoordParId" />
+<xs:element name="recherchePointChronopostAvecCoordParIdResponse" type="tns:recherchePointChronopostAvecCoordParIdResponse" />
+<xs:element name="recherchePointChronopostInter" type="tns:recherchePointChronopostInter" />
+<xs:element name="recherchePointChronopostInterParService" type="tns:recherchePointChronopostInterParService" />
+<xs:element name="recherchePointChronopostInterParServiceAGL" type="tns:recherchePointChronopostInterParServiceAGL" />
+<xs:element name="recherchePointChronopostInterParServiceAGLResponse" type="tns:recherchePointChronopostInterParServiceAGLResponse" />
+<xs:element name="recherchePointChronopostInterParServiceResponse" type="tns:recherchePointChronopostInterParServiceResponse" />
+<xs:element name="recherchePointChronopostInterResponse" type="tns:recherchePointChronopostInterResponse" />
+<xs:element name="recherchePointChronopostParCoordonneesGeographiques" type="tns:recherchePointChronopostParCoordonneesGeographiques" />
+<xs:element name="recherchePointChronopostParCoordonneesGeographiquesParService" type="tns:recherchePointChronopostParCoordonneesGeographiquesParService" />
+<xs:element name="recherchePointChronopostParCoordonneesGeographiquesParServiceResponse" type="tns:recherchePointChronopostParCoordonneesGeographiquesParServiceResponse" />
+<xs:element name="recherchePointChronopostParCoordonneesGeographiquesResponse" type="tns:recherchePointChronopostParCoordonneesGeographiquesResponse" />
+<xs:element name="recherchePointChronopostParId" type="tns:recherchePointChronopostParId" />
+<xs:element name="recherchePointChronopostParIdResponse" type="tns:recherchePointChronopostParIdResponse" />
+<xs:element name="recherchePointChronopostResponse" type="tns:recherchePointChronopostResponse" />
+<xs:element name="recherchePointRelaisParCoordonneesGeographiques" type="tns:recherchePointRelaisParCoordonneesGeographiques" />
+<xs:element name="recherchePointRelaisParCoordonneesGeographiquesParService" type="tns:recherchePointRelaisParCoordonneesGeographiquesParService" />
+<xs:element name="recherchePointRelaisParCoordonneesGeographiquesParServiceResponse" type="tns:recherchePointRelaisParCoordonneesGeographiquesParServiceResponse" />
+<xs:element name="recherchePointRelaisParCoordonneesGeographiquesResponse" type="tns:recherchePointRelaisParCoordonneesGeographiquesResponse" />
+<xs:element name="rechercheTournee" type="tns:rechercheTournee" />
+<xs:element name="rechercheTourneeParTypeTourneeEtPosteComptable" type="tns:rechercheTourneeParTypeTourneeEtPosteComptable" />
+<xs:element name="rechercheTourneeParTypeTourneeEtPosteComptableResponse" type="tns:rechercheTourneeParTypeTourneeEtPosteComptableResponse" />
+<xs:element name="rechercheTourneeResponse" type="tns:rechercheTourneeResponse" />
+<xs:complexType name="recherchePointChronopostInterParServiceAGL">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="address" type="xs:string" />
+<xs:element minOccurs="0" name="zipCode" type="xs:string" />
+<xs:element minOccurs="0" name="city" type="xs:string" />
+<xs:element minOccurs="0" name="countryCode" type="xs:string" />
+<xs:element minOccurs="0" name="type" type="xs:string" />
+<xs:element minOccurs="0" name="productCode" type="xs:string" />
+<xs:element minOccurs="0" name="service" type="xs:string" />
+<xs:element minOccurs="0" name="weight" type="xs:string" />
+<xs:element minOccurs="0" name="shippingDate" type="xs:string" />
+<xs:element minOccurs="0" name="maxPointChronopost" type="xs:string" />
+<xs:element minOccurs="0" name="maxDistanceSearch" type="xs:string" />
+<xs:element minOccurs="0" name="holidayTolerant" type="xs:string" />
+<xs:element minOccurs="0" name="serviceList" type="xs:string" />
+<xs:element minOccurs="0" name="language" type="xs:string" />
+<xs:element minOccurs="0" name="version" type="xs:string" />
+<xs:element minOccurs="0" name="amaGeoLoc" type="xs:string" />
+<xs:element minOccurs="0" name="pudoType" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostInterParServiceAGLResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pointCHRResult">
+<xs:sequence>
+<xs:element name="errorCode" type="xs:int" />
+<xs:element minOccurs="0" name="errorMessage" type="xs:string" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="listePointRelais" nillable="true" type="tns:pointCHR" />
+<xs:element name="qualiteReponse" type="xs:int" />
+<xs:element minOccurs="0" name="wsRequestId" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pointCHR">
+<xs:sequence>
+<xs:element name="accesPersonneMobiliteReduite" type="xs:boolean" />
+<xs:element name="actif" type="xs:boolean" />
+<xs:element minOccurs="0" name="adresse1" type="xs:string" />
+<xs:element minOccurs="0" name="adresse2" type="xs:string" />
+<xs:element minOccurs="0" name="adresse3" type="xs:string" />
+<xs:element minOccurs="0" name="codePays" type="xs:string" />
+<xs:element minOccurs="0" name="codePostal" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeolocalisationLatitude" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeolocalisationLongitude" type="xs:string" />
+<xs:element name="distanceEnMetre" type="xs:int" />
+<xs:element minOccurs="0" name="identifiant" type="xs:string" />
+<xs:element minOccurs="0" name="indiceDeLocalisation" type="xs:string" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="listeHoraireOuverture" nillable="true" type="tns:listeHoraireOuverturePourUnJour" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="listePeriodeFermeture" nillable="true" type="tns:periodeFermeture" />
+<xs:element minOccurs="0" name="localite" type="xs:string" />
+<xs:element minOccurs="0" name="nom" type="xs:string" />
+<xs:element name="poidsMaxi" type="xs:int" />
+<xs:element minOccurs="0" name="pudoType" type="xs:string" />
+<xs:element minOccurs="0" name="servicePudo" type="xs:string" />
+<xs:element minOccurs="0" name="typeDePoint" type="xs:string" />
+<xs:element minOccurs="0" name="urlGoogleMaps" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="listeHoraireOuverturePourUnJour">
+<xs:sequence>
+<xs:element minOccurs="0" name="horairesAsString" type="xs:string" />
+<xs:element name="jour" type="xs:int" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="listeHoraireOuverture" nillable="true" type="tns:horaireOuverture" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="horaireOuverture">
+<xs:sequence>
+<xs:element minOccurs="0" name="debut" type="xs:string" />
+<xs:element minOccurs="0" name="fin" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="periodeFermeture">
+<xs:sequence>
+<xs:element minOccurs="0" name="calendarDeDebut" type="xs:dateTime" />
+<xs:element minOccurs="0" name="calendarDeFin" type="xs:dateTime" />
+<xs:element name="numero" type="xs:int" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopost">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="address" type="xs:string" />
+<xs:element minOccurs="0" name="zipCode" type="xs:string" />
+<xs:element minOccurs="0" name="city" type="xs:string" />
+<xs:element minOccurs="0" name="countryCode" type="xs:string" />
+<xs:element minOccurs="0" name="type" type="xs:string" />
+<xs:element minOccurs="0" name="productCode" type="xs:string" />
+<xs:element minOccurs="0" name="service" type="xs:string" />
+<xs:element minOccurs="0" name="weight" type="xs:string" />
+<xs:element minOccurs="0" name="shippingDate" type="xs:string" />
+<xs:element minOccurs="0" name="maxPointChronopost" type="xs:string" />
+<xs:element minOccurs="0" name="maxDistanceSearch" type="xs:string" />
+<xs:element minOccurs="0" name="holidayTolerant" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostInterParService">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="address" type="xs:string" />
+<xs:element minOccurs="0" name="zipCode" type="xs:string" />
+<xs:element minOccurs="0" name="city" type="xs:string" />
+<xs:element minOccurs="0" name="countryCode" type="xs:string" />
+<xs:element minOccurs="0" name="type" type="xs:string" />
+<xs:element minOccurs="0" name="productCode" type="xs:string" />
+<xs:element minOccurs="0" name="service" type="xs:string" />
+<xs:element minOccurs="0" name="weight" type="xs:string" />
+<xs:element minOccurs="0" name="shippingDate" type="xs:string" />
+<xs:element minOccurs="0" name="maxPointChronopost" type="xs:string" />
+<xs:element minOccurs="0" name="maxDistanceSearch" type="xs:string" />
+<xs:element minOccurs="0" name="holidayTolerant" type="xs:string" />
+<xs:element minOccurs="0" name="serviceList" type="xs:string" />
+<xs:element minOccurs="0" name="language" type="xs:string" />
+<xs:element minOccurs="0" name="version" type="xs:string" />
+<xs:element minOccurs="0" name="pudoType" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostInterParServiceResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheBtParCodeproduitEtCodepostalEtDate">
+<xs:sequence>
+<xs:element minOccurs="0" name="codeProduit" type="xs:string" />
+<xs:element minOccurs="0" name="codePostal" type="xs:string" />
+<xs:element minOccurs="0" name="date" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheBtParCodeproduitEtCodepostalEtDateResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:bureauDeTabacAvecCoord" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="bureauDeTabacAvecCoord">
+<xs:complexContent>
+<xs:extension base="tns:bureauDeTabac">
+<xs:sequence>
+<xs:element name="coordGeoLatitude" type="xs:double" />
+<xs:element name="coordGeoLongitude" type="xs:double" />
+<xs:element minOccurs="0" name="urlGoogleMaps" type="xs:string" />
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="bureauDeTabac">
+<xs:sequence>
+<xs:element minOccurs="0" name="adresse1" type="xs:string" />
+<xs:element minOccurs="0" name="adresse2" type="xs:string" />
+<xs:element minOccurs="0" name="adresse3" type="xs:string" />
+<xs:element minOccurs="0" name="codePostal" type="xs:string" />
+<xs:element minOccurs="0" name="dateArriveColis" type="xs:dateTime" />
+<xs:element minOccurs="0" name="horairesOuvertureDimanche" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureJeudi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureLundi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureMardi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureMercredi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureSamedi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureVendredi" type="xs:string" />
+<xs:element minOccurs="0" name="identifiantChronopostPointA2PAS" type="xs:string" />
+<xs:element minOccurs="0" name="localite" type="xs:string" />
+<xs:element minOccurs="0" name="nomEnseigne" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheBtParIdChronopostA2Pas">
+<xs:sequence>
+<xs:element minOccurs="0" name="id" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheBtParIdChronopostA2PasResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:bureauDeTabacAvecCoord" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheTourneeParTypeTourneeEtPosteComptable">
+<xs:sequence>
+<xs:element minOccurs="0" name="codeTournee" type="xs:string" />
+<xs:element minOccurs="0" name="typeTournee" type="xs:string" />
+<xs:element minOccurs="0" name="posteComptable" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheTourneeParTypeTourneeEtPosteComptableResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:tourneeCompleteResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="tourneeCompleteResult">
+<xs:sequence>
+<xs:element name="errorCode" type="xs:int" />
+<xs:element minOccurs="0" name="errorMessage" type="xs:string" />
+<xs:element minOccurs="0" name="tourneeComplete" type="tns:tourneeComplete" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="tourneeComplete">
+<xs:complexContent>
+<xs:extension base="tns:tournee">
+<xs:sequence>
+<xs:element minOccurs="0" name="codeTourneeMaitre" type="xs:string" />
+<xs:element minOccurs="0" name="codeTypeTournee" type="xs:string" />
+<xs:element minOccurs="0" name="coutMensuelBatiment" type="xs:string" />
+<xs:element minOccurs="0" name="cubage" type="xs:string" />
+<xs:element minOccurs="0" name="cubageDistri" type="xs:string" />
+<xs:element minOccurs="0" name="detailPrestation" type="xs:string" />
+<xs:element minOccurs="0" name="heureTheoriqueRetour" type="xs:string" />
+<xs:element minOccurs="0" name="idMoyenPropre" type="xs:string" />
+<xs:element minOccurs="0" name="idSecteur" type="xs:string" />
+<xs:element minOccurs="0" name="idSousTraitant" type="xs:string" />
+<xs:element minOccurs="0" name="idVehicule" type="xs:string" />
+<xs:element minOccurs="0" name="picking" type="xs:string" />
+<xs:element minOccurs="0" name="planDistri" type="xs:string" />
+<xs:element minOccurs="0" name="posteComptable" type="xs:string" />
+<xs:element minOccurs="0" name="pourcentageCoChargement" type="xs:string" />
+<xs:element minOccurs="0" name="qualification" type="xs:string" />
+<xs:element minOccurs="0" name="spot" type="xs:string" />
+<xs:element minOccurs="0" name="trigrammeAgence" type="xs:string" />
+<xs:element minOccurs="0" name="typeTournee" type="xs:string" />
+<xs:element minOccurs="0" name="zone" type="xs:string" />
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="tournee">
+<xs:sequence>
+<xs:element minOccurs="0" name="code" type="xs:string" />
+<xs:element name="localise" type="xs:boolean" />
+<xs:element minOccurs="0" name="type" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostParId">
+<xs:sequence>
+<xs:element minOccurs="0" name="id" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostParIdResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:pointChronopost" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pointChronopost">
+<xs:sequence>
+<xs:element minOccurs="0" name="adresse1" type="xs:string" />
+<xs:element minOccurs="0" name="adresse2" type="xs:string" />
+<xs:element minOccurs="0" name="adresse3" type="xs:string" />
+<xs:element minOccurs="0" name="codePostal" type="xs:string" />
+<xs:element minOccurs="0" name="dateArriveColis" type="xs:dateTime" />
+<xs:element minOccurs="0" name="horairesOuvertureDimanche" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureJeudi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureLundi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureMardi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureMercredi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureSamedi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuvertureVendredi" type="xs:string" />
+<xs:element minOccurs="0" name="horairesOuverturesFormates" type="xs:string" />
+<xs:element minOccurs="0" name="identifiantChronopost" type="xs:string" />
+<xs:element minOccurs="0" name="localite" type="xs:string" />
+<xs:element minOccurs="0" name="nomEnseigne" type="xs:string" />
+<xs:element minOccurs="0" name="typeDePoint" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheDetailPointChronopost">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="identifiant" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheDetailPointChronopostResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostParCoordonneesGeographiques">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeoLatitude" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeoLongitude" type="xs:string" />
+<xs:element minOccurs="0" name="type" type="xs:string" />
+<xs:element minOccurs="0" name="productCode" type="xs:string" />
+<xs:element minOccurs="0" name="service" type="xs:string" />
+<xs:element minOccurs="0" name="weight" type="xs:string" />
+<xs:element minOccurs="0" name="shippingDate" type="xs:string" />
+<xs:element minOccurs="0" name="maxPointChronopost" type="xs:string" />
+<xs:element minOccurs="0" name="maxDistanceSearch" type="xs:string" />
+<xs:element minOccurs="0" name="holidayTolerant" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostParCoordonneesGeographiquesResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostInter">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="address" type="xs:string" />
+<xs:element minOccurs="0" name="zipCode" type="xs:string" />
+<xs:element minOccurs="0" name="city" type="xs:string" />
+<xs:element minOccurs="0" name="countryCode" type="xs:string" />
+<xs:element minOccurs="0" name="type" type="xs:string" />
+<xs:element minOccurs="0" name="productCode" type="xs:string" />
+<xs:element minOccurs="0" name="service" type="xs:string" />
+<xs:element minOccurs="0" name="weight" type="xs:string" />
+<xs:element minOccurs="0" name="shippingDate" type="xs:string" />
+<xs:element minOccurs="0" name="maxPointChronopost" type="xs:string" />
+<xs:element minOccurs="0" name="maxDistanceSearch" type="xs:string" />
+<xs:element minOccurs="0" name="holidayTolerant" type="xs:string" />
+<xs:element minOccurs="0" name="language" type="xs:string" />
+<xs:element minOccurs="0" name="version" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostInterResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointRelaisParCoordonneesGeographiques">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeoLatitude" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeoLongitude" type="xs:string" />
+<xs:element minOccurs="0" name="type" type="xs:string" />
+<xs:element minOccurs="0" name="productCode" type="xs:string" />
+<xs:element minOccurs="0" name="service" type="xs:string" />
+<xs:element minOccurs="0" name="weight" type="xs:string" />
+<xs:element minOccurs="0" name="shippingDate" type="xs:string" />
+<xs:element minOccurs="0" name="maxPointChronopost" type="xs:string" />
+<xs:element minOccurs="0" name="maxDistanceSearch" type="xs:string" />
+<xs:element minOccurs="0" name="holidayTolerant" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointRelaisParCoordonneesGeographiquesResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostAvecCoordParId">
+<xs:sequence>
+<xs:element minOccurs="0" name="id" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostAvecCoordParIdResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:pointChronopostAvecCoord" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pointChronopostAvecCoord">
+<xs:complexContent>
+<xs:extension base="tns:pointChronopost">
+<xs:sequence>
+<xs:element name="coordGeoLatitude" type="xs:double" />
+<xs:element name="coordGeoLongitude" type="xs:double" />
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getAllChronopostAgences">
+<xs:sequence />
+</xs:complexType>
+<xs:complexType name="getAllChronopostAgencesResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:pointChronopost" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointRelaisParCoordonneesGeographiquesParService">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="countryCode" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeoLatitude" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeoLongitude" type="xs:string" />
+<xs:element minOccurs="0" name="type" type="xs:string" />
+<xs:element minOccurs="0" name="productCode" type="xs:string" />
+<xs:element minOccurs="0" name="service" type="xs:string" />
+<xs:element minOccurs="0" name="weight" type="xs:string" />
+<xs:element minOccurs="0" name="shippingDate" type="xs:string" />
+<xs:element minOccurs="0" name="maxPointChronopost" type="xs:string" />
+<xs:element minOccurs="0" name="maxDistanceSearch" type="xs:string" />
+<xs:element minOccurs="0" name="holidayTolerant" type="xs:string" />
+<xs:element minOccurs="0" name="serviceList" type="xs:string" />
+<xs:element minOccurs="0" name="language" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointRelaisParCoordonneesGeographiquesParServiceResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheBtAvecPFParIdChronopostA2Pas">
+<xs:sequence>
+<xs:element minOccurs="0" name="id" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheBtAvecPFParIdChronopostA2PasResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:bureauDeTabacAvecPF" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="bureauDeTabacAvecPF">
+<xs:complexContent>
+<xs:extension base="tns:bureauDeTabacAvecCoord">
+<xs:sequence>
+<xs:element minOccurs="0" name="periodeDeFermeture1Debut" type="xs:dateTime" />
+<xs:element minOccurs="0" name="periodeDeFermeture1Fin" type="xs:dateTime" />
+<xs:element minOccurs="0" name="periodeDeFermeture2Debut" type="xs:dateTime" />
+<xs:element minOccurs="0" name="periodeDeFermeture2Fin" type="xs:dateTime" />
+<xs:element minOccurs="0" name="periodeDeFermeture3Debut" type="xs:dateTime" />
+<xs:element minOccurs="0" name="periodeDeFermeture3Fin" type="xs:dateTime" />
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="rechercheDetailPointChronopostInter">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="identifiant" type="xs:string" />
+<xs:element minOccurs="0" name="countryCode" type="xs:string" />
+<xs:element minOccurs="0" name="language" type="xs:string" />
+<xs:element minOccurs="0" name="version" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheDetailPointChronopostInterResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostParCoordonneesGeographiquesParService">
+<xs:sequence>
+<xs:element minOccurs="0" name="accountNumber" type="xs:string" />
+<xs:element minOccurs="0" name="password" type="xs:string" />
+<xs:element minOccurs="0" name="countryCode" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeoLatitude" type="xs:string" />
+<xs:element minOccurs="0" name="coordGeoLongitude" type="xs:string" />
+<xs:element minOccurs="0" name="type" type="xs:string" />
+<xs:element minOccurs="0" name="productCode" type="xs:string" />
+<xs:element minOccurs="0" name="service" type="xs:string" />
+<xs:element minOccurs="0" name="weight" type="xs:string" />
+<xs:element minOccurs="0" name="shippingDate" type="xs:string" />
+<xs:element minOccurs="0" name="maxPointChronopost" type="xs:string" />
+<xs:element minOccurs="0" name="maxDistanceSearch" type="xs:string" />
+<xs:element minOccurs="0" name="holidayTolerant" type="xs:string" />
+<xs:element minOccurs="0" name="serviceList" type="xs:string" />
+<xs:element minOccurs="0" name="language" type="xs:string" />
+<xs:element minOccurs="0" name="version" type="xs:string" />
+<xs:element minOccurs="0" name="pudoType" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="recherchePointChronopostParCoordonneesGeographiquesParServiceResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pointCHRResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDate">
+<xs:sequence>
+<xs:element minOccurs="0" name="codeProduit" type="xs:string" />
+<xs:element minOccurs="0" name="codePostal" type="xs:string" />
+<xs:element minOccurs="0" name="date" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDateResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:bureauDeTabacAvecPF" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheTournee">
+<xs:sequence>
+<xs:element minOccurs="0" name="codeTournee" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rechercheTourneeResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:tourneeResult" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="tourneeResult">
+<xs:sequence>
+<xs:element name="errorCode" type="xs:int" />
+<xs:element minOccurs="0" name="errorMessage" type="xs:string" />
+<xs:element minOccurs="0" name="tournee" type="tns:tournee" />
+</xs:sequence>
+</xs:complexType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="recherchePointRelaisParCoordonneesGeographiquesParServiceResponse">
+    <wsdl:part element="tns:recherchePointRelaisParCoordonneesGeographiquesParServiceResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostInterParService">
+    <wsdl:part element="tns:recherchePointChronopostInterParService" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheDetailPointChronopostInterResponse">
+    <wsdl:part element="tns:rechercheDetailPointChronopostInterResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheTourneeParTypeTourneeEtPosteComptable">
+    <wsdl:part element="tns:rechercheTourneeParTypeTourneeEtPosteComptable" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostParId">
+    <wsdl:part element="tns:recherchePointChronopostParId" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDateResponse">
+    <wsdl:part element="tns:rechercheBtAvecPFParCodeproduitEtCodepostalEtDateResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostParIdResponse">
+    <wsdl:part element="tns:recherchePointChronopostParIdResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostInterResponse">
+    <wsdl:part element="tns:recherchePointChronopostInterResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostResponse">
+    <wsdl:part element="tns:recherchePointChronopostResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheBtParIdChronopostA2PasResponse">
+    <wsdl:part element="tns:rechercheBtParIdChronopostA2PasResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostAvecCoordParId">
+    <wsdl:part element="tns:recherchePointChronopostAvecCoordParId" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAllChronopostAgences">
+    <wsdl:part element="tns:getAllChronopostAgences" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointRelaisParCoordonneesGeographiquesParService">
+    <wsdl:part element="tns:recherchePointRelaisParCoordonneesGeographiquesParService" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheBtAvecPFParIdChronopostA2Pas">
+    <wsdl:part element="tns:rechercheBtAvecPFParIdChronopostA2Pas" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheDetailPointChronopostInter">
+    <wsdl:part element="tns:rechercheDetailPointChronopostInter" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostParCoordonneesGeographiquesParServiceResponse">
+    <wsdl:part element="tns:recherchePointChronopostParCoordonneesGeographiquesParServiceResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostParCoordonneesGeographiquesResponse">
+    <wsdl:part element="tns:recherchePointChronopostParCoordonneesGeographiquesResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheTournee">
+    <wsdl:part element="tns:rechercheTournee" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostInterParServiceAGL">
+    <wsdl:part element="tns:recherchePointChronopostInterParServiceAGL" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopost">
+    <wsdl:part element="tns:recherchePointChronopost" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostInterParServiceResponse">
+    <wsdl:part element="tns:recherchePointChronopostInterParServiceResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheBtParCodeproduitEtCodepostalEtDate">
+    <wsdl:part element="tns:rechercheBtParCodeproduitEtCodepostalEtDate" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheTourneeResponse">
+    <wsdl:part element="tns:rechercheTourneeResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheBtParIdChronopostA2Pas">
+    <wsdl:part element="tns:rechercheBtParIdChronopostA2Pas" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheDetailPointChronopost">
+    <wsdl:part element="tns:rechercheDetailPointChronopost" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostAvecCoordParIdResponse">
+    <wsdl:part element="tns:recherchePointChronopostAvecCoordParIdResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostParCoordonneesGeographiques">
+    <wsdl:part element="tns:recherchePointChronopostParCoordonneesGeographiques" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostInter">
+    <wsdl:part element="tns:recherchePointChronopostInter" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointRelaisParCoordonneesGeographiques">
+    <wsdl:part element="tns:recherchePointRelaisParCoordonneesGeographiques" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointRelaisParCoordonneesGeographiquesResponse">
+    <wsdl:part element="tns:recherchePointRelaisParCoordonneesGeographiquesResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostInterParServiceAGLResponse">
+    <wsdl:part element="tns:recherchePointChronopostInterParServiceAGLResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheBtParCodeproduitEtCodepostalEtDateResponse">
+    <wsdl:part element="tns:rechercheBtParCodeproduitEtCodepostalEtDateResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheTourneeParTypeTourneeEtPosteComptableResponse">
+    <wsdl:part element="tns:rechercheTourneeParTypeTourneeEtPosteComptableResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheDetailPointChronopostResponse">
+    <wsdl:part element="tns:rechercheDetailPointChronopostResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAllChronopostAgencesResponse">
+    <wsdl:part element="tns:getAllChronopostAgencesResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheBtAvecPFParIdChronopostA2PasResponse">
+    <wsdl:part element="tns:rechercheBtAvecPFParIdChronopostA2PasResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="recherchePointChronopostParCoordonneesGeographiquesParService">
+    <wsdl:part element="tns:recherchePointChronopostParCoordonneesGeographiquesParService" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDate">
+    <wsdl:part element="tns:rechercheBtAvecPFParCodeproduitEtCodepostalEtDate" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="PointRelaisServiceWS">
+    <wsdl:operation name="recherchePointChronopostInterParServiceAGL">
+      <wsdl:input message="tns:recherchePointChronopostInterParServiceAGL" name="recherchePointChronopostInterParServiceAGL">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointChronopostInterParServiceAGLResponse" name="recherchePointChronopostInterParServiceAGLResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopost">
+      <wsdl:input message="tns:recherchePointChronopost" name="recherchePointChronopost">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointChronopostResponse" name="recherchePointChronopostResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostInterParService">
+      <wsdl:input message="tns:recherchePointChronopostInterParService" name="recherchePointChronopostInterParService">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointChronopostInterParServiceResponse" name="recherchePointChronopostInterParServiceResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheBtParCodeproduitEtCodepostalEtDate">
+      <wsdl:input message="tns:rechercheBtParCodeproduitEtCodepostalEtDate" name="rechercheBtParCodeproduitEtCodepostalEtDate">
+    </wsdl:input>
+      <wsdl:output message="tns:rechercheBtParCodeproduitEtCodepostalEtDateResponse" name="rechercheBtParCodeproduitEtCodepostalEtDateResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheBtParIdChronopostA2Pas">
+      <wsdl:input message="tns:rechercheBtParIdChronopostA2Pas" name="rechercheBtParIdChronopostA2Pas">
+    </wsdl:input>
+      <wsdl:output message="tns:rechercheBtParIdChronopostA2PasResponse" name="rechercheBtParIdChronopostA2PasResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheTourneeParTypeTourneeEtPosteComptable">
+      <wsdl:input message="tns:rechercheTourneeParTypeTourneeEtPosteComptable" name="rechercheTourneeParTypeTourneeEtPosteComptable">
+    </wsdl:input>
+      <wsdl:output message="tns:rechercheTourneeParTypeTourneeEtPosteComptableResponse" name="rechercheTourneeParTypeTourneeEtPosteComptableResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostParId">
+      <wsdl:input message="tns:recherchePointChronopostParId" name="recherchePointChronopostParId">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointChronopostParIdResponse" name="recherchePointChronopostParIdResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheDetailPointChronopost">
+      <wsdl:input message="tns:rechercheDetailPointChronopost" name="rechercheDetailPointChronopost">
+    </wsdl:input>
+      <wsdl:output message="tns:rechercheDetailPointChronopostResponse" name="rechercheDetailPointChronopostResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostParCoordonneesGeographiques">
+      <wsdl:input message="tns:recherchePointChronopostParCoordonneesGeographiques" name="recherchePointChronopostParCoordonneesGeographiques">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointChronopostParCoordonneesGeographiquesResponse" name="recherchePointChronopostParCoordonneesGeographiquesResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostInter">
+      <wsdl:input message="tns:recherchePointChronopostInter" name="recherchePointChronopostInter">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointChronopostInterResponse" name="recherchePointChronopostInterResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointRelaisParCoordonneesGeographiques">
+      <wsdl:input message="tns:recherchePointRelaisParCoordonneesGeographiques" name="recherchePointRelaisParCoordonneesGeographiques">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointRelaisParCoordonneesGeographiquesResponse" name="recherchePointRelaisParCoordonneesGeographiquesResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostAvecCoordParId">
+      <wsdl:input message="tns:recherchePointChronopostAvecCoordParId" name="recherchePointChronopostAvecCoordParId">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointChronopostAvecCoordParIdResponse" name="recherchePointChronopostAvecCoordParIdResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAllChronopostAgences">
+      <wsdl:input message="tns:getAllChronopostAgences" name="getAllChronopostAgences">
+    </wsdl:input>
+      <wsdl:output message="tns:getAllChronopostAgencesResponse" name="getAllChronopostAgencesResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointRelaisParCoordonneesGeographiquesParService">
+      <wsdl:input message="tns:recherchePointRelaisParCoordonneesGeographiquesParService" name="recherchePointRelaisParCoordonneesGeographiquesParService">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointRelaisParCoordonneesGeographiquesParServiceResponse" name="recherchePointRelaisParCoordonneesGeographiquesParServiceResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheBtAvecPFParIdChronopostA2Pas">
+      <wsdl:input message="tns:rechercheBtAvecPFParIdChronopostA2Pas" name="rechercheBtAvecPFParIdChronopostA2Pas">
+    </wsdl:input>
+      <wsdl:output message="tns:rechercheBtAvecPFParIdChronopostA2PasResponse" name="rechercheBtAvecPFParIdChronopostA2PasResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheDetailPointChronopostInter">
+      <wsdl:input message="tns:rechercheDetailPointChronopostInter" name="rechercheDetailPointChronopostInter">
+    </wsdl:input>
+      <wsdl:output message="tns:rechercheDetailPointChronopostInterResponse" name="rechercheDetailPointChronopostInterResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostParCoordonneesGeographiquesParService">
+      <wsdl:input message="tns:recherchePointChronopostParCoordonneesGeographiquesParService" name="recherchePointChronopostParCoordonneesGeographiquesParService">
+    </wsdl:input>
+      <wsdl:output message="tns:recherchePointChronopostParCoordonneesGeographiquesParServiceResponse" name="recherchePointChronopostParCoordonneesGeographiquesParServiceResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDate">
+      <wsdl:input message="tns:rechercheBtAvecPFParCodeproduitEtCodepostalEtDate" name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDate">
+    </wsdl:input>
+      <wsdl:output message="tns:rechercheBtAvecPFParCodeproduitEtCodepostalEtDateResponse" name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDateResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheTournee">
+      <wsdl:input message="tns:rechercheTournee" name="rechercheTournee">
+    </wsdl:input>
+      <wsdl:output message="tns:rechercheTourneeResponse" name="rechercheTourneeResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="PointRelaisServiceWSServiceSoapBinding" type="tns:PointRelaisServiceWS">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="recherchePointChronopostInterParServiceAGL">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointChronopostInterParServiceAGL">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointChronopostInterParServiceAGLResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopost">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointChronopost">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointChronopostResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostInterParService">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointChronopostInterParService">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointChronopostInterParServiceResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheBtParCodeproduitEtCodepostalEtDate">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="rechercheBtParCodeproduitEtCodepostalEtDate">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="rechercheBtParCodeproduitEtCodepostalEtDateResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheBtParIdChronopostA2Pas">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="rechercheBtParIdChronopostA2Pas">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="rechercheBtParIdChronopostA2PasResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheTourneeParTypeTourneeEtPosteComptable">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="rechercheTourneeParTypeTourneeEtPosteComptable">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="rechercheTourneeParTypeTourneeEtPosteComptableResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostParId">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointChronopostParId">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointChronopostParIdResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheDetailPointChronopost">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="rechercheDetailPointChronopost">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="rechercheDetailPointChronopostResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostParCoordonneesGeographiques">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointChronopostParCoordonneesGeographiques">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointChronopostParCoordonneesGeographiquesResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostInter">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointChronopostInter">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointChronopostInterResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointRelaisParCoordonneesGeographiques">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointRelaisParCoordonneesGeographiques">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointRelaisParCoordonneesGeographiquesResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostAvecCoordParId">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointChronopostAvecCoordParId">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointChronopostAvecCoordParIdResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAllChronopostAgences">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="getAllChronopostAgences">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="getAllChronopostAgencesResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointRelaisParCoordonneesGeographiquesParService">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointRelaisParCoordonneesGeographiquesParService">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointRelaisParCoordonneesGeographiquesParServiceResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheBtAvecPFParIdChronopostA2Pas">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="rechercheBtAvecPFParIdChronopostA2Pas">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="rechercheBtAvecPFParIdChronopostA2PasResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheDetailPointChronopostInter">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="rechercheDetailPointChronopostInter">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="rechercheDetailPointChronopostInterResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="recherchePointChronopostParCoordonneesGeographiquesParService">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="recherchePointChronopostParCoordonneesGeographiquesParService">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="recherchePointChronopostParCoordonneesGeographiquesParServiceResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDate">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDate">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="rechercheBtAvecPFParCodeproduitEtCodepostalEtDateResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechercheTournee">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="rechercheTournee">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="rechercheTourneeResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="PointRelaisServiceWSService">
+    <wsdl:port binding="tns:PointRelaisServiceWSServiceSoapBinding" name="PointRelaisServiceWSPort">
+      <soap:address location="https://ws.chronopost.fr/recherchebt-ws-cxf/PointRelaisServiceWS" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
