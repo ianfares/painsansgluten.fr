@@ -310,7 +310,18 @@ test('toutes les pages envoient les en-têtes de sécurité, sans divulguer la v
             ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
             ->assertHeader('X-Content-Type-Options', 'nosniff')
             ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
-            ->assertHeader('Content-Security-Policy-Report-Only')
+            ->assertHeader('Content-Security-Policy') // bloquante depuis l'audit du 26/10/2026
+            ->assertHeaderMissing('Content-Security-Policy-Report-Only')
             ->assertHeaderMissing('X-Powered-By');
     }
+});
+
+test('la CSP bloquante interdit l\'intégration du site dans un cadre externe et les plugins', function () {
+    $csp = (string) $this->get('/')->headers->get('Content-Security-Policy');
+
+    expect($csp)->toContain("frame-ancestors 'self'")
+        ->toContain("object-src 'none'")
+        ->toContain("base-uri 'self'")
+        ->toContain('form-action \'self\' https://checkout.stripe.com')
+        ->toContain('https://fonts.bunny.net');
 });

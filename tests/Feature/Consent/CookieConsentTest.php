@@ -49,7 +49,7 @@ test('en production sans ID GTM (ou avec la valeur factice), rien n\'est chargé
 })->with([null, '', 'GTM-XXXXXXX', 'pas-un-id', 'GTM-"><script>']);
 
 test('la CSP autorise Google Tag Manager et Google Analytics', function () {
-    $csp = $this->get('/')->headers->get('Content-Security-Policy-Report-Only');
+    $csp = $this->get('/')->headers->get('Content-Security-Policy');
 
     expect($csp)->toContain('https://www.googletagmanager.com')
         ->toContain('https://*.google-analytics.com')

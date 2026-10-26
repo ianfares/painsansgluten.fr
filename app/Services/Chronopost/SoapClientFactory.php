@@ -17,13 +17,15 @@ class SoapClientFactory
      */
     public function make(string $wsdl, int $timeoutSeconds): SoapClient
     {
-        return new SoapClient($wsdl, [
+        $client = new TimedSoapClient($wsdl, [
             'connection_timeout' => $timeoutSeconds,
-            // Délai de lecture de la réponse (connection_timeout ne couvre que la connexion).
-            'stream_context' => stream_context_create(['http' => ['timeout' => $timeoutSeconds]]),
             'exceptions' => true,
             'cache_wsdl' => WSDL_CACHE_DISK,
             'features' => SOAP_SINGLE_ELEMENT_ARRAYS,
         ]);
+        // Délai de lecture de la réponse (voir TimedSoapClient : connection_timeout ne couvre que la connexion).
+        $client->setReadTimeout($timeoutSeconds);
+
+        return $client;
     }
 }

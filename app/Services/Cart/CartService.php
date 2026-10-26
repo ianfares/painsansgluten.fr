@@ -33,7 +33,26 @@ class CartService
         private readonly FreeGiftSettings $freeGiftSettings,
     ) {}
 
+    /**
+     * Panier du visiteur, en LECTURE : le panier existant, ou un panier vide
+     * non enregistré. Aucune ligne `carts` ni identifiant de session n'est
+     * créé pour un simple affichage (audit du 26/10/2026 : chaque visiteur,
+     * robots compris, créait un panier en base). Pour écrire : cartForWrite().
+     */
     public function currentCart(): Cart
+    {
+        if (auth()->check()) {
+            return Cart::query()->firstWhere('user_id', auth()->id()) ?? new Cart(['user_id' => auth()->id()]);
+        }
+
+        $sessionId = session()->get('cart_session_id');
+
+        return ($sessionId ? Cart::query()->where('session_id', $sessionId)->whereNull('user_id')->first() : null)
+            ?? new Cart;
+    }
+
+    /** Panier du visiteur, créé en base si besoin (ajout d'un produit). */
+    public function cartForWrite(): Cart
     {
         if (auth()->check()) {
             return Cart::query()->firstOrCreate(['user_id' => auth()->id()]);
@@ -85,7 +104,7 @@ class CartService
 
     public function add(Product $product, int $quantity = 1): CartItem
     {
-        $cart = $this->currentCart();
+        $cart = $this->cartForWrite();
         $maxQuantity = $this->shippingSettings->max_quantity_per_line;
 
         $item = $cart->items()->where('product_id', $product->id)->first();

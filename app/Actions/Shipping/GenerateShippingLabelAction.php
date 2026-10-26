@@ -9,10 +9,15 @@ use App\Enums\OrderStatus;
 use App\Exceptions\Shipping\ShippingLabelFailed;
 use App\Models\Order;
 use App\Models\ShippingLabel;
+use App\Services\Chronopost\CreatedLabel;
 use App\Services\Chronopost\ShippingLabelClient;
 use App\Settings\ShippingSettings;
+use Illuminate\Contracts\Cache\Lock;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 /**
  * Action BO « Générer l'étiquette Chronopost » (T28, PLAN.md §8.2).
@@ -21,13 +26,23 @@ use Illuminate\Support\Facades\Storage;
  * « Expédier » quand le colis part, avec le numéro de suivi pré-rempli
  * (décision de Ian du 26/10/2026).
  *
- * Idempotente : sous verrou, une commande qui a déjà une étiquette active la
- * renvoie sans rappeler Chronopost (double clic, deux onglets).
+ * Idempotente : sous un verrou applicatif par commande, une commande qui a
+ * déjà une étiquette active la renvoie sans rappeler Chronopost (double
+ * clic, deux onglets).
+ *
+ * L'appel Chronopost est fait HORS transaction BDD (audit du 26/10/2026) : un
+ * verrou de ligne tenu pendant un appel réseau bloquerait la commande, et une
+ * erreur d'écriture après la création chez Chronopost laisserait une LT
+ * orpheline. Si l'enregistrement échoue, le PDF est supprimé et la LT est
+ * annulée chez Chronopost (au mieux, journalisé sinon).
  */
 class GenerateShippingLabelAction
 {
     /** Statuts où le colis est en cours de préparation. */
     private const ALLOWED_STATUSES = [OrderStatus::Paid, OrderStatus::Preparing];
+
+    /** Durée max du verrou applicatif : appel Chronopost (15 s) + marge. */
+    private const LOCK_SECONDS = 60;
 
     public function __construct(
         private readonly ShippingLabelClient $client,
@@ -41,36 +56,67 @@ class GenerateShippingLabelAction
             && in_array($order->status, self::ALLOWED_STATUSES, true);
     }
 
+    /** Verrou partagé par la génération et l'annulation d'étiquette d'une commande. */
+    public static function lockFor(Order $order): Lock
+    {
+        return Cache::lock("shipping-label:order:{$order->id}", self::LOCK_SECONDS);
+    }
+
     /**
-     * @throws ShippingLabelFailed commande non éligible ou refus/panne Chronopost
+     * @throws ShippingLabelFailed commande non éligible, opération déjà en cours, ou refus/panne Chronopost
      */
     public function execute(Order $order, ?int $adminId): ShippingLabel
     {
-        return DB::transaction(function () use ($order, $adminId): ShippingLabel {
-            /** @var Order $locked */
-            $locked = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
+        $lock = self::lockFor($order);
+        if (! $lock->get()) {
+            throw new ShippingLabelFailed('Une opération sur l\'étiquette de cette commande est déjà en cours : patientez quelques secondes.');
+        }
 
-            $existing = $locked->activeShippingLabel()->first();
+        try {
+            $fresh = Order::query()->findOrFail($order->id);
+            $existing = $fresh->activeShippingLabel()->first();
             if ($existing !== null) {
                 return $existing;
             }
 
-            $this->assertEligible($locked);
-            $weight = (int) $locked->items()->sum(DB::raw('weight_g * quantity'));
+            $this->assertEligible($fresh);
+            $weight = (int) $fresh->items()->sum(DB::raw('weight_g * quantity'));
 
-            $created = $this->client->create($locked, $weight);
+            $created = $this->client->create($fresh, $weight);
 
-            $path = "shipping-labels/{$locked->id}/{$created->skybillNumber}.pdf";
+            return $this->store($fresh, $created, $weight, $adminId);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /** Enregistre l'étiquette ; en cas d'échec, ne laisse ni fichier ni LT orphelins. */
+    private function store(Order $order, CreatedLabel $created, int $weight, ?int $adminId): ShippingLabel
+    {
+        $path = "shipping-labels/{$order->id}/{$created->skybillNumber}.pdf";
+
+        try {
             Storage::disk('local')->put($path, $created->pdf);
 
-            return $locked->shippingLabels()->create([
+            return $order->shippingLabels()->create([
                 'skybill_number' => $created->skybillNumber,
                 'reservation_number' => $created->reservationNumber,
                 'pdf_path' => $path,
                 'weight_g' => $weight,
                 'created_by_admin_id' => $adminId,
             ]);
-        });
+        } catch (Throwable $e) {
+            Storage::disk('local')->delete($path);
+            Log::error('Chronopost : étiquette créée mais non enregistrée, annulation de la LT.', ['order_id' => $order->id, 'skybill' => $created->skybillNumber, 'error' => $e->getMessage()]);
+
+            try {
+                $this->client->cancel($created->skybillNumber, $order);
+            } catch (ShippingLabelFailed) {
+                Log::critical('Chronopost : LT orpheline à annuler manuellement.', ['order_id' => $order->id, 'skybill' => $created->skybillNumber]);
+            }
+
+            throw new ShippingLabelFailed('L\'étiquette n\'a pas pu être enregistrée : réessayez.', previous: $e);
+        }
     }
 
     private function assertEligible(Order $order): void

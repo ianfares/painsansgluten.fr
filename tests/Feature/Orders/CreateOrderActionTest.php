@@ -32,7 +32,7 @@ function customerPayload(): array
 test('crée une commande avec un numéro séquentiel, un token et un snapshot complet', function () {
     $product = Product::factory()->create(['price_ttc' => 690, 'shipping_weight_g' => 400]);
     $cartService = app(CartService::class);
-    $cart = $cartService->currentCart();
+    $cart = $cartService->cartForWrite();
     $cartService->add($product, 2);
 
     $payload = customerPayload();
@@ -65,7 +65,7 @@ test('les numéros de commande sont séquentiels sans trou', function () {
 test('les totaux sont toujours recalculés côté serveur, jamais depuis une valeur cliente', function () {
     $product = Product::factory()->create(['price_ttc' => 1000, 'shipping_weight_g' => 300]);
     $service = app(CartService::class);
-    $cart = $service->currentCart();
+    $cart = $service->cartForWrite();
     $service->add($product, 3);
 
     $payload = customerPayload();
@@ -89,7 +89,7 @@ test('un panier vide ne peut pas créer de commande', function () {
 test('le panier est vidé après création de la commande', function () {
     $product = Product::factory()->create();
     $service = app(CartService::class);
-    $cart = $service->currentCart();
+    $cart = $service->cartForWrite();
     $service->add($product, 1);
     $payload = customerPayload();
 

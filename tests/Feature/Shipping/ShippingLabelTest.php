@@ -15,6 +15,7 @@ use App\Models\ShippingLabel;
 use App\Services\Chronopost\SoapClientFactory;
 use App\Settings\ShippingSettings;
 use App\Settings\ShopSettings;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\Support\FakeChronopostSoapClientFactory;
@@ -211,4 +212,44 @@ test('BO : l\'admin génère l\'étiquette, la télécharge, et « Expédier » 
 
 test('BO : les actions d\'étiquette ne sont pas accessibles sans connexion admin', function () {
     $this->get(route('filament.admin.resources.orders.index'))->assertRedirect();
+});
+
+test('si l\'enregistrement échoue après la création chez Chronopost : PDF supprimé et LT annulée', function () {
+    $order = labelOrder();
+    // Une étiquette annulée porte déjà ce numéro de LT : l'insertion viole l'unicité.
+    $order->shippingLabels()->create(['skybill_number' => FIXTURE_SKYBILL, 'pdf_path' => 'x.pdf', 'weight_g' => 1]);
+    $order->shippingLabels()->update(['cancelled_at' => now()]);
+
+    expect(fn () => app(GenerateShippingLabelAction::class)->execute($order, null))
+        ->toThrow(ShippingLabelFailed::class, 'pas pu être enregistrée');
+
+    expect(Storage::disk('local')->allFiles())->toBe([])
+        ->and($this->fake->requests)->toHaveCount(2)
+        ->and($this->fake->requests[1])->toContain('cancelListSkybill')->toContain(FIXTURE_SKYBILL);
+});
+
+test('une opération déjà en cours sur l\'étiquette est refusée sans appeler Chronopost', function () {
+    $order = labelOrder();
+    $lock = GenerateShippingLabelAction::lockFor($order);
+    $lock->get();
+
+    try {
+        expect(fn () => app(GenerateShippingLabelAction::class)->execute($order, null))->toThrow(ShippingLabelFailed::class, 'déjà en cours')
+            ->and(fn () => app(CancelShippingLabelAction::class)->execute($order))->toThrow(ShippingLabelFailed::class, 'déjà en cours')
+            ->and($this->fake->requests)->toBe([]);
+    } finally {
+        $lock->release();
+    }
+});
+
+test('l\'appel à Chronopost n\'est pas fait dans une transaction BDD', function () {
+    $levels = [];
+    $this->fake->onRequest = function () use (&$levels): void {
+        $levels[] = DB::transactionLevel();
+    };
+
+    app(GenerateShippingLabelAction::class)->execute(labelOrder(), null);
+
+    // RefreshDatabase ouvre déjà une transaction de test (niveau 1) : aucune de plus pendant l'appel.
+    expect($levels)->toBe([1]);
 });

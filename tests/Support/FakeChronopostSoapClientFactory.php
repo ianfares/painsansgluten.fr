@@ -20,6 +20,9 @@ class FakeChronopostSoapClientFactory extends SoapClientFactory
     /** @var list<string> requêtes XML envoyées */
     public array $requests = [];
 
+    /** Appelé à chaque requête (ex. : observer l'état de la BDD pendant l'appel). */
+    public ?\Closure $onRequest = null;
+
     /** @var array<string, string|null> méthode SOAP => réponse (null = panne) */
     public array $responsesByMethod = [];
 
@@ -80,6 +83,9 @@ class FakeChronopostSoapClientFactory extends SoapClientFactory
             public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false): ?string
             {
                 $this->factory->requests[] = $request;
+                if ($this->factory->onRequest !== null) {
+                    ($this->factory->onRequest)();
+                }
 
                 $response = $this->factory->responseFor($request);
                 if ($response === null) {
