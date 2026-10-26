@@ -32,6 +32,7 @@ use App\Settings\ShopSettings;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Features\SupportTesting\Testable;
@@ -101,9 +102,35 @@ test('au-delà de 3 commandes en 10 minutes avec le même email, la commande est
         auditWizard()->call('pay');
     }
 
-    auditWizard()->call('pay')->assertSet('error', 'Trop de commandes ont été passées avec cette adresse email. Merci de réessayer dans quelques minutes.');
+    auditWizard()->call('pay')->assertSet('error', 'Trop de commandes ont été passées en peu de temps. Merci de réessayer dans quelques minutes.');
 
     expect(Order::query()->count())->toBe(3);
+});
+
+test('une tentative qui échoue ne compte pas dans la limite de commandes', function () {
+    Mail::fake();
+    // Panier vide : la commande n'est pas créée (3 fois de suite).
+    foreach (range(1, 3) as $i) {
+        $component = auditWizard();
+        app(CartService::class)->currentCart()->items()->delete();
+        $component->call('pay')->assertSet('error', 'Votre panier est vide ou cette commande a déjà été validée.');
+    }
+
+    auditWizard()->call('pay')->assertSet('error', null);
+    expect(Order::query()->count())->toBe(1);
+});
+
+test('au-delà de 10 commandes en 10 minutes depuis la même IP, même avec des emails différents, la commande est refusée', function () {
+    Mail::fake();
+    foreach (range(1, 10) as $i) {
+        RateLimiter::clear('relay-search:127.0.0.1');
+        auditWizard(['email' => "client{$i}@example.com"])->call('pay');
+    }
+    RateLimiter::clear('relay-search:127.0.0.1'); // limite de recherche de relais, testée ailleurs
+
+    auditWizard(['email' => 'autre@example.com'])->call('pay')
+        ->assertSet('error', 'Trop de commandes ont été passées en peu de temps. Merci de réessayer dans quelques minutes.');
+    expect(Order::query()->count())->toBe(10);
 });
 
 test('deux validations du même panier ne créent qu\'une seule commande', function () {

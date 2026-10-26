@@ -13,7 +13,10 @@
     // pages privées (panier, commande, compte, connexion) jamais indexées.
     $seo = app(\App\Settings\SeoSettings::class);
     $shopName = 'Mon Sans Gluten by Angélique';
-    $fullTitle = $title ? $title.' — '.$shopName : ($seo->default_title ?: $shopName.' — boulangerie 100 % sans gluten');
+    // Pas de nom de boutique en double si le titre SEO saisi dans le BO le contient déjà (audit du 26/10/2026).
+    $fullTitle = $title
+        ? (\Illuminate\Support\Str::contains($title, $shopName, ignoreCase: true) ? $title : $title.' — '.$shopName)
+        : ($seo->default_title ?: $shopName.' — boulangerie 100 % sans gluten');
     $metaDescription = \Illuminate\Support\Str::limit((string) ($description ?: $seo->default_description ?: 'Boulangerie artisanale 100 % sans gluten à Avranches : pains, viennoiseries, pâtisseries et biscuits fabriqués à la commande, livrés en point relais Chronopost partout en France métropolitaine.'), 160, '…');
     $canonicalUrl = $canonical ?: url()->current();
     $ogImage = $image ?: ($seo->default_og_image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($seo->default_og_image_path) : null);

@@ -6,7 +6,10 @@ namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductSlugRedirect;
 use App\Settings\ShippingSettings;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
@@ -14,9 +17,15 @@ use Illuminate\View\View;
  */
 class ProductController extends Controller
 {
-    public function show(Product $product): View
+    public function show(Request $request, Product $product): View|RedirectResponse
     {
         abort_unless($product->is_published, 404);
+
+        // La base compare sans tenir compte de la casse : /produit/La-Brioche trouve
+        // « la-brioche ». Une seule adresse officielle (SEO) : 301 vers le slug exact.
+        if ($request->route()?->originalParameter('product') !== $product->slug) {
+            return redirect()->route('products.show', $product, 301);
+        }
 
         $related = Product::query()
             ->published()
@@ -33,5 +42,16 @@ class ProductController extends Controller
             'related' => $related,
             'shippingSettings' => app(ShippingSettings::class),
         ]);
+    }
+
+    /**
+     * Ancien slug d'un produit → 301 vers son adresse actuelle ; sinon 404.
+     */
+    public static function redirectFromOldSlug(string $slug): RedirectResponse
+    {
+        $redirect = ProductSlugRedirect::query()->with('product')->where('old_slug', $slug)->first();
+        abort_unless($redirect?->product !== null && $redirect->product->is_published, 404);
+
+        return redirect()->route('products.show', $redirect->product, 301);
     }
 }

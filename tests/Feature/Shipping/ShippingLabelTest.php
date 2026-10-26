@@ -253,3 +253,22 @@ test('l\'appel à Chronopost n\'est pas fait dans une transaction BDD', function
     // RefreshDatabase ouvre déjà une transaction de test (niveau 1) : aucune de plus pendant l'appel.
     expect($levels)->toBe([1]);
 });
+
+test('l\'étiquette d\'une commande remboursée ou annulée avant expédition peut être annulée', function (OrderStatus $status) {
+    $order = labelOrder();
+    app(GenerateShippingLabelAction::class)->execute($order, null);
+    $order->forceFill(['status' => $status])->save();
+
+    expect(CancelShippingLabelAction::isAvailableFor($order->fresh()))->toBeTrue();
+    app(CancelShippingLabelAction::class)->execute($order);
+
+    expect($order->fresh()->activeShippingLabel)->toBeNull();
+})->with([OrderStatus::Refunded, OrderStatus::Cancelled]);
+
+test('une commande remboursée APRÈS expédition ne propose pas l\'annulation de l\'étiquette', function () {
+    $order = labelOrder();
+    app(GenerateShippingLabelAction::class)->execute($order, null);
+    $order->forceFill(['status' => OrderStatus::Refunded, 'shipped_at' => now()])->save();
+
+    expect(CancelShippingLabelAction::isAvailableFor($order->fresh()))->toBeFalse();
+});

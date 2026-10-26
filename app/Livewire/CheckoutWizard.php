@@ -55,6 +55,13 @@ class CheckoutWizard extends Component
 
     private const RELAY_SEARCHES_PER_MINUTE = 10;
 
+    /** Commandes créées max par fenêtre de 10 min (anti-abus d'emails). */
+    private const ORDERS_PER_EMAIL = 3;
+
+    private const ORDERS_PER_IP = 10;
+
+    private const ORDER_LIMIT_WINDOW_SECONDS = 600;
+
     private const RELAY_SERVICE_DOWN_MESSAGE = 'Service de points relais momentanément indisponible, réessayez dans quelques instants.';
 
     #[Validate('required|email|max:255')]
@@ -511,14 +518,17 @@ class CheckoutWizard extends Component
             'paymentMethod.in' => 'Le paiement par virement est réservé aux comptes professionnels autorisés : choisissez la carte bancaire.',
         ]);
 
-        // Anti-abus : chaque commande envoie des emails à l'adresse saisie.
-        $limiterKey = 'checkout:'.sha1(mb_strtolower($this->email));
-        if (RateLimiter::tooManyAttempts($limiterKey, 3)) {
-            $this->error = 'Trop de commandes ont été passées avec cette adresse email. Merci de réessayer dans quelques minutes.';
+        // Anti-abus : chaque commande envoie des emails à l'adresse saisie. Seules les
+        // commandes réellement créées comptent (audit du 26/10/2026 : un échec ne bloque plus
+        // le client), par adresse email ET par IP (l'email seul se contourne en le changeant).
+        $limiterKeys = $this->orderLimiterKeys();
+        foreach ($limiterKeys as $key => $max) {
+            if (RateLimiter::tooManyAttempts($key, $max)) {
+                $this->error = 'Trop de commandes ont été passées en peu de temps. Merci de réessayer dans quelques minutes.';
 
-            return;
+                return;
+            }
         }
-        RateLimiter::hit($limiterKey, 600);
 
         $this->pushAnalytics('add_payment_info', $this->analyticsCart() + ['payment_type' => $this->paymentMethod === 'stripe' ? 'Carte bancaire' : 'Virement']);
 
@@ -581,6 +591,10 @@ class CheckoutWizard extends Component
             return;
         }
 
+        foreach (array_keys($limiterKeys) as $key) {
+            RateLimiter::hit($key, self::ORDER_LIMIT_WINDOW_SECONDS);
+        }
+
         if ($order->payment_method === PaymentMethod::Stripe) {
             $this->redirect(route('checkout.stripe.start', $order), navigate: false);
 
@@ -591,6 +605,19 @@ class CheckoutWizard extends Component
         AdminMailer::queue(new NewBankTransferOrderMail($order));
 
         $this->redirect(route('checkout.confirmation', $order->token), navigate: false);
+    }
+
+    /**
+     * Clés du limiteur de commandes => nombre max de commandes créées par fenêtre.
+     *
+     * @return array<string, int>
+     */
+    private function orderLimiterKeys(): array
+    {
+        return [
+            'checkout:email:'.sha1(mb_strtolower($this->email)) => self::ORDERS_PER_EMAIL,
+            'checkout:ip:'.request()->ip() => self::ORDERS_PER_IP,
+        ];
     }
 
     /** Particuliers et invités : carte seule ; pros validés : virement sauf s'il a été désactivé dans le BO. */

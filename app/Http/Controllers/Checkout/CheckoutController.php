@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Services\Payments\StripeCheckoutService;
 use App\Settings\BankTransferSettings;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Throwable;
@@ -23,6 +24,9 @@ use Throwable;
  */
 class CheckoutController extends Controller
 {
+    /** Durée max de création d'une session Stripe (appel API) + marge. */
+    private const SESSION_LOCK_SECONDS = 30;
+
     public function create(): View
     {
         return view('checkout.wizard');
@@ -42,6 +46,14 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.confirmation', $order);
         }
 
+        // Deux ouvertures simultanées du lien (double clic, deux onglets) ne doivent pas créer
+        // deux sessions Stripe payables en parallèle (audit du 26/10/2026) : verrou par commande.
+        $lock = Cache::lock("stripe-session:order:{$order->id}", self::SESSION_LOCK_SECONDS);
+        if (! $lock->get()) {
+            return redirect()->route('checkout.confirmation', $order)
+                ->with('payment_error', 'Votre paiement est déjà en cours de préparation : patientez quelques secondes puis réessayez.');
+        }
+
         try {
             return redirect()->away($stripe->createSession($order));
         } catch (PaymentAlreadyCompleted) {
@@ -52,6 +64,8 @@ class CheckoutController extends Controller
 
             return redirect()->route('checkout.confirmation', $order)
                 ->with('payment_error', 'Le paiement par carte est momentanément indisponible. Merci de réessayer dans quelques minutes.');
+        } finally {
+            $lock->release();
         }
     }
 

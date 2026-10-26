@@ -133,3 +133,15 @@ test('les pages privées ne sont jamais indexées', function () {
 
     expect($this->get('/boutique')->getContent())->not->toContain('noindex');
 });
+
+test('le nom de la boutique n\'apparaît pas deux fois dans le titre quand le titre SEO le contient déjà', function () {
+    $category = Category::factory()->create(['name' => 'Biscuits', 'slug' => 'biscuits-sans-gluten', 'is_active' => true,
+        'seo_title' => 'Biscuits sans gluten | Mon Sans Gluten by Angélique']);
+
+    $this->get(route('content.show', $category))->assertOk()
+        ->assertSee('<title>Biscuits sans gluten | Mon Sans Gluten by Angélique</title>', false);
+
+    $plain = Category::factory()->create(['name' => 'Pains', 'slug' => 'pains-sans-gluten', 'is_active' => true, 'seo_title' => null]);
+    $this->get(route('content.show', $plain))->assertOk()
+        ->assertSee('<title>Pains — Mon Sans Gluten by Angélique</title>', false);
+});

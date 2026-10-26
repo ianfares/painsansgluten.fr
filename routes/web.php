@@ -14,6 +14,7 @@ use App\Http\Controllers\Content\FaqController;
 use App\Http\Controllers\Content\ProAccountRequestController;
 use App\Http\Controllers\Content\SeoFilesController;
 use App\Http\Controllers\Content\SlugController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -28,7 +29,9 @@ Route::get('/panier', function () {
 // Catalogue public (PLAN.md §5, §23 : slugs de catégories repris au niveau
 // racine pour matcher les redirections 301 Shopify déjà seedées en T02).
 Route::get('/boutique', [BoutiqueController::class, 'index'])->name('boutique.index');
-Route::get('/produit/{product:slug}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/produit/{product:slug}', [ProductController::class, 'show'])->name('products.show')
+    // Ancienne adresse d'un produit (slug modifié) : 301 vers l'adresse actuelle (audit du 26/10/2026).
+    ->missing(fn (Request $request) => ProductController::redirectFromOldSlug((string) $request->route('product')));
 Route::get('/faq', FaqController::class)->name('faq');
 
 // Fichiers pour moteurs et assistants IA (T21).
@@ -45,7 +48,8 @@ Route::post('/professionnels', [ProAccountRequestController::class, 'store'])->m
 // paramètre au token aléatoire de la commande (jamais son id, pour éviter
 // toute énumération — voir docs/DECISIONS.md, T13).
 Route::get('/commande', [CheckoutController::class, 'create'])->name('checkout');
-Route::get('/commande/stripe/{order:token}', [CheckoutController::class, 'stripeStart'])->name('checkout.stripe.start');
+// Limité : chaque appel crée une session Stripe (audit du 26/10/2026).
+Route::get('/commande/stripe/{order:token}', [CheckoutController::class, 'stripeStart'])->middleware('throttle:10,1')->name('checkout.stripe.start');
 Route::get('/commande/confirmation/{order:token}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
 
 // Webhook Stripe (T14) : hors CSRF (bootstrap/app.php), signature vérifiée dans le contrôleur.

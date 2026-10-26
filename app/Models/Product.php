@@ -28,6 +28,26 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 ])]
 class Product extends Model implements HasMedia
 {
+    /**
+     * Ancienne adresse conservée à chaque changement de slug (redirection 301,
+     * audit du 26/10/2026) ; un slug réutilisé par un produit cesse d'être une redirection.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Product $product): void {
+            if ($product->isDirty('slug')) {
+                ProductSlugRedirect::query()->where('old_slug', $product->slug)->delete();
+            }
+        });
+
+        static::updated(function (Product $product): void {
+            $old = $product->getOriginal('slug');
+            if ($product->wasChanged('slug') && is_string($old) && $old !== '') {
+                ProductSlugRedirect::query()->updateOrCreate(['old_slug' => $old], ['product_id' => $product->id]);
+            }
+        });
+    }
+
     /** @use HasFactory<ProductFactory> */
     use HasFactory, InteractsWithMedia, SoftDeletes;
 
