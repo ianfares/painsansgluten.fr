@@ -10,6 +10,7 @@ use App\Enums\PaymentMethod;
 use App\Exceptions\Orders\OrderBelowMinimum;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\CheckoutBlock;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Models\User;
@@ -169,6 +170,9 @@ class CreateOrderAction
                 'actor_id' => null,
                 'comment' => 'Commande créée',
             ]);
+
+            // Refus antérieurs de ce panier (minimum) : le client a finalement commandé.
+            CheckoutBlock::query()->where('cart_id', $cart->id)->whereNull('order_id')->update(['order_id' => $order->id]);
 
             $cart->items()->delete();
 

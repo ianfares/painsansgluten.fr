@@ -10,6 +10,7 @@ use App\Filament\Pages\ManageShippingSettings;
 use App\Livewire\CartWidget;
 use App\Livewire\CheckoutWizard;
 use App\Models\Admin;
+use App\Models\CheckoutBlock;
 use App\Models\Order;
 use App\Models\PickupPoint;
 use App\Models\Product;
@@ -17,6 +18,7 @@ use App\Models\ShippingRate;
 use App\Services\Cart\CartService;
 use App\Settings\ShippingSettings;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
@@ -187,4 +189,32 @@ test('admin : les minimums se saisissent en euros et sont stockés en centimes',
 
 test('admin : la page des paramètres d\'expédition est refusée sans connexion admin', function () {
     $this->get('/admin/manage-shipping-settings')->assertRedirect();
+});
+
+test('un refus pour minimum non atteint est compté une fois, puis rattaché à la commande passée ensuite', function () {
+    cartOf(1000, 2);
+
+    $wizard = minimumCheckoutAtStep2();
+    $wizard->call('goToStep', 3)->assertHasErrors('deliveryChoice');
+    $wizard->call('goToStep', 3)->assertHasErrors('deliveryChoice'); // second clic : pas de doublon
+
+    $block = CheckoutBlock::query()->sole();
+    expect($block->delivery_method)->toBe(DeliveryMethod::ChronopostRelay)
+        ->and($block->subtotal_ttc)->toBe(2000)
+        ->and($block->minimum_ttc)->toBe(2500)
+        ->and($block->order_id)->toBeNull();
+
+    // Le client complète son panier puis commande.
+    cartOf(500);
+    [$customer, $billing, $relay] = minimumOrderPayload();
+    $order = app(CreateOrderAction::class)->execute(app(CartService::class)->currentCart(), $customer, $billing, $relay, PaymentMethod::Stripe);
+
+    expect($block->fresh()->order_id)->toBe($order->id);
+});
+
+test('un échec d\'enregistrement du refus ne gêne pas le client', function () {
+    Schema::drop('checkout_blocks');
+    cartOf(1000, 2);
+
+    minimumCheckoutAtStep2()->call('goToStep', 3)->assertHasErrors('deliveryChoice')->assertSee('il vous manque 5,00 €');
 });

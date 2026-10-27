@@ -572,3 +572,9 @@ Audit complet du 26/10 (sécurité, bugs, SEO/perf ; synthèse hors git dans `se
 - Imprimante de la boutique : **Zebra ZD220** (thermique 203 dpi, ZPL). Réglage BO `shipping.chronopost_label_mode` : **`THE1015`** par défaut (PDF 10×15 pour imprimante thermique, imprimé via le pilote Zebra), `PDF` (A4 laser avec preuve de dépôt) en secours.
 - Écarté : `Z2D` (ZPL brut) — un navigateur ne sait pas envoyer du ZPL brut à l'imprimante sans logiciel Zebra supplémentaire (Browser Print) ; le PDF 10×15 se télécharge et s'imprime comme aujourd'hui.
 - `THE1015` n'imprime pas de preuve de dépôt (doc WS, champ `mode`).
+
+## 2026-10-27 — Paniers abandonnés et refus « minimum non atteint »
+- Page BO **Commandes > Paniers abandonnés** (lecture seule) : panier non vide sans activité depuis 1 h (une commande vide le panier) ; paniers techniques des commandes BO (`admin-order-*`) exclus. Montant = prix catalogue TTC actuels × quantités (hors port, hors remise pro). « Sous le minimum » = sous le plus élevé des minimums actifs (Chronopost / retrait). Nom affiché seulement pour un client connecté (demande de Ian) ; visiteur anonyme.
+- Chiffres 7 j / 30 j : paniers abandonnés, commandes en ligne (hors BO), part sous le minimum, montant moyen, refus « minimum » et combien ont ensuite commandé.
+- Table `checkout_blocks` (sans donnée personnelle) : un refus du tunnel pour minimum = 1 ligne (dédoublonnée 30 min par panier/mode/montant) ; `order_id` renseigné par CreateOrderAction si le même panier commande ensuite. Un échec d'enregistrement est signalé (report) sans gêner le client.
+- Limites : paniers invités purgés après 30 jours ; GA4 non utilisé ici (dépend du consentement).
