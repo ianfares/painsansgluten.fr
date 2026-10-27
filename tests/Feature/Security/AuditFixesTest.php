@@ -352,3 +352,9 @@ test('la CSP bloquante interdit l\'intégration du site dans un cadre externe et
         ->toContain('form-action \'self\' https://checkout.stripe.com')
         ->toContain('https://fonts.bunny.net');
 });
+
+test('la CSP autorise les web workers blob: des aperçus d\'images du back-office', function () {
+    $csp = (string) $this->get('/')->headers->get('Content-Security-Policy');
+
+    expect($csp)->toContain("worker-src 'self' blob:");
+});

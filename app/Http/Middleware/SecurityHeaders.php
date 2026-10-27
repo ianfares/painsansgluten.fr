@@ -29,6 +29,8 @@ class SecurityHeaders
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
         "font-src 'self' data: https://fonts.gstatic.com https://fonts.bunny.net",
         "img-src 'self' data: blob: https:",
+        // Aperçus d'images du back-office (FilePond) : web worker créé depuis une URL blob:.
+        "worker-src 'self' blob:",
         "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net",
         'frame-src https://challenges.cloudflare.com https://www.googletagmanager.com',
         "frame-ancestors 'self'",

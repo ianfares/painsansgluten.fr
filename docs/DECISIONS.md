@@ -564,3 +564,6 @@ Audit complet du 26/10 (sécurité, bugs, SEO/perf ; synthèse hors git dans `se
 - Ajouté **une fois par colis** : au poids du panier pour la tranche de frais de port (choix de Ian : port + étiquette) et au poids déclaré sur l'étiquette Chronopost.
 - Étiquette : valeur du réglage **au moment de la génération** (non figée sur la commande) ; les lignes de commande gardent le poids des produits seul.
 - Constat Chronopost (doc WS §2.6.4) : une LT ne peut être annulée qu'**environ 10 minutes après sa création** ; l'annulation immédiate renvoie « System error (code 1) ».
+
+## 2026-10-27 — CSP : worker-src
+- Aperçus d'images vides dans le BO depuis la CSP bloquante (26/10) : FilePond dessine les aperçus dans un web worker créé depuis une URL `blob:`, refusé faute de `worker-src` (repli sur `script-src`). Ajout de `worker-src 'self' blob:` (portée limitée aux workers ; `script-src` inchangé). Constat fait en navigateur sur la page produit du BO.
