@@ -92,7 +92,7 @@ class ProductResource extends Resource
                                 ->afterStateUpdated(fn (?string $state, Set $set) => $set('slug', Str::slug((string) $state)))
                                 ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
                                 ->validationMessages(['regex' => 'Le slug ne doit contenir que des minuscules, des chiffres et des tirets.'])
-                                ->helperText('Adresse de la fiche : changer le slug redirige automatiquement l\'ancienne adresse.'),
+                                ->helperText('Adresse de la fiche (painsansgluten.fr/produit/…), remplie automatiquement depuis le nom. Minuscules, chiffres et tirets uniquement : majuscules, accents et espaces sont convertis automatiquement (ex. « La BriÔche » → la-brioche). Changer le slug redirige automatiquement l\'ancienne adresse.'),
                             TextInput::make('reference')->label('Référence')->required()->unique(ignoreRecord: true)->maxLength(255),
                             TextInput::make('price_ttc')
                                 ->label('Prix TTC (€)')
