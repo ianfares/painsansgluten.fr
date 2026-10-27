@@ -184,6 +184,7 @@ test('l\'annulation est refusée une fois le colis expédié', function () {
 test('un refus d\'annulation de Chronopost laisse l\'étiquette active', function () {
     $order = labelOrder();
     $label = app(GenerateShippingLabelAction::class)->execute($order, null);
+    $this->travel(20)->minutes();
     $this->fake->responsesByMethod['cancelListSkybill'] = FakeChronopostSoapClientFactory::cancelResponse(1, 'Colis déjà pris en charge');
 
     expect(fn () => app(CancelShippingLabelAction::class)->execute($order))->toThrow(ShippingLabelFailed::class, 'déjà pris en charge');
@@ -281,4 +282,16 @@ test('le poids déclaré ajoute le poids d\'emballage paramétré', function () 
     $label = app(GenerateShippingLabelAction::class)->execute(labelOrder(), null);
 
     expect($label->weight_g)->toBe(1450);
+});
+
+test('annulation refusée peu après la création : message expliquant le délai Chronopost', function () {
+    $this->travelTo(now()->setTimezone('Europe/Paris')->setTime(12, 0));
+    $order = labelOrder();
+    $label = app(GenerateShippingLabelAction::class)->execute($order, null);
+    $this->fake->responsesByMethod['cancelListSkybill'] = FakeChronopostSoapClientFactory::cancelResponse(1, 'System error');
+    $this->travel(2)->minutes();
+
+    expect(fn () => app(CancelShippingLabelAction::class)->execute($order))
+        ->toThrow(ShippingLabelFailed::class, 'environ 10 minutes après sa création : réessayez à partir de 12:11');
+    expect($label->fresh()->cancelled_at)->toBeNull();
 });
