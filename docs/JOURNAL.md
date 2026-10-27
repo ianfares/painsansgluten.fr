@@ -1440,7 +1440,7 @@ QUALITÉ : pint OK, phpstan 0 erreur ; aucune dépendance modifiée.
 DOCUMENTATION : docs/DECISIONS.md.
 DÉPLOIEMENT (2026-10-27, ordre de Ian) : local : dump `.backups/db-local-avant-packaging-20261027-122125.sql.gz` puis migrate (+ product_slug_redirects qui restait en local). Prod : 4 fichiers serveur vérifiés identiques au tag deploy-20261026-205155 ; sauvegarde fichiers + dump (33 tables) dans ~/backups-ia/20261027-122227/ (600) ; 5 fichiers envoyés ; php -l OK ; migrate --force (1 settings) ; optimize ; queue:restart ; pages 200 ; chronopost:test-relays prod = 10 relais ; tag deploy-20261027-122227.
 RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-122227/app/ dans /var/www/painsansgluten/, supprimer le fichier database/settings/2026_10_27_*, `php artisan optimize` (la ligne settings `shipping.packaging_weight_g` peut rester, ou restauration du dump).
-À RENSEIGNER / QUESTIONS OUVERTES : modèle de l'imprimante thermique (format d'étiquette 10×15) avant d'activer « Livraison Chronopost » ; confirmer l'annulation de la LT de test XS497128462FR.
+À RENSEIGNER / QUESTIONS OUVERTES : modèle de l'imprimante thermique (format d'étiquette 10×15) avant d'activer « Livraison Chronopost ». LT de test XS497128462FR annulée avec succès à 12:25 (11 min après création).
 POINTS À RELIRE PAR UN HUMAIN : une annulation d'étiquette < 10 min après création affiche « System error (code 1) » dans le BO (sans dégât, réessayer plus tard) ; idem pour l'annulation automatique d'une LT orpheline (journalisée). Message plus clair possible.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : format d'étiquette réglable (A4 / thermique 10×15) dès réception du modèle d'imprimante, puis activation de Chronopost en BO.
