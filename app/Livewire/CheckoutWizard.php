@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Actions\Analytics\RecordMinimumOrderBlockAction;
 use App\Actions\Orders\CreateOrderAction;
 use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
@@ -357,8 +358,11 @@ class CheckoutWizard extends Component
 
         // Minimum de commande du mode choisi (19/10/2026), revérifié par CreateOrderAction.
         $cartService = app(CartService::class);
-        $totals = $cartService->totals($cartService->currentCart(), $this->selectedDeliveryMethod());
+        $cart = $cartService->currentCart();
+        $totals = $cartService->totals($cart, $this->selectedDeliveryMethod());
         if ($totals['minimum_missing_ttc'] > 0) {
+            app(RecordMinimumOrderBlockAction::class)->execute($cart, $this->selectedDeliveryMethod(), $totals['subtotal_ttc'], $totals['minimum_ttc']);
+
             return $this->deliveryError('deliveryChoice', OrderBelowMinimum::forAmounts($totals['minimum_ttc'], $totals['minimum_missing_ttc'])->getMessage());
         }
 
