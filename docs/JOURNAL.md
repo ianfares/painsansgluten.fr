@@ -1531,3 +1531,20 @@ RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-192553/app/ puis php artisan op
 À RENSEIGNER / QUESTIONS OUVERTES : aucune. POINTS À RELIRE PAR UN HUMAIN : texte de la légende.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : impression d'essai Zebra le 28/10 puis activation Chronopost ; page « paniers abandonnés ».
+
+## [2026-10-27 19:42] — [IA : Claude Opus 5.5] — Paniers abandonnés + refus « minimum » + lien Google Analytics
+TÂCHE : demande d'Angélique (voir si le minimum de commande bloque les clients) + lien GA4 dans le BO (Ian).
+RÉSUMÉ : page BO Commandes > Paniers abandonnés (lecture seule, filtres 7/30 j, sous le minimum, connectés) avec chiffres 7 j / 30 j ; table checkout_blocks (refus du tunnel pour minimum, sans donnée personnelle, dédoublonnés 30 min, rattachés à la commande si le panier commande ensuite) ; rubrique de menu « Google Analytics » → rapport GA4 dans un nouvel onglet (intégration impossible : Google interdit l'affichage en cadre ; authuser retiré du lien).
+FICHIERS CRÉÉS / MODIFIÉS : database/migrations/2026_10_27_200000_create_checkout_blocks_table.php, app/Models/CheckoutBlock.php, app/Actions/Analytics/RecordMinimumOrderBlockAction.php, app/Services/Analytics/AbandonedCartReport.php, app/Filament/Resources/AbandonedCartResource.php (+ Pages/ListAbandonedCarts, Widgets/AbandonedCartsStatsWidget), app/Livewire/CheckoutWizard.php (1 appel), app/Actions/Orders/CreateOrderAction.php (1 update), app/Providers/Filament/AdminPanelProvider.php, tests/Feature/Admin/AbandonedCartsTest.php, tests/Feature/Checkout/MinimumOrderTest.php, docs/DECISIONS.md.
+ANALYSE D'IMPACT : tunnel : enregistrement après le refus existant, encapsulé (erreur → report, client non gêné, test dédié) ; CreateOrderAction : un UPDATE checkout_blocks dans la transaction existante. Paniers : lecture seule. Paniers des commandes BO exclus.
+SÉCURITÉ : page réservée aux admins (test sans connexion → redirection) ; checkout_blocks sans donnée personnelle ; nom client affiché seulement pour un compte connecté (demande de Ian).
+PERFORMANCE : sous-requêtes par panier (volume faible : paniers invités purgés à 30 j) ; stats calculées à l'affichage de la page.
+TESTS : 631 passés / 0 échec (+9 : sélection des paniers, stats, page BO, filtre, accès, refus compté une fois puis rattaché, échec d'enregistrement sans effet, lien GA).
+QUALITÉ : pint OK, phpstan 0 erreur ; aucune dépendance ajoutée.
+DOCUMENTATION : docs/DECISIONS.md.
+DÉPLOIEMENT (2026-10-27, ordre de Ian) : local : dump .backups/db-local-avant-checkout-blocks-* + migrate. Prod : 3 fichiers serveur identiques au tag précédent ; sauvegarde + dump (33 tables) ~/backups-ia/20261027-193756/ ; migration envoyée et jouée avant le code ; 9 fichiers envoyés ; php -l OK ; optimize ; queue:restart ; pages / /panier /commande /admin/login 200 ; page vérifiée en navigateur (20 paniers abandonnés sur 30 j, 4 commandes en ligne, 50 % sous le minimum, moyenne 32,11 €, lien GA en nouvel onglet) ; tag deploy-20261027-193756.
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-193756/app/ ; supprimer les 7 fichiers nouveaux ; php artisan optimize ; (table checkout_blocks laissable, ou migrate:rollback --step=1 après dump).
+À RENSEIGNER / QUESTIONS OUVERTES : minimums actuels en BO = 20 € Chronopost, 25 € retrait (et non 15 €) ; « sous le minimum » = sous 25 €. Angélique doit avoir accès à la propriété GA4 avec son compte Google.
+POINTS À RELIRE PAR UN HUMAIN : libellés de la page ; seuil d'1 h d'inactivité.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : impression d'essai Zebra le 28/10 puis activation Chronopost ; relire les chiffres de refus dans 1 à 2 semaines.
