@@ -1461,3 +1461,20 @@ RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-123456/app/ dans /var/www/pains
 POINTS À RELIRE PAR UN HUMAIN : texte du message.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : format d'étiquette réglable (A4 / thermique 10×15) dès réception du modèle d'imprimante, puis activation de Chronopost en BO.
+
+## [2026-10-27 18:28] — [IA : Claude Opus 5.5] — Aperçus d'images vides dans le back-office (CSP)
+TÂCHE : images produit non affichées dans le BO (affichées sur le site), signalé par Ian.
+RÉSUMÉ : diagnostic en navigateur (session BO ouverte par Ian) : images téléchargées (200) mais aperçus FilePond jamais dessinés ; création d'un web worker blob: refusée par la CSP bloquante du 26/10 (pas de worker-src → repli sur script-src). Ajout de « worker-src 'self' blob: ». Vérifié après déploiement : aperçus affichés (page « Le Bretz'l », onglet Images).
+FICHIERS CRÉÉS / MODIFIÉS : app/Http/Middleware/SecurityHeaders.php, tests/Feature/Security/AuditFixesTest.php, docs/DECISIONS.md.
+ANALYSE D'IMPACT : en-tête CSP de toutes les pages ; seule la création de workers est élargie (self + blob:), script-src inchangé.
+SÉCURITÉ : blob: en worker-src = scripts déjà présents dans la page uniquement (une URL blob: ne se crée que depuis la page elle-même) ; risque faible, accepté.
+PERFORMANCE : neutre.
+TESTS : 622 passés / 0 échec (+1 : présence de worker-src).
+QUALITÉ : pint OK, phpstan 0 erreur.
+DOCUMENTATION : docs/DECISIONS.md.
+DÉPLOIEMENT (2026-10-27, ordre de Ian) : fichier serveur identique au tag précédent ; sauvegarde ~/backups-ia/20261027-182630/ ; 1 fichier envoyé ; php -l OK ; optimize ; en-tête vérifié ; pages 200 ; tag deploy-20261027-182630. Branche feature/label-format NON fusionnée ni déployée.
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-182630/app/ dans /var/www/painsansgluten/ puis php artisan optimize.
+À RENSEIGNER / QUESTIONS OUVERTES : accord de Ian pour l'étiquette réelle THE1015 (création + annulation) et le déploiement du format d'étiquette ; taux de TVA du port (expert-comptable).
+POINTS À RELIRE PAR UN HUMAIN : parcourir les autres écrans du BO (factures, paramètres) pour repérer un autre blocage CSP éventuel.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : test réel + déploiement du format d'étiquette Zebra (feature/label-format), puis activation de Chronopost.
