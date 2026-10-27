@@ -7,6 +7,7 @@ namespace App\Filament\Pages;
 use App\Settings\ShippingSettings;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
@@ -51,6 +52,14 @@ class ManageShippingSettings extends SettingsPage
                         ->label('Livraison Chronopost Relais proposée aux clients')
                         ->helperText('Désactivée : le client ne peut choisir qu\'un retrait chez un commerçant partenaire (dans le rayon défini plus bas). Les commandes saisies dans le back-office ne sont pas concernées.'),
                     TextInput::make('chronopost_product_code')->label('Code produit Chronopost')->maxLength(50),
+                    Select::make('chronopost_label_mode')
+                        ->label('Format des étiquettes')
+                        ->options([
+                            'THE1015' => 'Imprimante thermique 10×15 (Zebra ZD220)',
+                            'PDF' => 'Imprimante classique, feuille A4',
+                        ])
+                        ->helperText('S\'applique aux prochaines étiquettes générées. En thermique, imprimer le PDF avec le pilote Zebra, échelle 100 %.')
+                        ->required()->selectablePlaceholder(false),
                     TextInput::make('carrier_label')->label('Libellé du transporteur (affiché au client)')->maxLength(100),
                     TextInput::make('tracking_url_template')
                         ->label('Modèle d\'URL de suivi')

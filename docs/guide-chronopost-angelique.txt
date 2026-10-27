@@ -42,11 +42,15 @@ Menu « Commandes ». Les boutons sont sur la ligne de la commande ou en haut de
      (Vérifiez que chaque produit a le bon poids dans sa fiche.)
 
 ÉTAPE 3 — Imprimer l'étiquette
-   - Imprimante classique, feuille A4, à 100 % (sans « ajuster à la page »).
-   - La feuille contient 2 parties :
-       • à droite : l'ÉTIQUETTE, à coller bien à plat sur le carton, code-barres lisible,
-         sans scotch par-dessus le code-barres ;
-       • à gauche : la PREUVE DE DÉPÔT, à garder (à faire tamponner au dépôt du colis).
+   - Imprimante thermique Zebra ZD220 (format réglé dans Paramètres > Expédition >
+     « Format des étiquettes » : « Imprimante thermique 10×15 »).
+   - Ouvrir le PDF et l'imprimer sur la Zebra (pilote Zebra installé sur l'ordinateur),
+     taille réelle / échelle 100 % (sans « ajuster à la page »), papier 10×15 cm.
+   - Coller l'étiquette bien à plat sur le carton, code-barres lisible, sans scotch
+     par-dessus le code-barres. (Pas de preuve de dépôt imprimée dans ce format.)
+   - Dépannage sans la Zebra : choisir « Imprimante classique, feuille A4 » dans le même
+     réglage AVANT de générer l'étiquette ; la feuille A4 contient l'étiquette à droite
+     et la preuve de dépôt à gauche (à garder).
    - Besoin de la réimprimer ? Bouton « Étiquette Chronopost (PDF) ».
 
 ÉTAPE 4 — Déposer le colis (le jeudi)

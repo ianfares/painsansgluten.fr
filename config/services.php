@@ -55,8 +55,7 @@ return [
         'relay_wsdl' => resource_path('chronopost/PointRelaisServiceWS.wsdl'),
         'shipping_wsdl' => resource_path('chronopost/ShippingServiceWS.wsdl'),
         'tracking_wsdl' => resource_path('chronopost/TrackingServiceWS.wsdl'),
-        // Étiquette PDF A4 avec preuve de dépôt (imprimante classique, décision de Ian du 26/10/2026).
-        'label_mode' => 'PDF',
+        // Format d'étiquette : réglage back-office `shipping.chronopost_label_mode` (27/10/2026).
         // Service 0 = livraison en semaine (expédition le jeudi, livraison le vendredi ; pas de samedi).
         'label_service' => '0',
         // Délai plus long que la recherche de relais : génération d'un PDF côté Chronopost.

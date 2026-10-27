@@ -15,7 +15,7 @@ use Throwable;
 
 /**
  * Étiquettes Chronopost Relais (T28, PLAN.md §8.2) :
- * - création : `shippingMultiParcelV4`, un colis par commande, PDF A4 ;
+ * - création : `shippingMultiParcelV4`, un colis par commande, PDF A4 ou 10×15 thermique (réglage BO) ;
  * - annulation : `cancelListSkybill`.
  *
  * Règles imposées par Chronopost pour un envoi en relais (email du 26/10/2026) :
@@ -88,7 +88,7 @@ class ShippingLabelClient
                 'length' => 0,
                 'width' => 0,
             ],
-            'skybillParamsValue' => ['duplicata' => 'N', 'mode' => (string) config('services.chronopost.label_mode'), 'withReservation' => 0],
+            'skybillParamsValue' => ['duplicata' => 'N', 'mode' => $this->shippingSettings->chronopost_label_mode, 'withReservation' => 0],
             'password' => $credentials['password'],
             'modeRetour' => '2',
             'numberOfParcel' => 1,

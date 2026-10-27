@@ -61,6 +61,9 @@ class ShippingSettings extends Settings
     /** Poids moyen du carton + calage (grammes), ajouté au colis : tranche de port et étiquette (27/10/2026). */
     public int $packaging_weight_g;
 
+    /** Format d'étiquette Chronopost : `PDF` (A4, imprimante laser) ou `THE1015` (PDF 10×15, imprimante thermique Zebra ZD220). */
+    public string $chronopost_label_mode;
+
     public static function group(): string
     {
         return 'shipping';

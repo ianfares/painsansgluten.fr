@@ -564,3 +564,8 @@ Audit complet du 26/10 (sécurité, bugs, SEO/perf ; synthèse hors git dans `se
 - Ajouté **une fois par colis** : au poids du panier pour la tranche de frais de port (choix de Ian : port + étiquette) et au poids déclaré sur l'étiquette Chronopost.
 - Étiquette : valeur du réglage **au moment de la génération** (non figée sur la commande) ; les lignes de commande gardent le poids des produits seul.
 - Constat Chronopost (doc WS §2.6.4) : une LT ne peut être annulée qu'**environ 10 minutes après sa création** ; l'annulation immédiate renvoie « System error (code 1) ».
+
+## 2026-10-27 — Format d'étiquette Chronopost
+- Imprimante de la boutique : **Zebra ZD220** (thermique 203 dpi, ZPL). Réglage BO `shipping.chronopost_label_mode` : **`THE1015`** par défaut (PDF 10×15 pour imprimante thermique, imprimé via le pilote Zebra), `PDF` (A4 laser avec preuve de dépôt) en secours.
+- Écarté : `Z2D` (ZPL brut) — un navigateur ne sait pas envoyer du ZPL brut à l'imprimante sans logiciel Zebra supplémentaire (Browser Print) ; le PDF 10×15 se télécharge et s'imprime comme aujourd'hui.
+- `THE1015` n'imprime pas de preuve de dépôt (doc WS, champ `mode`).
