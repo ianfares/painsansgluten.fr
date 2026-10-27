@@ -88,6 +88,10 @@ class ManageShippingSettings extends SettingsPage
                         ->numeric()->minValue(0)
                         ->visible(fn (callable $get) => $get('free_shipping_enabled')),
                     TextInput::make('shipping_vat_rate')->label('Taux de TVA sur les frais de port (%)')->numeric()->step(0.01),
+                    TextInput::make('packaging_weight_g')
+                        ->label('Poids de l\'emballage (grammes)')
+                        ->helperText('Carton + calage, ajouté une fois par colis : compte dans la tranche de frais de port et sur l\'étiquette Chronopost.')
+                        ->numeric()->integer()->minValue(0)->maxValue(5000)->required(),
                 ]),
 
             Section::make('Retraits')

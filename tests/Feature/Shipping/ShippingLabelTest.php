@@ -70,7 +70,7 @@ test('crée l\'étiquette chez Chronopost, stocke le PDF en privé et ne change 
     $label = app(GenerateShippingLabelAction::class)->execute($order, null);
 
     expect($label->skybill_number)->toBe(FIXTURE_SKYBILL)
-        ->and($label->weight_g)->toBe(1200)
+        ->and($label->weight_g)->toBe(1600) // 1 200 g de produits + 400 g d'emballage
         ->and($label->pdf_path)->toBe("shipping-labels/{$order->id}/".FIXTURE_SKYBILL.'.pdf')
         ->and(Storage::disk('local')->get($label->pdf_path))->toStartWith('%PDF')
         ->and($order->fresh()->status)->toBe(OrderStatus::Preparing)
@@ -90,7 +90,7 @@ test('envoie à Chronopost les données exigées pour un relais', function () {
         ->toContain('<recipientEmail>jeanne@example.com</recipientEmail>')
         ->toContain('<productCode>86</productCode>')
         ->toContain('<service>0</service>')
-        ->toContain('<weight>1.2</weight>')
+        ->toContain('<weight>1.6</weight>')
         ->toContain('<mode>PDF</mode>')
         ->toContain('<insuredValue>0</insuredValue>')
         ->toContain('<shipperName>Mon Sans Gluten by Angelique</shipperName>')
@@ -271,4 +271,14 @@ test('une commande remboursée APRÈS expédition ne propose pas l\'annulation d
     $order->forceFill(['status' => OrderStatus::Refunded, 'shipped_at' => now()])->save();
 
     expect(CancelShippingLabelAction::isAvailableFor($order->fresh()))->toBeFalse();
+});
+
+test('le poids déclaré ajoute le poids d\'emballage paramétré', function () {
+    $shipping = app(ShippingSettings::class);
+    $shipping->packaging_weight_g = 250;
+    $shipping->save();
+
+    $label = app(GenerateShippingLabelAction::class)->execute(labelOrder(), null);
+
+    expect($label->weight_g)->toBe(1450);
 });
