@@ -86,3 +86,11 @@ test('BO : le filtre « sous le minimum » ne garde que les petits paniers', fun
 test('BO : la page n\'est pas accessible sans connexion admin', function () {
     $this->get('/admin/paniers-abandonnes')->assertRedirect();
 });
+
+test('BO : le menu propose le lien vers le rapport Google Analytics, ouvert dans un nouvel onglet', function () {
+    $this->actingAs(Admin::factory()->create(), 'admin');
+
+    $this->get('/admin')->assertOk()
+        ->assertSee('Rapport Google Analytics')
+        ->assertSee('https://analytics.google.com/analytics/web/#/a62003154p558281421/reports/intelligenthome', false);
+});

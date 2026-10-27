@@ -9,6 +9,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -45,6 +46,14 @@ class AdminPanelProvider extends PanelProvider
                 : null)
             // Date et heure de Paris dans la barre du haut (demande de Ian).
             ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => view('filament.topbar-clock'))
+            // Lien vers le rapport GA4 (27/10/2026, demande de Ian) : Google interdit
+            // l'affichage de ses pages dans un cadre, d'où l'ouverture dans un onglet.
+            ->navigationItems([
+                NavigationItem::make('Rapport Google Analytics')
+                    ->url('https://analytics.google.com/analytics/web/#/a62003154p558281421/reports/intelligenthome', shouldOpenInNewTab: true)
+                    ->icon('heroicon-o-chart-bar')
+                    ->group('Google Analytics'),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
