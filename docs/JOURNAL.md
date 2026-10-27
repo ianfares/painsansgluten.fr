@@ -1506,3 +1506,16 @@ TESTS : sans objet. QUALITÉ : sans objet. DOCUMENTATION : ce journal.
 POINTS À RELIRE PAR UN HUMAIN : test sur un vrai téléphone (la fenêtre de test est restée à 951 px de large, menu mobile tout de même affiché).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : normalize-slugs --apply ; impression d'essai Zebra le 28/10 puis activation Chronopost ; page « paniers abandonnés » (demande client, en discussion).
+
+## [2026-10-27 19:25] — [IA : Claude Opus 5.5] — Normalisation des slugs produits en prod
+TÂCHE : `catalog:normalize-slugs --apply` en prod (accord de Ian).
+RÉSUMÉ : dump préalable ~/backups-ia/20261027-192309/db-avant-normalize-slugs.sql.gz (33 tables, 600). 7 slugs corrigés (8 simulés : le produit 31 avait été corrigé entre-temps dans le BO en « l-insolent-cookie-noisette », faute « Insolen » réparée). Relance de contrôle : « Tous les slugs sont déjà corrects ». Vérifs : anciennes adresses (majuscules, « Ô », « Insolen ») → 301 vers les nouvelles ; nouvelles adresses 200 ; sitemap sans majuscule.
+FICHIERS CRÉÉS / MODIFIÉS : aucun fichier (données prod : products.slug ×7 + product_slug_redirects).
+ANALYSE D'IMPACT : liens existants et Google redirigés en 301 ; aucun lien cassé constaté.
+SÉCURITÉ / PERFORMANCE : sans objet.
+TESTS : sans objet (commande déjà testée, ProductSlugTest). QUALITÉ : sans objet. DOCUMENTATION : ce journal.
+RETOUR ARRIÈRE : restauration du dump (zcat … | mysql) — à éviter, les 301 suffisent.
+À RENSEIGNER / QUESTIONS OUVERTES : aucune.
+POINTS À RELIRE PAR UN HUMAIN : Search Console, couverture d'indexation dans quelques jours.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : impression d'essai Zebra le 28/10 puis activation Chronopost ; page « paniers abandonnés ».
