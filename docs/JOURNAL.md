@@ -1444,3 +1444,20 @@ RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-122227/app/ dans /var/www/pains
 POINTS À RELIRE PAR UN HUMAIN : une annulation d'étiquette < 10 min après création affiche « System error (code 1) » dans le BO (sans dégât, réessayer plus tard) ; idem pour l'annulation automatique d'une LT orpheline (journalisée). Message plus clair possible.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : format d'étiquette réglable (A4 / thermique 10×15) dès réception du modèle d'imprimante, puis activation de Chronopost en BO.
+
+## [2026-10-27 12:36] — [IA : Claude Opus 5.5] — Message d'annulation d'étiquette trop récente
+TÂCHE : remplacer « System error (code 1) » par un message clair quand Angélique annule une étiquette trop tôt (accord de Ian).
+RÉSUMÉ : CancelShippingLabelAction intercepte le refus Chronopost si l'étiquette a moins de 15 min et affiche « Chronopost n'accepte l'annulation d'une étiquette qu'environ 10 minutes après sa création : réessayez à partir de HH:MM » (création + 11 min, heure de Paris). Au-delà de 15 min, message Chronopost inchangé. L'étiquette reste active.
+FICHIERS CRÉÉS / MODIFIÉS : app/Actions/Shipping/CancelShippingLabelAction.php, tests/Feature/Shipping/ShippingLabelTest.php.
+ANALYSE D'IMPACT : seul appelant BO = ShippingLabelActions (affiche le message de l'exception) ; annulation automatique (remboursement, LT orpheline) inchangée.
+SÉCURITÉ : aucune nouvelle surface.
+PERFORMANCE : neutre.
+TESTS : 621 passés / 0 échec (+1 : refus 2 min après création → message avec heure ; test « refus d'annulation » décalé à 20 min pour garder le message Chronopost).
+QUALITÉ : pint OK, phpstan 0 erreur.
+DOCUMENTATION : ce journal (constat Chronopost déjà dans docs/DECISIONS.md du 27/10).
+DÉPLOIEMENT (2026-10-27, ordre de Ian) : fichier serveur identique au tag précédent ; sauvegarde ~/backups-ia/20261027-123456/ ; 1 fichier envoyé ; php -l OK ; optimize ; queue:restart ; pages / /panier /admin/login 200 ; tag deploy-20261027-123456.
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-123456/app/ dans /var/www/painsansgluten/ puis php artisan optimize.
+À RENSEIGNER / QUESTIONS OUVERTES : modèle de l'imprimante thermique.
+POINTS À RELIRE PAR UN HUMAIN : texte du message.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : format d'étiquette réglable (A4 / thermique 10×15) dès réception du modèle d'imprimante, puis activation de Chronopost en BO.
