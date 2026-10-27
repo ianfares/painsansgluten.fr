@@ -18,6 +18,12 @@ use App\Services\Chronopost\ShippingLabelClient;
  */
 class CancelShippingLabelAction
 {
+    /** Délai Chronopost avant qu'une LT puisse être annulée (doc WS §2.6.4). */
+    private const CANCEL_DELAY_MINUTES = 10;
+
+    /** Au-delà, un refus n'est plus attribué au délai et le message Chronopost est affiché tel quel. */
+    private const EARLY_CANCEL_WINDOW_MINUTES = 15;
+
     public function __construct(private readonly ShippingLabelClient $client) {}
 
     public static function isAvailableFor(Order $order): bool
@@ -55,7 +61,11 @@ class CancelShippingLabelAction
                 throw new ShippingLabelFailed('Aucune étiquette annulable pour cette commande (déjà annulée ou colis expédié).');
             }
 
-            $this->client->cancel($label->skybill_number, $fresh);
+            try {
+                $this->client->cancel($label->skybill_number, $fresh);
+            } catch (ShippingLabelFailed $e) {
+                throw self::explainEarlyCancel($label, $e);
+            }
 
             $label->cancelled_at = now();
             $label->save();
@@ -64,5 +74,24 @@ class CancelShippingLabelAction
         } finally {
             $lock->release();
         }
+    }
+
+    /**
+     * Chronopost n'accepte l'annulation qu'environ 10 minutes après la création
+     * de la LT (doc WS §2.6.4) et répond sinon « System error (code 1) » :
+     * message explicite tant que l'étiquette est récente (marge jusqu'à 15 min).
+     */
+    private static function explainEarlyCancel(ShippingLabel $label, ShippingLabelFailed $e): ShippingLabelFailed
+    {
+        if ($label->created_at === null || $label->created_at->lt(now()->subMinutes(self::EARLY_CANCEL_WINDOW_MINUTES))) {
+            return $e;
+        }
+
+        $retryAt = $label->created_at->copy()->addMinutes(self::CANCEL_DELAY_MINUTES + 1)->timezone('Europe/Paris')->format('H:i');
+
+        return new ShippingLabelFailed(
+            'Chronopost n\'accepte l\'annulation d\'une étiquette qu\'environ 10 minutes après sa création : réessayez à partir de '.$retryAt.'.',
+            previous: $e,
+        );
     }
 }
