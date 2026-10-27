@@ -1519,3 +1519,15 @@ RETOUR ARRIÈRE : restauration du dump (zcat … | mysql) — à éviter, les 30
 POINTS À RELIRE PAR UN HUMAIN : Search Console, couverture d'indexation dans quelques jours.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : impression d'essai Zebra le 28/10 puis activation Chronopost ; page « paniers abandonnés ».
+
+## [2026-10-27 19:30] — [IA : Claude Opus 5.5] — Légende du slug produit
+TÂCHE : garde-fou sur les adresses produit (demande de Ian après la normalisation).
+RÉSUMÉ : garde-fous déjà en place depuis l'audit du 26/10 (slug généré depuis le nom, conversion auto, refus hors [a-z0-9-], redirection 301 au changement) ; seule la légende du champ « Slug (URL) » a été rendue explicite (format, conversion automatique, exemple, redirection).
+FICHIERS CRÉÉS / MODIFIÉS : app/Filament/Resources/ProductResource.php.
+ANALYSE D'IMPACT : texte d'aide uniquement. SÉCURITÉ / PERFORMANCE : sans objet.
+TESTS : 54 tests produits passés. QUALITÉ : pint OK, phpstan 0 erreur. DOCUMENTATION : ce journal.
+DÉPLOIEMENT (2026-10-27, ordre de Ian) : fichier serveur identique au tag précédent ; sauvegarde ~/backups-ia/20261027-192553/ ; 1 fichier envoyé ; php -l OK ; optimize ; légende vérifiée en navigateur (BO > Produits > Créer) ; tag deploy-20261027-192553. (Une première tentative groupée a été refusée par le contrôle automatique ; relancée en étapes séparées après ordre explicite.)
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-192553/app/ puis php artisan optimize.
+À RENSEIGNER / QUESTIONS OUVERTES : aucune. POINTS À RELIRE PAR UN HUMAIN : texte de la légende.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : impression d'essai Zebra le 28/10 puis activation Chronopost ; page « paniers abandonnés ».
