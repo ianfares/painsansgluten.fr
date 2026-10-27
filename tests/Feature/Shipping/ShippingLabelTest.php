@@ -91,7 +91,7 @@ test('envoie à Chronopost les données exigées pour un relais', function () {
         ->toContain('<productCode>86</productCode>')
         ->toContain('<service>0</service>')
         ->toContain('<weight>1.6</weight>')
-        ->toContain('<mode>PDF</mode>')
+        ->toContain('<mode>THE1015</mode>')
         ->toContain('<insuredValue>0</insuredValue>')
         ->toContain('<shipperName>Mon Sans Gluten by Angelique</shipperName>')
         ->toContain('<shipperPhone>0233000000</shipperPhone>');
@@ -294,4 +294,14 @@ test('annulation refusée peu après la création : message expliquant le délai
     expect(fn () => app(CancelShippingLabelAction::class)->execute($order))
         ->toThrow(ShippingLabelFailed::class, 'environ 10 minutes après sa création : réessayez à partir de 12:11');
     expect($label->fresh()->cancelled_at)->toBeNull();
+});
+
+test('le format d\'étiquette suit le réglage du back-office', function () {
+    $shipping = app(ShippingSettings::class);
+    $shipping->chronopost_label_mode = 'PDF';
+    $shipping->save();
+
+    app(GenerateShippingLabelAction::class)->execute(labelOrder(), null);
+
+    expect($this->fake->requests[0])->toContain('<mode>PDF</mode>');
 });

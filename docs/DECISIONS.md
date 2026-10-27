@@ -567,3 +567,8 @@ Audit complet du 26/10 (sécurité, bugs, SEO/perf ; synthèse hors git dans `se
 
 ## 2026-10-27 — CSP : worker-src
 - Aperçus d'images vides dans le BO depuis la CSP bloquante (26/10) : FilePond dessine les aperçus dans un web worker créé depuis une URL `blob:`, refusé faute de `worker-src` (repli sur `script-src`). Ajout de `worker-src 'self' blob:` (portée limitée aux workers ; `script-src` inchangé). Constat fait en navigateur sur la page produit du BO.
+
+## 2026-10-27 — Format d'étiquette Chronopost
+- Imprimante de la boutique : **Zebra ZD220** (thermique 203 dpi, ZPL). Réglage BO `shipping.chronopost_label_mode` : **`THE1015`** par défaut (PDF 10×15 pour imprimante thermique, imprimé via le pilote Zebra), `PDF` (A4 laser avec preuve de dépôt) en secours.
+- Écarté : `Z2D` (ZPL brut) — un navigateur ne sait pas envoyer du ZPL brut à l'imprimante sans logiciel Zebra supplémentaire (Browser Print) ; le PDF 10×15 se télécharge et s'imprime comme aujourd'hui.
+- `THE1015` n'imprime pas de preuve de dépôt (doc WS, champ `mode`).
