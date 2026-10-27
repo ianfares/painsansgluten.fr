@@ -58,6 +58,9 @@ class ShippingSettings extends Settings
     /** Chronopost Relais proposé dans le tunnel ; coupé = retrait chez un commerçant uniquement (24/10/2026). */
     public bool $chronopost_enabled;
 
+    /** Poids moyen du carton + calage (grammes), ajouté au colis : tranche de port et étiquette (27/10/2026). */
+    public int $packaging_weight_g;
+
     public static function group(): string
     {
         return 'shipping';

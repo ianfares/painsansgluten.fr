@@ -102,3 +102,24 @@ test('la fusion à la connexion additionne les lignes du panier invité dans cel
 test('la page panier répond 200', function () {
     $this->get(route('panier'))->assertOk();
 });
+
+test('le poids d\'emballage compte dans la tranche de frais de port', function () {
+    ShippingRate::query()->delete();
+    ShippingRate::factory()->create(['min_weight_g' => 0, 'max_weight_g' => 999, 'price_ht' => 500]);
+    ShippingRate::factory()->create(['min_weight_g' => 1000, 'max_weight_g' => 5000, 'price_ht' => 1000]);
+    $settings = app(ShippingSettings::class);
+    $settings->packaging_weight_g = 400;
+    $settings->save();
+
+    // 2 × 300 g = 600 g de produits : 1 000 g avec l'emballage → seconde tranche.
+    $product = Product::factory()->create(['price_ttc' => 500, 'shipping_weight_g' => 300]);
+    $service = app(CartService::class);
+    $service->add($product, 2);
+
+    $withPackaging = $service->totals($service->currentCart())['shipping_ttc'];
+
+    $settings->packaging_weight_g = 0;
+    $settings->save();
+
+    expect($withPackaging)->toBeGreaterThan(app(CartService::class)->totals($service->currentCart())['shipping_ttc']);
+});

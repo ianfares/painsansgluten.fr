@@ -558,3 +558,9 @@ Audit complet du 26/10 (sécurité, bugs, SEO/perf ; synthèse hors git dans `se
 - **18 Titres** : le nom de la boutique n'est plus ajouté si le titre SEO saisi le contient déjà.
 - **21 Performance (sans toucher aux composants Livewire, choix de Ian)** : préchargement category + media (boutique, accueil, produits associés, panier) ; jours fermés chargés en une requête par calcul de date. Boutique : ~11 requêtes quel que soit le nombre de produits (test de non-régression).
 - **24 Accessibilité** : piège et retour du focus (`x-trap`, plugin Alpine inclus dans Livewire 3) sur le tiroir panier et le menu mobile, `aria-expanded`/`aria-controls` sur le bouton menu, Échap ferme le menu mobile, boutons « Ajouter au panier » nommés avec le produit + annonce « ajouté », `aria-invalid`/`aria-describedby` sur les champs en erreur, ocre foncé (#8a5d26) pour les petits textes (contraste AA).
+
+## 2026-10-27 — Poids de l'emballage
+- Réglage `shipping.packaging_weight_g` (Paramètres > Expédition > Frais de port), **400 g** par défaut (moyenne carton + calage donnée par Angélique via Ian).
+- Ajouté **une fois par colis** : au poids du panier pour la tranche de frais de port (choix de Ian : port + étiquette) et au poids déclaré sur l'étiquette Chronopost.
+- Étiquette : valeur du réglage **au moment de la génération** (non figée sur la commande) ; les lignes de commande gardent le poids des produits seul.
+- Constat Chronopost (doc WS §2.6.4) : une LT ne peut être annulée qu'**environ 10 minutes après sa création** ; l'annulation immédiate renvoie « System error (code 1) ».

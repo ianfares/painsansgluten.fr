@@ -210,6 +210,11 @@ class CartService
             $weight += $this->freeGiftSettings->weight_g;
         }
 
+        // Carton + calage : une fois par colis.
+        if ($count > 0) {
+            $weight += $this->shippingSettings->packaging_weight_g;
+        }
+
         $shipping = null;
         $shippingError = null;
         $plannedShipDate = null;

@@ -80,7 +80,8 @@ class GenerateShippingLabelAction
             }
 
             $this->assertEligible($fresh);
-            $weight = (int) $fresh->items()->sum(DB::raw('weight_g * quantity'));
+            // Produits (pâtisserie offerte comprise) + carton et calage.
+            $weight = (int) $fresh->items()->sum(DB::raw('weight_g * quantity')) + $this->shippingSettings->packaging_weight_g;
 
             $created = $this->client->create($fresh, $weight);
 
