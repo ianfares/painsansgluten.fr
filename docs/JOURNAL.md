@@ -1495,3 +1495,14 @@ RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-182926/{app,config}/ dans /var/
 POINTS À RELIRE PAR UN HUMAIN : première impression réelle sur la ZD220 (échelle 100 %, papier 10×15).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : activation de Chronopost en BO après impression d'essai, puis suivi de la première commande Chronopost (frais de port, étiquette).
+
+## [2026-10-27 19:20] — [IA : Claude Opus 5.5] — Vérifications avant activation Chronopost
+TÂCHE : vérifications demandées par Ian (aucun code modifié).
+RÉSUMÉ : (1) BO prod : TVA du port = 5,5 % (saisie par Ian), emballage 400 g ; grille de port 0–20 000 g continue (5 tranches, 9,50 € à 19,00 € TTC) → pas de blocage sous 20 kg. (2) `git push origin develop` fait (tags deploy-* non poussés). (3) Navigateur, fenêtre étroite : menu mobile (ouverture, aria-expanded, focus piégé sur 20 Tab, Échap ferme et rend le focus au bouton) OK ; tiroir panier (ouverture, aria-modal, focus piégé, Échap ferme et rend le focus) OK. (4) `catalog:normalize-slugs` simulé en prod : 8 slugs à corriger (produits 1, 2, 25, 27, 28, 31, 32, 33 : majuscules et « Ô ») ; --apply en attente de l'accord de Ian (dump avant).
+FICHIERS CRÉÉS / MODIFIÉS : docs/JOURNAL.md.
+ANALYSE D'IMPACT / SÉCURITÉ / PERFORMANCE : sans objet (lecture seule).
+TESTS : sans objet. QUALITÉ : sans objet. DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : accord pour --apply ; produit 31 « L-Insolen-Cookie-Noisette » (faute « Insolen » probable, à corriger par Angélique dans le BO si voulu) ; imprimante reçue le 28/10 matin.
+POINTS À RELIRE PAR UN HUMAIN : test sur un vrai téléphone (la fenêtre de test est restée à 951 px de large, menu mobile tout de même affiché).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : normalize-slugs --apply ; impression d'essai Zebra le 28/10 puis activation Chronopost ; page « paniers abandonnés » (demande client, en discussion).
