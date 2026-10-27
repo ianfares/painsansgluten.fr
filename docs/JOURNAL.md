@@ -1478,3 +1478,20 @@ RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-182630/app/ dans /var/www/pains
 POINTS À RELIRE PAR UN HUMAIN : parcourir les autres écrans du BO (factures, paramètres) pour repérer un autre blocage CSP éventuel.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : test réel + déploiement du format d'étiquette Zebra (feature/label-format), puis activation de Chronopost.
+
+## [2026-10-27 18:35] — [IA : Claude Opus 5.5] — Format d'étiquette Chronopost (Zebra ZD220)
+TÂCHE : étiquettes adaptées à l'imprimante de la boutique (Zebra ZD220, thermique 203 dpi) ; test réel puis déploiement (accord de Ian).
+RÉSUMÉ : réglage BO « Format des étiquettes » (Paramètres > Expédition > Chronopost) : THE1015 (PDF 10×15 thermique, défaut) ou PDF (A4 laser avec preuve de dépôt). Z2D (ZPL brut) écarté : non imprimable depuis le navigateur sans logiciel Zebra. Test réel compte prod : LT XS497297979FR en THE1015, PDF 1 page 283×425 pt (= 10×15 cm), contenu vérifié (relais, 13H REL, codes-barres, poids) ; annulation programmée à +11 min. Guide d'Angélique (étape 3) mis à jour.
+FICHIERS CRÉÉS / MODIFIÉS : app/Settings/ShippingSettings.php, database/settings/2026_10_27_140000_add_chronopost_label_mode_to_shipping_settings.php (créé), app/Filament/Pages/ManageShippingSettings.php, app/Services/Chronopost/ShippingLabelClient.php, config/services.php (label_mode retiré), tests/Feature/Shipping/ShippingLabelTest.php, docs/guide-chronopost-angelique.txt, docs/DECISIONS.md.
+ANALYSE D'IMPACT : seul ShippingLabelClient::create lisait label_mode ; téléchargement/stockage du PDF inchangés (THE1015 renvoie un PDF). Les étiquettes déjà générées ne changent pas.
+SÉCURITÉ : aucune nouvelle surface (valeur limitée par un select ; envoyée à Chronopost seulement).
+PERFORMANCE : PDF plus léger (≈ 22 Ko contre 70 Ko en A4).
+TESTS : 623 passés / 0 échec (+1 : format suit le réglage ; assertion mode → THE1015).
+QUALITÉ : pint OK, phpstan 0 erreur.
+DOCUMENTATION : docs/DECISIONS.md, docs/guide-chronopost-angelique.txt.
+DÉPLOIEMENT (2026-10-27, ordre de Ian) : local : dump .backups/db-local-avant-label-format-*.sql.gz + migrate. Prod : 4 fichiers serveur identiques au tag précédent ; sauvegarde + dump (33 tables) ~/backups-ia/20261027-182926/ ; migration settings envoyée et jouée AVANT le code (évite l'erreur de réglage manquant) ; 4 fichiers envoyés ; php -l OK ; optimize ; queue:restart ; pages 200 ; BO Expédition vérifié en navigateur (format thermique sélectionné, poids d'emballage présent) ; tag deploy-20261027-182926.
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-182926/{app,config}/ dans /var/www/painsansgluten/, supprimer database/settings/2026_10_27_140000_*, php artisan optimize.
+À RENSEIGNER / QUESTIONS OUVERTES : installation du pilote Zebra chez Angélique + impression d'essai ; activation de « Livraison Chronopost Relais » ; taux de TVA du port (expert-comptable).
+POINTS À RELIRE PAR UN HUMAIN : première impression réelle sur la ZD220 (échelle 100 %, papier 10×15).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : activation de Chronopost en BO après impression d'essai, puis suivi de la première commande Chronopost (frais de port, étiquette).
