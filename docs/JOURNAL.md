@@ -1548,3 +1548,14 @@ RETOUR ARRIÈRE : recopier ~/backups-ia/20261027-193756/app/ ; supprimer les 7 f
 POINTS À RELIRE PAR UN HUMAIN : libellés de la page ; seuil d'1 h d'inactivité.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : impression d'essai Zebra le 28/10 puis activation Chronopost ; relire les chiffres de refus dans 1 à 2 semaines.
+
+## [2026-10-28 17:10] — [IA : Claude Opus 5.5] — Réception de l'imprimante Zebra
+TÂCHE : point d'étape (aucun code modifié).
+RÉSUMÉ : Ian a reçu l'imprimante Zebra ZD220 le 28/10. Elle ne peut être configurée que le 29/10. Étapes données : pilote ZDesigner (zebra.com), calibrage du rouleau 10×15, papier 100×150 mm portrait dans le pilote, impression à l'échelle 100 % sans « Ajuster à la page ». Proposé : générer une étiquette d'essai sur le compte Chronopost de production puis l'annuler (accord de Ian à obtenir).
+FICHIERS CRÉÉS / MODIFIÉS : docs/JOURNAL.md.
+ANALYSE D'IMPACT / SÉCURITÉ / PERFORMANCE : sans objet.
+TESTS : sans objet. QUALITÉ : sans objet. DOCUMENTATION : ce journal.
+À RENSEIGNER / QUESTIONS OUVERTES : accord pour générer et annuler une LT d'essai (prod) ; résultat de l'impression d'essai.
+POINTS À RELIRE PAR UN HUMAIN : première impression réelle sur la ZD220 (cadrage, netteté des codes-barres).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : le 29/10, configuration de la Zebra + étiquette d'essai (créée puis annulée), puis activation de « Livraison Chronopost Relais » dans le BO.
