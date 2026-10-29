@@ -1559,3 +1559,17 @@ TESTS : sans objet. QUALITÉ : sans objet. DOCUMENTATION : ce journal.
 POINTS À RELIRE PAR UN HUMAIN : première impression réelle sur la ZD220 (cadrage, netteté des codes-barres).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : le 29/10, configuration de la Zebra + étiquette d'essai (créée puis annulée), puis activation de « Livraison Chronopost Relais » dans le BO.
+
+## [2026-10-29 09:45] — [IA : Claude Opus 5.5] — Impression d'essai Zebra + activation Chronopost
+TÂCHE : étiquette réelle d'essai sur la Zebra ZD220 (accord de Ian), puis activation de « Livraison Chronopost Relais ».
+RÉSUMÉ : LT XS497840134FR créée à 09:19 sur le compte Chronopost de prod (commande fictive « ESSAI-ZEBRA-2910 » non enregistrée, relais 5755P Avranches, 1 kg, script hors projet dans le scratchpad), format THE1015 : PDF 1 page 283×425 pt (10×15), contenu vérifié. Imprimée par Ian sur la ZD220 : impeccable. LT annulée avec succès à ~09:32 (Chronopost : annulation possible ~10 min après création). Activation : réglages déjà faits par Ian dans le BO (Paramètres > Expédition) ; vérification côté boutique demandée au client.
+FICHIERS CRÉÉS / MODIFIÉS : docs/JOURNAL.md uniquement (aucun code modifié).
+ANALYSE D'IMPACT : aucune (pas de code ; réglage BO modifié par Ian).
+SÉCURITÉ : identifiants Chronopost lus par l'application uniquement, jamais affichés. Aucune écriture en base locale ou de prod par l'IA.
+PERFORMANCE / TESTS / QUALITÉ : sans objet (aucun code).
+DOCUMENTATION : ce journal.
+AUTRE (même session) : connecteurs Search Console + GA4 reliés. Search Console sc-domain:painsansgluten.fr : pas encore de données, sitemap non soumis (Ian ne veut pas pour l'instant). GA4 (propriété 558216813) : aucun événement depuis sa création alors que GTM-KFK55VB8 est en place (conteneur → G-XF6EHRRV48) ; cause identifiée par Ian, traitement reporté ; devise de la propriété en USD (à passer en EUR). Catalogue en ligne : 10 produits publiés, catégories Pâtisseries/Apéritif/Épicerie vides mais indexables.
+À RENSEIGNER / QUESTIONS OUVERTES : retour du client sur la présence de Chronopost Relais dans le tunnel ; taux de TVA du port (expert-comptable) si non confirmé ; correction GA4.
+POINTS À RELIRE PAR UN HUMAIN : première vraie commande Chronopost (frais de port, poids avec emballage, étiquette).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : suivi de la première commande Chronopost ; correction GA4 (ID de mesure / devise) ; bilan Search Console dans ~1 semaine.
