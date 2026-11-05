@@ -98,11 +98,10 @@ test('panier et commande d\'un pro : lignes HT, sous-total HT, port HT, total HT
         ->assertSee('10,00 € HT / unité')
         ->assertSee('20,00 € HT')
         ->assertSee('Sous-total HT')
-        ->assertSee('Frais de port HT')
-        ->assertSee('Total HT')
-        ->assertSee('25,00 €')
-        ->assertSee('Total TTC')
-        ->assertSee('27,10 €');
+        ->assertDontSee('Frais de port HT')
+        ->assertSee('Total TTC hors livraison')
+        ->assertSee('21,10 €')
+        ->assertDontSee('27,10 €');
 
     Http::fake(['api-adresse.data.gouv.fr/*' => Http::response(['features' => []])]);
     Livewire::test(CheckoutWizard::class)
