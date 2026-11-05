@@ -1573,3 +1573,10 @@ AUTRE (même session) : connecteurs Search Console + GA4 reliés. Search Console
 POINTS À RELIRE PAR UN HUMAIN : première vraie commande Chronopost (frais de port, poids avec emballage, étiquette).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : suivi de la première commande Chronopost ; correction GA4 (ID de mesure / devise) ; bilan Search Console dans ~1 semaine.
+
+## [2026-10-30 00:10] — [IA : Claude Opus 5.5] — GA4 / GTM : recâblage vers le compte d'Angélique (EN COURS)
+TÂCHE : faire remonter les données GA4 dans le bon compte Google d'Angélique (point d'étape, aucun code modifié).
+RÉSUMÉ : cause du « zéro donnée » trouvée : le conteneur GTM-KFK55VB8 publié envoyait vers G-XF6EHRRV48, alors que la propriété GA4 d'Angélique a l'ID G-0M5YDBNY8F. Ian a publié la version 3 du conteneur (29/10 18:51) : balise « GA4 - Configuration » (Balise Google) passée à G-0M5YDBNY8F. Vérifié dans le gtm.js public : nouvel ID présent, ancien absent. Le conteneur ne contient qu'une balise (Balise Google) : la balise « GA4 - E-commerce » n'a jamais été publiée. Droits : le bon compte d'Angélique est l'adresse orange.fr ; l'adresse impressionalimentaire.com est le MAUVAIS compte (actuellement administrateur du compte GTM et « Publier » sur le conteneur). Angélique (orange.fr) ajoutée au conteneur GTM en « Lire » seulement. Un compte de service « ai-cocotours » (projet Google Cloud cocotours) a aussi « Lire » sur le conteneur.
+FICHIERS CRÉÉS / MODIFIÉS : docs/JOURNAL.md uniquement. Aucun code du site à modifier (l'ID GA4 n'est que dans GTM ; le site ne connaît que GTM_ID).
+ANALYSE D'IMPACT / PERFORMANCE / TESTS / QUALITÉ : sans objet.
+SÉCURITÉ : ne retirer le mauvais compte (im
