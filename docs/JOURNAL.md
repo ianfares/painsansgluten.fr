@@ -1594,5 +1594,6 @@ SYNCHRO : rsync -n : code identique au serveur. Seuls PLAN.md et README.md diff�
 À RENSEIGNER / QUESTIONS OUVERTES : libellé de la mention à valider par Angélique.
 POINTS À RELIRE PAR UN HUMAIN : rendu du panier sur mobile et ordinateur ; confirmer que les fichiers personnels du serveur ne sont pas accessibles depuis le web.
 AJOUTÉ AU BACKLOG : rien.
-NON DÉPLOYÉ : branche feature/shipping-in-recap, en attente de l'ordre de déploiement.
-PROCHAINE TÂCHE SUGGÉRÉE : déploiement de cette modification (1 vue) sur ordre de Ian.
+DÉPLOIEMENT (2026-11-05, ordre de Ian) : mergé dans develop ; vue serveur identique à la version d'avant tâche ; sauvegarde ~/backups-ia/20261105-085741/ ; 1 fichier envoyé (cart-widget.blade.php, tests absents du serveur) ; empreinte vérifiée ; view:cache ; / /panier /commande 200 ; tag deploy-20261105-085741. Panier rempli non testé en ligne (pour ne pas créer de panier abandonné) : vérification visuelle par Ian.
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261105-085741/resources/views/livewire/cart-widget.blade.php puis php artisan view:cache.
+PROCHAINE TÂCHE SUGGÉRÉE : vérification visuelle du panier en ligne ; contrôle des fichiers personnels dans le dossier du site.
