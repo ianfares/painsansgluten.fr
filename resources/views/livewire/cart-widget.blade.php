@@ -54,15 +54,18 @@
             @if ($totals['shipping_error'])
                 {{-- Message client générique : le détail technique est signalé à l'admin (tableau de bord). --}}
                 <x-ui.alert variant="warning">Livraison momentanément indisponible pour votre panier. Contactez-nous pour finaliser votre commande.</x-ui.alert>
-            @elseif ($totals['show_ht'])
-                {{-- Compte professionnel : HT d'abord (15/10/2026). --}}
-                <x-cart.ht-summary :totals="$totals" />
-            @elseif (! $chronopostEnabled)
-                <x-ui.alert variant="info">Livraison Chronopost momentanément suspendue : retrait gratuit chez nos commerçants partenaires.</x-ui.alert>
-                <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
             @else
-                <div class="flex justify-between"><span>Frais de port</span><span>{{ $totals['shipping_ttc'] === 0 ? 'Offerts' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
-                <div class="flex justify-between text-base font-semibold"><span>Total</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
+                {{-- Frais de livraison affichés seulement au récapitulatif du tunnel, une fois
+                     le mode de livraison choisi (05/11/2026) : le panier montre le total hors livraison. --}}
+                @if (! $chronopostEnabled)
+                    <x-ui.alert variant="info">Livraison Chronopost momentanément suspendue : retrait gratuit chez nos commerçants partenaires.</x-ui.alert>
+                @endif
+                @if ($totals['show_ht'])
+                    {{-- Compte professionnel : HT d'abord (15/10/2026). --}}
+                    <div class="flex justify-between"><span>Sous-total HT @if ($totals['discount_percent'] > 0)<span class="text-sage-dark">(remise -{{ $totals['discount_percent'] }} % déduite)</span>@endif</span><span>{{ number_format($totals['subtotal_ht'] / 100, 2, ',', ' ') }} €</span></div>
+                @endif
+                <div class="flex justify-between text-base font-semibold"><span>Total{{ $totals['show_ht'] ? ' TTC' : '' }} hors livraison</span><span>{{ number_format($totals['subtotal_ttc'] / 100, 2, ',', ' ') }} €</span></div>
+                <p class="text-xs text-ink-muted">Frais de livraison calculés au récapitulatif, après le choix du mode de livraison.</p>
             @endif
             {{-- Retrait seul : la date dépend du commerçant, affichée dans le tunnel. --}}
             @if (! $totals['shipping_error'] && $totals['planned_ship_date'] && $chronopostEnabled)

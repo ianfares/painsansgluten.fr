@@ -113,8 +113,12 @@ test('coupé : aucun commerçant dans le rayon, le client est prévenu qu\'on ne
         ->assertDontSee('Retrait gratuit chez Épicerie de Granville');
 });
 
-test('panier : frais de port Chronopost affichés quand activé, retrait annoncé quand coupé', function () {
-    Livewire::test(CartWidget::class)->assertSee('Frais de port')->assertDontSee('Livraison Chronopost momentanément suspendue');
+test('panier : frais de port renvoyés au récapitulatif, retrait annoncé quand Chronopost coupé', function () {
+    Livewire::test(CartWidget::class)
+        ->assertDontSee('Frais de port')
+        ->assertSee('Total hors livraison')
+        ->assertSee('Frais de livraison calculés au récapitulatif')
+        ->assertDontSee('Livraison Chronopost momentanément suspendue');
 
     disableChronopost();
 

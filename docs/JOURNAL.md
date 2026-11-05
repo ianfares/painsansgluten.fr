@@ -1580,3 +1580,19 @@ RÉSUMÉ : cause du « zéro donnée » trouvée : le conteneur GTM-KFK55VB8 pub
 FICHIERS CRÉÉS / MODIFIÉS : docs/JOURNAL.md uniquement. Aucun code du site à modifier (l'ID GA4 n'est que dans GTM ; le site ne connaît que GTM_ID).
 ANALYSE D'IMPACT / PERFORMANCE / TESTS / QUALITÉ : sans objet.
 SÉCURITÉ : ne retirer le mauvais compte (im
+## [2026-11-05 09:00] — [IA : Claude Opus 5.5] — Frais de port affichés seulement au récapitulatif
+TÂCHE : hors numérotation, demande de Ian : n'afficher les frais de port qu'au récapitulatif du tunnel, après le choix du mode de livraison.
+RÉSUMÉ : le tunnel n'affichait déjà les frais de port qu'à l'étape 3 (Récapitulatif). Le panier (page /panier et tiroir, composant CartWidget) affichait en revanche une ligne « Frais de port » (ou « Frais de port HT » pour les pros) et un total qui les incluait. Le panier montre maintenant « Total hors livraison » (= sous-total TTC après remise ; pour un pro : Sous-total HT puis « Total TTC hors livraison ») et la mention « Frais de livraison calculés au récapitulatif, après le choix du mode de livraison. ». Message de suspension Chronopost, alerte « Livraison momentanément indisponible », date d'expédition prévue et blocage du bouton sous le minimum : inchangés.
+FICHIERS CRÉÉS / MODIFIÉS : resources/views/livewire/cart-widget.blade.php ; tests/Feature/Checkout/ChronopostToggleTest.php ; tests/Feature/Catalog/ProPriceHtTest.php ; docs/JOURNAL.md.
+ANALYSE D'IMPACT : affichage seulement. CartService::totals() et le calcul serveur (tunnel, CreateOrderAction, Stripe) ne changent pas. Le récapitulatif (étape 3) et le composant x-cart.ht-summary restent utilisés par le tunnel. Les événements e-commerce GTM ne sont pas modifiés.
+SÉCURITÉ : aucune nouvelle entrée utilisateur ; montants toujours recalculés côté serveur. Sortie Blade échappée ({{ }}).
+PERFORMANCE : aucune requête ajoutée.
+TESTS : 2 tests adaptés (panier particulier : plus de « Frais de port », présence de « Total hors livraison » et de la mention ; panier pro : plus de « Frais de port HT », total TTC hors livraison 21,10 €, le récapitulatif du tunnel affiche toujours le port HT). Suite complète : 631 passés / 0 échec.
+QUALITÉ : pint OK, phpstan 0 erreur ; aucune dépendance ajoutée (composer audit sans objet).
+DOCUMENTATION : ce journal.
+SYNCHRO : rsync -n : code identique au serveur. Seuls PLAN.md et README.md diffèrent, non rapatriés. Le dossier web du serveur contient des fichiers personnels (.bash_history, .ssh/known_hosts, .config/, .cache/, .local/, qrcode.zip) : à vérifier par Ian (ne doivent pas être servis par le serveur web).
+À RENSEIGNER / QUESTIONS OUVERTES : libellé de la mention à valider par Angélique.
+POINTS À RELIRE PAR UN HUMAIN : rendu du panier sur mobile et ordinateur ; confirmer que les fichiers personnels du serveur ne sont pas accessibles depuis le web.
+AJOUTÉ AU BACKLOG : rien.
+NON DÉPLOYÉ : branche feature/shipping-in-recap, en attente de l'ordre de déploiement.
+PROCHAINE TÂCHE SUGGÉRÉE : déploiement de cette modification (1 vue) sur ordre de Ian.
