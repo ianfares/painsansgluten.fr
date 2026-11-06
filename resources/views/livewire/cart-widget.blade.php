@@ -59,11 +59,11 @@
                      panier ; le récapitulatif du tunnel reste la référence (serveur). --}}
                 @if ($totals['show_ht'])
                     <x-cart.shipping-tier :tier="$totals['next_shipping_tier']" :show-ht="true" />
-                    <x-cart.ht-summary :totals="$totals" shipping-label="Livraison en point relais" />
+                    <x-cart.ht-summary :totals="$totals" shipping-label="Livraison en Chronopost Relais" />
                 @else
-                    <div class="flex justify-between"><span>Livraison en point relais</span><span>{{ $totals['shipping_ttc'] === 0 ? 'Offerte' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
+                    <div class="flex justify-between"><span>Livraison en Chronopost Relais</span><span>{{ $totals['shipping_ttc'] === 0 ? 'Offerte' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
                     <x-cart.shipping-tier :tier="$totals['next_shipping_tier']" />
-                    <div class="flex justify-between text-base font-semibold"><span>Total avec livraison en point relais</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
+                    <div class="flex justify-between text-base font-semibold"><span>Total avec livraison en Chronopost Relais</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
                 @endif
                 @if ($merchantPickupAvailable)
                     <p class="text-xs text-ink-muted">Retrait chez un commerçant partenaire : gratuit (selon votre adresse).</p>
