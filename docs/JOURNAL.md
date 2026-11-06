@@ -1664,7 +1664,7 @@ QUALITÉ : pint OK, phpstan 0 erreur ; aucune dépendance.
 DOCUMENTATION : ce journal.
 DÉPLOIEMENT (2026-11-06, go de Ian) : 3 fichiers serveur identiques au tag deploy-20261106-233353 ; sauvegarde ~/backups-ia/20261106-235254/ ; 3 fichiers envoyés ; php -l OK ; optimize ; 3/3 empreintes identiques ; / /panier /commande /boutique 200 ; tag deploy-20261106-235254.
 RETOUR ARRIÈRE : recopier ~/backups-ia/20261106-235254/{app,resources}/ dans /var/www/painsansgluten/ puis php artisan optimize.
-NON FAIT : changement du réglage « Libellé du transporteur » (BO > Expédition) en « Livraison en Chronopost Relais » : écriture en base de prod refusée par le garde-fou de permissions ; à faire par Ian dans le BO (ancienne valeur : « Chronopost — Point relais (Chrono Relais 13) »). Ce libellé s'affiche au récapitulatif du tunnel et sur la page de paiement Stripe.
+FAIT PAR IAN (BO, vérifié en prod au récapitulatif : « Livraison en Chronopost Relais 9,50 € ») — initialement non fait par l'IA : changement du réglage « Libellé du transporteur » (BO > Expédition) en « Livraison en Chronopost Relais » : écriture en base de prod refusée par le garde-fou de permissions ; à faire par Ian dans le BO (ancienne valeur : « Chronopost — Point relais (Chrono Relais 13) »). Ce libellé s'affiche au récapitulatif du tunnel et sur la page de paiement Stripe.
 À RENSEIGNER / QUESTIONS OUVERTES : texte du bandeau de l'offre.
 POINTS À RELIRE PAR UN HUMAIN : étape Livraison en ligne (non parcourue en prod pour ne pas créer de données).
 AJOUTÉ AU BACKLOG : rien.
