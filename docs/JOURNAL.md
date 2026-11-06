@@ -1615,3 +1615,21 @@ RETOUR ARRIÈRE : simple = décocher « Frais de port par montant activés » da
 POINTS À RELIRE PAR UN HUMAIN : première commande en mode paliers (port facturé, montant Stripe) ; marge sur les colis lourds.
 AJOUTÉ AU BACKLOG : rien (traductions des messages de validation traitées juste après).
 PROCHAINE TÂCHE SUGGÉRÉE : traductions françaises des messages de validation (« validation.required » affiché en brut).
+
+## [2026-11-06 23:30] — [IA : Claude Opus 5.5] — Messages de validation, connexion et mot de passe en français
+TÂCHE : hors numérotation, demande de Ian : les formulaires affichaient « validation.required » (et « auth.failed » à la connexion).
+RÉSUMÉ : APP_LOCALE=fr en local et en prod, mais aucun dossier lang/ : Laravel affichait les clés brutes. Ajout de lang/fr/{validation,auth,passwords,pagination}.php (toutes les clés de Laravel 13, mêmes variables :attribute/:max/…, contrôlé par script et par test) avec les noms français des champs du site. Messages « mot de passe oublié » neutres (compte existant ou non : même texte).
+FICHIERS CRÉÉS / MODIFIÉS : lang/fr/validation.php, lang/fr/auth.php, lang/fr/passwords.php, lang/fr/pagination.php (nouveaux) ; tests/Feature/I18n/FrenchMessagesTest.php (nouveau) ; docs/DECISIONS.md ; ce journal.
+ANALYSE D'IMPACT : texte des messages uniquement (règles de validation inchangées). Les messages personnalisés déjà écrits dans le code restent prioritaires. Back-office Filament : ses champs gardent leur libellé comme nom. Aucun test existant ne dépendait des clés brutes ni de messages anglais.
+SÉCURITÉ : passwords.sent et passwords.user identiques (pas de confirmation qu'une adresse est cliente) ; reste visible : statut vs erreur sous le champ (masquage complet hors périmètre, voir DECISIONS). Aucune entrée utilisateur nouvelle.
+PERFORMANCE : sans objet (fichiers de traduction chargés à la demande par Laravel).
+TESTS : 9 ajoutés (parité des clés fr/en ×4 fichiers, locale fr, tunnel : champs vides + téléphone invalide, connexion refusée, mot de passe oublié neutre, inscription : mot de passe court + e-mail déjà utilisé). Suite complète : 658 passés / 0 échec. Navigateur local : connexion, tunnel (7 messages en français). Prod : connexion refusée → « Ces identifiants ne correspondent à aucun compte. ».
+QUALITÉ : pint OK, phpstan 0 erreur ; aucune dépendance (paquet laravel-lang écarté).
+DOCUMENTATION : docs/DECISIONS.md (2026-11-06) ; ce journal.
+INCIDENT LOCAL : un lancement de tests pendant que la suite complète tournait (même base de test) a faussé les deux exécutions ; relancées l'une après l'autre, toutes vertes.
+DÉPLOIEMENT (2026-11-06, go de Ian) : dossier lang/ absent du serveur ; 4 fichiers nouveaux envoyés (aucun fichier existant écrasé, pas de base touchée) ; php -l OK ; optimize ; / /panier /commande /connexion /inscription /forgot-password /contact /admin/login 200 ; tag deploy-20261106-230212.
+RETOUR ARRIÈRE : supprimer le dossier /var/www/painsansgluten/lang puis php artisan optimize.
+À RENSEIGNER / QUESTIONS OUVERTES : relecture des tournures par Angélique si besoin (fichier lang/fr/validation.php).
+POINTS À RELIRE PAR UN HUMAIN : messages du back-office (champ obligatoire vide) ; activer la grille de port par montant et le bandeau d'annonce (tâche précédente).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : activation de l'offre de lancement dans le BO + suivi de la première commande en mode paliers.
