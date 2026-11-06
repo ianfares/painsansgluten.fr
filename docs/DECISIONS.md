@@ -586,3 +586,9 @@ Audit complet du 26/10 (sécurité, bugs, SEO/perf ; synthèse hors git dans `se
 - Fin de l'offre : manuelle (Angélique décoche ou modifie la grille), pas de date de fin automatique (choix Ian : plus simple, l'offre risque de durer).
 - Message panier « Plus que X € pour bénéficier de la livraison à Y € » vers le palier moins cher suivant (deux paliers). Bandeau d'annonce : réglage existant de la page d'accueil, aucun code.
 - Annotation `@var` détaillée impossible sur `amount_tiers` : spatie/laravel-settings tente de caster les tableaux de tableaux typés et échoue.
+
+## 2026-11-06 — Traductions françaises des messages Laravel
+- Constat : `APP_LOCALE=fr` (local et prod) mais aucun dossier `lang/` : les formulaires affichaient les clés brutes (`validation.required` au tunnel et dans le BO, `auth.failed` à la connexion, `passwords.*` au mot de passe oublié).
+- Ajout de `lang/fr/{validation,auth,passwords,pagination}.php`, écrits à la main sur les clés exactes de Laravel 13 (fichiers `en` du framework) avec les noms français des champs du site (`attributes`). Un test vérifie que chaque clé anglaise a sa traduction (filet pour les futures mises à jour de Laravel).
+- Écarté : le paquet `laravel-lang/lang` (dépendance + commande de publication pour 4 fichiers stables ; la règle du projet évite un paquet pour une fonction triviale).
+- `passwords.sent` et `passwords.user` ont le même texte neutre (« Si un compte correspond à cette adresse… ») pour ne pas confirmer qu'une adresse e-mail est cliente. L'affichage diffère encore (statut ou erreur sous le champ) : masquage complet = personnaliser la réponse Fortify (hors périmètre ; l'inscription révèle de toute façon une adresse déjà utilisée, et Turnstile freine l'automatisation).
