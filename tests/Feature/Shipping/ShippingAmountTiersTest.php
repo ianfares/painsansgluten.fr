@@ -307,15 +307,15 @@ test('panier : mention retrait gratuit seulement si un commerçant partenaire es
     tierCart(2000);
 
     Livewire::test(CartWidget::class, ['onCartPage' => true])
-        ->assertDontSee('Retrait chez un commerçant partenaire');
+        ->assertDontSee('point de retrait partenaire');
 
     PickupPoint::factory()->create(['is_active' => false, 'latitude' => 48.68, 'longitude' => -1.35]);
     Livewire::test(CartWidget::class, ['onCartPage' => true])
-        ->assertDontSee('Retrait chez un commerçant partenaire');
+        ->assertDontSee('point de retrait partenaire');
 
     PickupPoint::factory()->create(['is_active' => true, 'latitude' => 48.68, 'longitude' => -1.35]);
     Livewire::test(CartWidget::class, ['onCartPage' => true])
-        ->assertSeeInOrder(['Total avec livraison en Chronopost Relais', 'Retrait chez un commerçant partenaire : gratuit (selon votre adresse).']);
+        ->assertSeeInOrder(['Total avec livraison en Chronopost Relais', 'Livraison gratuite en point de retrait partenaire (selon votre adresse).']);
 });
 
 test('panier pro : mention retrait gratuit sous le total TTC', function () {
@@ -324,5 +324,5 @@ test('panier pro : mention retrait gratuit sous le total TTC', function () {
     tierCart(1500, 2);
 
     Livewire::test(CartWidget::class, ['onCartPage' => true])
-        ->assertSeeInOrder(['Total TTC', 'Retrait chez un commerçant partenaire : gratuit (selon votre adresse).']);
+        ->assertSeeInOrder(['Total TTC', 'Livraison gratuite en point de retrait partenaire (selon votre adresse).']);
 });
