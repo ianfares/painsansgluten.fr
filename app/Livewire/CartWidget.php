@@ -7,6 +7,7 @@ namespace App\Livewire;
 use App\Enums\DeliveryMethod;
 use App\Livewire\Concerns\PushesAnalyticsEvents;
 use App\Models\CartItem;
+use App\Models\PickupPoint;
 use App\Services\Analytics\Ecommerce;
 use App\Services\Cart\CartService;
 use App\Settings\ShippingSettings;
@@ -97,6 +98,9 @@ class CartWidget extends Component
             'showRelayShipping' => $chronopostEnabled
                 && $shippingSettings->amount_tiers_enabled
                 && ! $items->contains(fn (CartItem $item): bool => $item->product->isPickupOnly()),
+            // Mention « retrait gratuit » (06/11/2026, demande de Ian) : seulement s'il existe
+            // au moins un commerçant partenaire réservable (le tunnel filtre ensuite par distance).
+            'merchantPickupAvailable' => PickupPoint::query()->bookable()->exists(),
             'minimumChronopost' => $cartService->minimumOrderFor($chronopostEnabled ? DeliveryMethod::ChronopostRelay : DeliveryMethod::MerchantPickup),
             'minimumPickup' => $cartService->minimumOrderFor(DeliveryMethod::MerchantPickup),
         ]);

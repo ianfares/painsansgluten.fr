@@ -9,6 +9,7 @@ use App\Exceptions\Shipping\WeightOutOfRange;
 use App\Filament\Pages\ManageShippingSettings;
 use App\Livewire\CartWidget;
 use App\Models\Admin;
+use App\Models\PickupPoint;
 use App\Models\Product;
 use App\Models\ShippingRate;
 use App\Models\User;
@@ -300,4 +301,28 @@ test('panier pro : livraison en point relais HT et total TTC', function () {
     // TVA du port à 20 % (beforeEach) : 5,90 € TTC = 4,92 € HT.
     Livewire::test(CartWidget::class, ['onCartPage' => true])
         ->assertSeeInOrder(['Plus que 20,00 € TTC', 'Sous-total HT', 'Livraison en point relais HT', '4,92 €', 'Total HT', 'TVA', 'Total TTC', '35,90 €']);
+});
+
+test('panier : mention retrait gratuit seulement si un commerçant partenaire est actif', function () {
+    tierCart(2000);
+
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertDontSee('Retrait chez un commerçant partenaire');
+
+    PickupPoint::factory()->create(['is_active' => false, 'latitude' => 48.68, 'longitude' => -1.35]);
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertDontSee('Retrait chez un commerçant partenaire');
+
+    PickupPoint::factory()->create(['is_active' => true, 'latitude' => 48.68, 'longitude' => -1.35]);
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertSeeInOrder(['Total avec livraison en point relais', 'Retrait chez un commerçant partenaire : gratuit (selon votre adresse).']);
+});
+
+test('panier pro : mention retrait gratuit sous le total TTC', function () {
+    PickupPoint::factory()->create(['is_active' => true, 'latitude' => 48.68, 'longitude' => -1.35]);
+    $this->actingAs(User::factory()->pro()->create());
+    tierCart(1500, 2);
+
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertSeeInOrder(['Total TTC', 'Retrait chez un commerçant partenaire : gratuit (selon votre adresse).']);
 });
