@@ -54,13 +54,22 @@
             @if ($totals['shipping_error'])
                 {{-- Message client générique : le détail technique est signalé à l'admin (tableau de bord). --}}
                 <x-ui.alert variant="warning">Livraison momentanément indisponible pour votre panier. Contactez-nous pour finaliser votre commande.</x-ui.alert>
+            @elseif ($showRelayShipping)
+                {{-- Port par palier de montant (06/11/2026) : prix du point relais connu dès le
+                     panier ; le récapitulatif du tunnel reste la référence (serveur). --}}
+                @if ($totals['show_ht'])
+                    <x-cart.shipping-tier :tier="$totals['next_shipping_tier']" :show-ht="true" />
+                    <x-cart.ht-summary :totals="$totals" shipping-label="Livraison en point relais" />
+                @else
+                    <div class="flex justify-between"><span>Livraison en point relais</span><span>{{ $totals['shipping_ttc'] === 0 ? 'Offerte' : number_format($totals['shipping_ttc'] / 100, 2, ',', ' ').' €' }}</span></div>
+                    <x-cart.shipping-tier :tier="$totals['next_shipping_tier']" />
+                    <div class="flex justify-between text-base font-semibold"><span>Total avec livraison en point relais</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
+                @endif
             @else
                 {{-- Frais de livraison affichés seulement au récapitulatif du tunnel, une fois
                      le mode de livraison choisi (05/11/2026) : le panier montre le total hors livraison. --}}
                 @if (! $chronopostEnabled)
                     <x-ui.alert variant="info">Livraison Chronopost momentanément suspendue : retrait gratuit chez nos commerçants partenaires.</x-ui.alert>
-                @else
-                    <x-cart.shipping-tier :tier="$totals['next_shipping_tier']" :show-ht="$totals['show_ht']" />
                 @endif
                 @if ($totals['show_ht'])
                     {{-- Compte professionnel : HT d'abord (15/10/2026). --}}

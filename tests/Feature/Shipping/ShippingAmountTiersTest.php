@@ -245,3 +245,59 @@ test('admin : grille refusée sans palier à 0 € ou avec deux paliers au même
         ->call('save')
         ->assertHasFormErrors(['amount_tiers']);
 });
+
+test('panier : prix de la livraison en point relais et total avec livraison', function () {
+    tierCart(1008, 2); // 20,16 €
+
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertSeeInOrder(['Sous-total TTC', '20,16 €', 'Livraison en point relais', '9,50 €', 'Plus que 9,84 €', 'Total avec livraison en point relais', '29,66 €'])
+        ->assertDontSee('Total hors livraison');
+});
+
+test('panier : livraison offerte au-delà du franco', function () {
+    tierSettings(['free_shipping_enabled' => true, 'free_shipping_threshold_ttc' => 10000]);
+    tierCart(5000, 2); // 100,00 €
+
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertSeeInOrder(['Livraison en point relais', 'Offerte', 'Total avec livraison en point relais', '100,00 €'])
+        ->assertDontSee('pour bénéficier de la livraison');
+});
+
+test('panier : produit en retrait uniquement, pas de prix ni de message point relais', function () {
+    tierCart(2000);
+    app(CartService::class)->add(Product::factory()->notShippable()->create(['price_ttc' => 500]), 1);
+
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertDontSee('Livraison en point relais')
+        ->assertDontSee('pour bénéficier de la livraison')
+        ->assertSee('Total hors livraison');
+});
+
+test('panier : Chronopost coupé, pas de prix de point relais', function () {
+    tierSettings(['chronopost_enabled' => false]);
+    tierCart(2000);
+
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertDontSee('Livraison en point relais')
+        ->assertSee('Livraison Chronopost momentanément suspendue');
+});
+
+test('panier : grille désactivée, affichage inchangé (total hors livraison)', function () {
+    tierSettings(['amount_tiers_enabled' => false]);
+    tierCart(2000);
+
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertDontSee('Livraison en point relais')
+        ->assertSee('Total hors livraison')
+        ->assertSee('Frais de livraison calculés au récapitulatif');
+});
+
+test('panier pro : livraison en point relais HT et total TTC', function () {
+    $pro = User::factory()->pro()->create();
+    $this->actingAs($pro);
+    tierCart(1500, 2); // 30,00 € TTC → 5,90 € TTC
+
+    // TVA du port à 20 % (beforeEach) : 5,90 € TTC = 4,92 € HT.
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertSeeInOrder(['Plus que 20,00 € TTC', 'Sous-total HT', 'Livraison en point relais HT', '4,92 €', 'Total HT', 'TVA', 'Total TTC', '35,90 €']);
+});

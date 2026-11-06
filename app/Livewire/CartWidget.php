@@ -80,7 +80,8 @@ class CartWidget extends Component
         }
 
         // Chronopost coupé dans le BO (24/10/2026) : panier chiffré en retrait (port nul, minimum retrait).
-        $chronopostEnabled = app(ShippingSettings::class)->chronopost_enabled;
+        $shippingSettings = app(ShippingSettings::class);
+        $chronopostEnabled = $shippingSettings->chronopost_enabled;
         $totals = $cartService->totals($cart, $chronopostEnabled ? DeliveryMethod::ChronopostRelay : DeliveryMethod::MerchantPickup);
 
         // Met à jour le compteur de l'en-tête (rendu serveur au chargement).
@@ -90,6 +91,12 @@ class CartWidget extends Component
             'items' => $items,
             'totals' => $totals,
             'chronopostEnabled' => $chronopostEnabled,
+            // Port par palier de montant (06/11/2026) : le prix du point relais ne dépend
+            // plus que du montant, il peut donc être annoncé dès le panier — sauf si un
+            // produit est en retrait uniquement (point relais impossible pour ce panier).
+            'showRelayShipping' => $chronopostEnabled
+                && $shippingSettings->amount_tiers_enabled
+                && ! $items->contains(fn (CartItem $item): bool => $item->product->isPickupOnly()),
             'minimumChronopost' => $cartService->minimumOrderFor($chronopostEnabled ? DeliveryMethod::ChronopostRelay : DeliveryMethod::MerchantPickup),
             'minimumPickup' => $cartService->minimumOrderFor(DeliveryMethod::MerchantPickup),
         ]);
