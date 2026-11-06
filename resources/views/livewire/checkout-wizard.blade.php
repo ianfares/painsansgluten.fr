@@ -38,7 +38,7 @@
                         <x-ui.input name="last_name" wire:model="last_name" />
                     </x-ui.field>
                 </div>
-                <x-ui.field name="phone" label="Téléphone mobile" hint="Format 06/07 ou +336/+337 — utilisé pour la livraison en point relais.">
+                <x-ui.field name="phone" label="Téléphone mobile" hint="Format 06/07 ou +336/+337 — utilisé pour la livraison en Chronopost Relais.">
                     <x-ui.input name="phone" wire:model="phone" />
                 </x-ui.field>
                 <x-ui.field name="billing_line1" label="Adresse de facturation">
@@ -96,7 +96,7 @@
                             {{ $pickupOnlyNames->join(', ', ' et ') }} : disponible uniquement en retrait, pas d'expédition Chronopost.
                             @if ($merchantOptions->isEmpty() && ! $labPickupAllowed)
                                 @if ($chronopostEnabled)
-                                    Aucun point de retrait n'est proposé près de votre adresse de livraison : retirez ce produit du panier pour être livré en point relais.
+                                    Aucun point de retrait n'est proposé près de votre adresse de livraison : retirez ce produit du panier pour être livré en Chronopost Relais.
                                 @else
                                     Aucun point de retrait n'est proposé près de votre adresse de livraison.
                                 @endif
@@ -105,7 +105,7 @@
                     @elseif (! $chronopostEnabled)
                         {{-- Chronopost coupé dans le BO (24/10/2026) : retrait chez un commerçant uniquement. --}}
                         <x-ui.alert :variant="$merchantOptions->isEmpty() && ! $labPickupAllowed ? 'warning' : 'info'">
-                            La livraison en point relais Chronopost est momentanément suspendue : nous vous proposons le retrait gratuit chez nos commerçants partenaires.
+                            La livraison en Chronopost Relais est momentanément suspendue : nous vous proposons le retrait gratuit chez nos commerçants partenaires.
                             @if ($merchantOptions->isEmpty() && ! $labPickupAllowed)
                                 Aucun point de retrait n'est proposé près de votre adresse de livraison : nous ne pouvons pas encore vous livrer. N'hésitez pas à nous contacter.
                             @endif
@@ -113,7 +113,7 @@
                     @else
                         <label class="flex cursor-pointer items-start gap-3 rounded-card border border-line bg-white p-3 has-[:checked]:border-sage">
                             <input type="radio" name="delivery_choice" wire:model.live="deliveryChoice" value="chronopost_relay" class="mt-1 text-sage focus:ring-sage">
-                            <span class="text-sm"><strong>Chronopost Relais</strong><br><span class="text-ink-muted">Expédition en point relais, partout en France métropolitaine (hors Corse).</span></span>
+                            <span class="text-sm"><strong>Chronopost Relais</strong><br><span class="text-ink-muted">Livraison dans un relais Chronopost, partout en France métropolitaine (hors Corse).</span></span>
                         </label>
                     @endif
 
@@ -151,7 +151,7 @@
 
                 @if ($deliveryMethodValue->value === 'chronopost_relay' && ! $pickupOnly)
                     <fieldset class="flex flex-col gap-3">
-                        <legend class="mb-2 font-semibold text-ink">Choisissez votre point relais</legend>
+                        <legend class="mb-2 font-semibold text-ink">Choisissez votre relais Chronopost</legend>
                         <form wire:submit="searchRelays" class="flex flex-col gap-3 sm:flex-row sm:items-start">
                             <x-ui.field name="relay_postal_code" label="Code postal" class="sm:w-32">
                                 <x-ui.input name="relay_postal_code" wire:model="relay_postal_code" inputmode="numeric" maxlength="5" autocomplete="postal-code" />
