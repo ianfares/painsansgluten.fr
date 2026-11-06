@@ -1633,3 +1633,21 @@ RETOUR ARRIÈRE : supprimer le dossier /var/www/painsansgluten/lang puis php art
 POINTS À RELIRE PAR UN HUMAIN : messages du back-office (champ obligatoire vide) ; activer la grille de port par montant et le bandeau d'annonce (tâche précédente).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : activation de l'offre de lancement dans le BO + suivi de la première commande en mode paliers.
+
+## [2026-11-06 23:40] — [IA : Claude Opus 5.5] — Panier : prix de la livraison en point relais et total avec livraison
+TÂCHE : hors numérotation, retour de Ian : le panier n'affichait jamais le coût de la livraison, seulement « Plus que X € ».
+RÉSUMÉ : quand la grille par montant est activée et que Chronopost est ouvert, le panier (page et tiroir) affiche « Livraison en point relais » (ou « Offerte » au-delà du franco), le message de palier et « Total avec livraison en point relais » (choix de Ian). Pros : résumé HT existant (Livraison en point relais HT, Total HT, TVA, Total TTC), message de palier au-dessus. Panier contenant un produit en retrait uniquement, Chronopost coupé ou grille désactivée : affichage du 05/11 inchangé (total hors livraison). Mention « retrait gratuit » non ajoutée (question restée ouverte, choix le plus simple). Correction au passage : le message « Plus que X € » ne s'affiche plus pour un panier contenant un produit non expédiable (défaut du déploiement de 22h53).
+FICHIERS CRÉÉS / MODIFIÉS : app/Livewire/CartWidget.php (variable showRelayShipping) ; resources/views/livewire/cart-widget.blade.php ; tests/Feature/Shipping/ShippingAmountTiersTest.php ; ce journal.
+ANALYSE D'IMPACT : affichage seulement ; CartService::totals() calculait déjà le port Chronopost du panier. Récapitulatif du tunnel, commande, Stripe et facture inchangés (le serveur recalcule tout). Composant x-cart.ht-summary réutilisé (libellé passé en paramètre).
+SÉCURITÉ : aucune entrée utilisateur nouvelle ; sortie Blade échappée.
+PERFORMANCE : aucune requête ajoutée (produits du panier déjà chargés).
+TESTS : 6 ajoutés (ordre des lignes et total, livraison offerte au franco, produit en retrait uniquement, Chronopost coupé, grille désactivée, pro HT). Suite complète : 664 passés / 0 échec. Chrome local : 20,16 / 30,24 / 40,32 / 50,40 € (mise à jour en direct), produit non expédiable, mobile 375 px (tiroir), compte pro (36,71 € TTC, identique au récapitulatif). Prod : panier invité 4,90 € → livraison 9,50 €, total 14,40 €, puis panier vidé.
+QUALITÉ : pint OK, phpstan 0 erreur ; aucune dépendance.
+DOCUMENTATION : ce journal.
+CONSTAT PROD (lecture autorisée par Ian) : grille par montant ACTIVÉE dans le BO depuis le déploiement de 22h53 (par Ian ou Angélique) ; bandeau actif avec le texte « Boulangerie & créations artisanales 100 % sans gluten » (pas encore le texte de l'offre).
+DÉPLOIEMENT (2026-11-06, go de Ian) : 2 fichiers serveur identiques au tag deploy-20261106-225306 ; sauvegarde ~/backups-ia/20261106-233353/ ; 2 fichiers envoyés ; php -l OK ; optimize ; empreintes identiques ; / /panier /commande /boutique 200 ; tag deploy-20261106-233353.
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261106-233353/{app,resources}/ dans /var/www/painsansgluten/ puis php artisan optimize.
+À RENSEIGNER / QUESTIONS OUVERTES : mention « retrait chez un commerçant : gratuit » dans le panier (souhaitée ?) ; texte du bandeau de l'offre.
+POINTS À RELIRE PAR UN HUMAIN : rendu du panier en ligne sur mobile.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : suivi de la première commande en mode paliers (port facturé, montant Stripe, étiquette).
