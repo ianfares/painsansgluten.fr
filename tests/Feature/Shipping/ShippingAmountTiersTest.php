@@ -11,6 +11,7 @@ use App\Livewire\CartWidget;
 use App\Models\Admin;
 use App\Models\Product;
 use App\Models\ShippingRate;
+use App\Models\User;
 use App\Services\Cart\CartService;
 use App\Services\Shipping\ShippingCostCalculator;
 use App\Settings\ShippingSettings;
@@ -168,6 +169,34 @@ test('panier : message « Plus que X € » vers le palier suivant', function ()
 
     Livewire::test(CartWidget::class, ['onCartPage' => true])
         ->assertDontSee('pour bénéficier de la livraison');
+});
+
+test('compte pro : message en TTC, palier calculé sur le montant après remise', function () {
+    $pro = User::factory()->pro()->create();
+    $pro->discount_percent = 10;
+    $pro->save();
+    $this->actingAs($pro);
+    tierCart(1700, 2); // 34,00 € TTC catalogue, 30,60 € après remise de 10 %
+
+    $totals = app(CartService::class)->totals(app(CartService::class)->currentCart());
+    expect($totals['subtotal_ttc'])->toBe(3060)
+        ->and($totals['shipping_ttc'])->toBe(590)
+        ->and($totals['next_shipping_tier'])->toBe(['missing_ttc' => 1940, 'price_ttc' => 490]);
+
+    Livewire::test(CartWidget::class, ['onCartPage' => true])
+        ->assertSee('Plus que 19,40 € TTC pour bénéficier de la livraison à 4,90 € TTC');
+});
+
+test('compte pro sous 30 € après remise : palier à 9,50 €', function () {
+    $pro = User::factory()->pro()->create();
+    $pro->discount_percent = 10;
+    $pro->save();
+    $this->actingAs($pro);
+    tierCart(1600, 2); // 32,00 € catalogue, 28,80 € après remise : reste sous 30 €
+
+    $totals = app(CartService::class)->totals(app(CartService::class)->currentCart());
+    expect($totals['subtotal_ttc'])->toBe(2880)
+        ->and($totals['shipping_ttc'])->toBe(950);
 });
 
 test('panier : pas de message quand les paliers sont désactivés', function () {
