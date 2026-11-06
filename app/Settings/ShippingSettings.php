@@ -64,6 +64,17 @@ class ShippingSettings extends Settings
     /** Format d'étiquette Chronopost : `PDF` (A4, imprimante laser) ou `THE1015` (PDF 10×15, imprimante thermique Zebra ZD220). */
     public string $chronopost_label_mode;
 
+    /** Frais de port Chronopost Relais par palier de montant du panier au lieu de la grille au poids (06/11/2026). */
+    public bool $amount_tiers_enabled;
+
+    /**
+     * Paliers (centimes TTC) : `min_subtotal_ttc` = montant des produits (après remise, hors port)
+     * à partir duquel `price_ttc` s'applique. Un palier doit commencer à 0.
+     * Forme : list<array{min_subtotal_ttc: int, price_ttc: int}> (pas d'annotation
+     * de type détaillée : spatie/laravel-settings ne sait pas caster un tableau de tableaux).
+     */
+    public array $amount_tiers;
+
     public static function group(): string
     {
         return 'shipping';

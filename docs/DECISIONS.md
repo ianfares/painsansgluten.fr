@@ -578,3 +578,11 @@ Audit complet du 26/10 (sécurité, bugs, SEO/perf ; synthèse hors git dans `se
 - Chiffres 7 j / 30 j : paniers abandonnés, commandes en ligne (hors BO), part sous le minimum, montant moyen, refus « minimum » et combien ont ensuite commandé.
 - Table `checkout_blocks` (sans donnée personnelle) : un refus du tunnel pour minimum = 1 ligne (dédoublonnée 30 min par panier/mode/montant) ; `order_id` renseigné par CreateOrderAction si le même panier commande ensuite. Un échec d'enregistrement est signalé (report) sans gêner le client.
 - Limites : paniers invités purgés après 30 jours ; GA4 non utilisé ici (dépend du consentement).
+
+## 2026-11-06 — Frais de port par palier de montant du panier
+- Demande d'Angélique (offre de lancement, via Ian) : Chronopost Relais à 9,50 € TTC sous 30 €, 5,90 € de 30 € à 49,99 €, 4,90 € dès 50 € (montant des produits après remise, hors port — même assiette que le minimum et la pâtisserie offerte). Même grille pour les pros (décision Ian).
+- Réglages `shipping.amount_tiers_enabled` (désactivé par défaut) et `shipping.amount_tiers` (centimes TTC, pré-rempli avec la grille ci-dessus) ; page BO Expédition, saisie en euros. Le calcul reste dans le seul `ShippingCostCalculator` : panier, tunnel, commande, Stripe et facture n'ont pas changé.
+- Ordre : franco (s'il est activé) > palier par montant > grille au poids. En mode paliers, la grille au poids reste obligatoire comme garde-fou du poids maximum (> 20 kg toujours refusé). Grille sans palier couvrant le montant : repli sur le poids.
+- Fin de l'offre : manuelle (Angélique décoche ou modifie la grille), pas de date de fin automatique (choix Ian : plus simple, l'offre risque de durer).
+- Message panier « Plus que X € pour bénéficier de la livraison à Y € » vers le palier moins cher suivant (deux paliers). Bandeau d'annonce : réglage existant de la page d'accueil, aucun code.
+- Annotation `@var` détaillée impossible sur `amount_tiers` : spatie/laravel-settings tente de caster les tableaux de tableaux typés et échoue.

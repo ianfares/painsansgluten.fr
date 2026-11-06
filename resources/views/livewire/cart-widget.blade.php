@@ -59,6 +59,8 @@
                      le mode de livraison choisi (05/11/2026) : le panier montre le total hors livraison. --}}
                 @if (! $chronopostEnabled)
                     <x-ui.alert variant="info">Livraison Chronopost momentanément suspendue : retrait gratuit chez nos commerçants partenaires.</x-ui.alert>
+                @else
+                    <x-cart.shipping-tier :tier="$totals['next_shipping_tier']" :show-ht="$totals['show_ht']" />
                 @endif
                 @if ($totals['show_ht'])
                     {{-- Compte professionnel : HT d'abord (15/10/2026). --}}
