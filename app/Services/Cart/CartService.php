@@ -186,13 +186,16 @@ class CartService
      * facture (HT de chaque ligne à son taux + HT du port) ; `show_ht` vrai
      * pour un compte professionnel.
      *
+     * `next_shipping_tier` (06/11/2026) : palier de port moins cher atteignable
+     * (message « Plus que X € ») en Chronopost Relais ; null sinon.
      *
      * @param  list<string>|null  $pickupWeekdays
      * @return array{count: int, subtotal_ttc: int, discount_percent: int, discount_ttc: int, shipping_ttc: int|null,
      *     total_ttc: int|null, planned_ship_date: ?CarbonImmutable, shipping_error: ?string,
      *     show_ht: bool, subtotal_ht: int, shipping_ht: int|null, total_ht: int|null, total_vat: int|null,
      *     minimum_ttc: int, minimum_missing_ttc: int,
-     *     free_gift: array{active: bool, earned: bool, label: string, threshold_ttc: int, missing_ttc: int}}
+     *     free_gift: array{active: bool, earned: bool, label: string, threshold_ttc: int, missing_ttc: int},
+     *     next_shipping_tier: array{missing_ttc: int, price_ttc: int}|null}
      */
     public function totals(Cart $cart, DeliveryMethod $deliveryMethod = DeliveryMethod::ChronopostRelay, ?array $pickupWeekdays = null): array
     {
@@ -250,6 +253,7 @@ class CartService
             'minimum_ttc' => $this->minimumOrderFor($deliveryMethod),
             'minimum_missing_ttc' => max(0, $this->minimumOrderFor($deliveryMethod) - $subtotal),
             'free_gift' => $freeGift,
+            'next_shipping_tier' => $count > 0 && ! $deliveryMethod->isPickup() ? $this->shippingCostCalculator->nextAmountTier($subtotal) : null,
         ];
     }
 

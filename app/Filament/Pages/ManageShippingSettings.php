@@ -6,6 +6,7 @@ namespace App\Filament\Pages;
 
 use App\Settings\ShippingSettings;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -101,6 +102,45 @@ class ManageShippingSettings extends SettingsPage
                         ->label('Poids de l\'emballage (grammes)')
                         ->helperText('Carton + calage, ajouté une fois par colis : compte dans la tranche de frais de port et sur l\'étiquette Chronopost.')
                         ->numeric()->integer()->minValue(0)->maxValue(5000)->required(),
+                ]),
+
+            // Paliers par montant du panier (06/11/2026, offre de lancement) :
+            // saisie en euros, stockage en centimes TTC.
+            Section::make('Frais de port par montant du panier (Chronopost Relais)')
+                ->description('Activé : le prix de la livraison dépend du montant des produits (après remise, hors livraison) et non plus du poids. Désactivé : retour à la grille au poids. Le franco de port, s\'il est activé, reste prioritaire. Le poids maximum d\'un colis reste contrôlé par la grille au poids.')
+                ->schema([
+                    Toggle::make('amount_tiers_enabled')->label('Frais de port par montant activés')->live(),
+                    Repeater::make('amount_tiers')
+                        ->label('Paliers')
+                        ->helperText('Chaque palier s\'applique à partir de son montant, jusqu\'au palier suivant. Un palier doit commencer à 0 €.')
+                        ->schema([
+                            TextInput::make('min_subtotal_ttc')
+                                ->label('À partir de (€ TTC)')
+                                ->numeric()->step(0.01)->minValue(0)->maxValue(10000)->prefix('€')->required()
+                                ->formatStateUsing(fn (int|string|null $state): ?float => $state !== null ? round(((int) $state) / 100, 2) : null)
+                                ->dehydrateStateUsing(fn (?string $state): int => (int) round(((float) $state) * 100)),
+                            TextInput::make('price_ttc')
+                                ->label('Livraison (€ TTC)')
+                                ->numeric()->step(0.01)->minValue(0)->maxValue(1000)->prefix('€')->required()
+                                ->formatStateUsing(fn (int|string|null $state): ?float => $state !== null ? round(((int) $state) / 100, 2) : null)
+                                ->dehydrateStateUsing(fn (?string $state): int => (int) round(((float) $state) * 100)),
+                        ])
+                        ->columns(2)
+                        ->minItems(1)->maxItems(10)
+                        ->defaultItems(0)
+                        ->reorderable(false)
+                        ->addActionLabel('Ajouter un palier')
+                        ->rules([
+                            fn (): \Closure => function (string $attribute, mixed $value, \Closure $fail): void {
+                                $mins = array_map(fn (array $tier): float => (float) ($tier['min_subtotal_ttc'] ?? -1), is_array($value) ? $value : []);
+                                if (! in_array(0.0, $mins, true)) {
+                                    $fail('Un palier doit commencer à 0 €.');
+                                }
+                                if (count($mins) !== count(array_unique($mins))) {
+                                    $fail('Deux paliers ne peuvent pas commencer au même montant.');
+                                }
+                            },
+                        ]),
                 ]),
 
             Section::make('Retraits')
