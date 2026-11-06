@@ -1651,3 +1651,21 @@ RETOUR ARRIÈRE : recopier ~/backups-ia/20261106-233353/{app,resources}/ dans /v
 POINTS À RELIRE PAR UN HUMAIN : rendu du panier en ligne sur mobile.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : suivi de la première commande en mode paliers (port facturé, montant Stripe, étiquette).
+
+## [2026-11-06 23:55] — [IA : Claude Opus 5.5] — Panier et tunnel : « Chronopost Relais » + livraison gratuite en point de retrait
+TÂCHE : hors numérotation, demandes de Ian : « point relais » prête à confusion avec « point de retrait » ; ajouter « Livraison gratuite en point de retrait partenaire » au panier.
+RÉSUMÉ : panier (grille par montant active) : « Livraison en Chronopost Relais », « Total avec livraison en Chronopost Relais » (pros : « Livraison en Chronopost Relais HT ») et, s'il existe au moins un commerçant partenaire réservable, « Livraison gratuite en point de retrait partenaire (selon votre adresse). » (précision ajoutée car le retrait dépend de la distance à l'adresse du client). Tunnel, étape Livraison : « Livraison dans un relais Chronopost, partout en France métropolitaine (hors Corse). », « Choisissez votre relais Chronopost », et 3 autres mentions « point relais » → « Chronopost Relais ».
+FICHIERS CRÉÉS / MODIFIÉS : app/Livewire/CartWidget.php (merchantPickupAvailable) ; resources/views/livewire/cart-widget.blade.php ; resources/views/livewire/checkout-wizard.blade.php ; tests/Feature/Shipping/ShippingAmountTiersTest.php ; tests/Feature/Checkout/ChronopostToggleTest.php ; ce journal.
+ANALYSE D'IMPACT : textes d'affichage uniquement + 1 requête exists() sur pickup_points au rendu du panier. Aucun calcul modifié. Un test existant (ChronopostToggleTest, « coupé ») cherchait l'ancien texte : mis à jour vers le nouveau, et test inverse ajouté (« ouvert » → texte présent) pour qu'il reste significatif.
+SÉCURITÉ : aucune entrée utilisateur ; sortie Blade échappée.
+PERFORMANCE : +1 requête légère (EXISTS, table pickup_points de quelques lignes) par rendu du panier.
+TESTS : 3 ajoutés (mention absente sans commerçant actif / présente sinon, pro ; option Chronopost affichée quand ouvert) ; libellés mis à jour. Suite complète : 667 passés / 0 échec. Chrome local : panier (avec commerçant de test temporaire, supprimé ensuite) et étape Livraison. Prod : panier invité → libellés et mention affichés (commerçants actifs en prod), panier vidé.
+QUALITÉ : pint OK, phpstan 0 erreur ; aucune dépendance.
+DOCUMENTATION : ce journal.
+DÉPLOIEMENT (2026-11-06, go de Ian) : 3 fichiers serveur identiques au tag deploy-20261106-233353 ; sauvegarde ~/backups-ia/20261106-235254/ ; 3 fichiers envoyés ; php -l OK ; optimize ; 3/3 empreintes identiques ; / /panier /commande /boutique 200 ; tag deploy-20261106-235254.
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261106-235254/{app,resources}/ dans /var/www/painsansgluten/ puis php artisan optimize.
+NON FAIT : changement du réglage « Libellé du transporteur » (BO > Expédition) en « Livraison en Chronopost Relais » : écriture en base de prod refusée par le garde-fou de permissions ; à faire par Ian dans le BO (ancienne valeur : « Chronopost — Point relais (Chrono Relais 13) »). Ce libellé s'affiche au récapitulatif du tunnel et sur la page de paiement Stripe.
+À RENSEIGNER / QUESTIONS OUVERTES : texte du bandeau de l'offre.
+POINTS À RELIRE PAR UN HUMAIN : étape Livraison en ligne (non parcourue en prod pour ne pas créer de données).
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : suivi de la première commande en mode paliers.
