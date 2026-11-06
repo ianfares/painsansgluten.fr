@@ -65,6 +65,9 @@
                     <x-cart.shipping-tier :tier="$totals['next_shipping_tier']" />
                     <div class="flex justify-between text-base font-semibold"><span>Total avec livraison en point relais</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
                 @endif
+                @if ($merchantPickupAvailable)
+                    <p class="text-xs text-ink-muted">Retrait chez un commerçant partenaire : gratuit (selon votre adresse).</p>
+                @endif
             @else
                 {{-- Frais de livraison affichés seulement au récapitulatif du tunnel, une fois
                      le mode de livraison choisi (05/11/2026) : le panier montre le total hors livraison. --}}
