@@ -70,6 +70,11 @@ test('Chronopost est activé par défaut (migration de réglages)', function () 
     toggleCheckoutAtStep2()->assertSet('deliveryChoice', 'chronopost_relay')->assertSee('Chronopost Relais');
 });
 
+test('ouvert : l\'option Chronopost Relais est proposée avec son texte', function () {
+    toggleCheckoutAtStep2()
+        ->assertSee('Livraison dans un relais Chronopost, partout en France');
+});
+
 test('coupé : Chronopost n\'est plus proposé, seul le retrait chez le commerçant', function () {
     disableChronopost();
 
@@ -77,7 +82,7 @@ test('coupé : Chronopost n\'est plus proposé, seul le retrait chez le commerç
         ->assertSet('deliveryChoice', '')
         ->assertSee('momentanément suspendue')
         ->assertSee('Retrait gratuit chez Épicerie de Granville')
-        ->assertDontSee('Expédition en point relais, partout en France')
+        ->assertDontSee('Livraison dans un relais Chronopost, partout en France')
         ->assertDontSee('Code postal du relais');
 });
 
