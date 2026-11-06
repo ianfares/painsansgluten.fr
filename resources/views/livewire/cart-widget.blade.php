@@ -66,7 +66,7 @@
                     <div class="flex justify-between text-base font-semibold"><span>Total avec livraison en Chronopost Relais</span><span>{{ number_format($totals['total_ttc'] / 100, 2, ',', ' ') }} €</span></div>
                 @endif
                 @if ($merchantPickupAvailable)
-                    <p class="text-xs text-ink-muted">Retrait chez un commerçant partenaire : gratuit (selon votre adresse).</p>
+                    <p class="text-xs text-ink-muted">Livraison gratuite en point de retrait partenaire (selon votre adresse).</p>
                 @endif
             @else
                 {{-- Frais de livraison affichés seulement au récapitulatif du tunnel, une fois
