@@ -1669,3 +1669,20 @@ FAIT PAR IAN (BO, vérifié en prod au récapitulatif : « Livraison en Chronopo
 POINTS À RELIRE PAR UN HUMAIN : étape Livraison en ligne (non parcourue en prod pour ne pas créer de données).
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : suivi de la première commande en mode paliers.
+
+## [2026-11-10 08:54] — [IA : Claude Opus 5.5] — BO Commandes : onglets « Commandes » / « Non abouties, annulées, remboursées » / « Toutes »
+TÂCHE : hors numérotation, demande de Gregory (via Ian) : la liste Commandes du BO affichait les paiements carte jamais aboutis. Option B validée par Ian (onglets d'affichage, pas de refonte du tunnel de paiement).
+RÉSUMÉ : la page Commandes s'ouvre sur l'onglet « Commandes » : statuts payés (payée, en préparation, expédiée, livrée, prête au retrait, retirée) + en attente de paiement SI virement (à valider par Angélique) ou commande saisie par l'admin (created_by_admin_id). Onglet « Non abouties, annulées, remboursées » : le complément exact (carte en attente ou échouée, annulées, remboursées). Onglet « Toutes » : comme avant. Les filtres existants (statut, paiement, livraison, virements en attente) restent utilisables dans chaque onglet.
+FICHIERS CRÉÉS / MODIFIÉS : app/Filament/Resources/OrderResource/Pages/ListOrders.php (getTabs, getDefaultActiveTab, scopeOrders) ; tests/Feature/Orders/OrderResourceTest.php (1 test adapté : commande payée ; 2 ajoutés) ; docs/guide-chronopost-angelique.txt (2 lignes sur les onglets) ; ce journal.
+ANALYSE D'IMPACT : affichage BO uniquement. Aucune migration, aucun changement du tunnel, du webhook Stripe, des statuts, des factures ni des emails. Le cycle de vie reste : commande créée « En attente de paiement » avant Stripe (nécessaire au montant figé et à la référence), webhook → payée, expiration 30 min → annulée. Widget de stats, page Expéditions et fiche client inchangés. Option A (créer la commande seulement après paiement) écartée : refonte de la partie paiement en prod, risque élevé pour un gain visuel.
+SÉCURITÉ : aucune entrée utilisateur nouvelle (onglets = clés fixes, requêtes Eloquent paramétrées). Pas de donnée personnelle ajoutée.
+PERFORMANCE : conditions WHERE simples sur orders (status, payment_method, created_by_admin_id) ; pas de requête supplémentaire.
+TESTS : 2 ajoutés (répartition de 10 commandes types entre les 3 onglets ; filtre virements dans l'onglet par défaut) ; 1 adapté (le test « la liste affiche la commande » utilisait une commande Stripe non payée). Suite complète : 669 passés / 0 échec.
+QUALITÉ : pint OK, phpstan 0 erreur ; aucune dépendance (composer audit non concerné).
+DOCUMENTATION : guide Chronopost d'Angélique (§3) ; ce journal.
+SYNCHRO AVANT TÂCHE : rsync -n avec --checksum : aucun fichier de code différent du serveur (seuls PLAN.md, README.md et des fichiers propres au serveur : backups-ia/, caches, anciens builds) → synchronisation réelle non lancée. Commit « avant » 97c9184 (inclut la suppression de 6 captures docs/reference déjà présente dans l'arbre).
+DÉPLOIEMENT : non fait, en attente de l'ordre de Ian (1 fichier : ListOrders.php ; php artisan optimize après envoi).
+À RENSEIGNER / QUESTIONS OUVERTES : aucune.
+POINTS À RELIRE PAR UN HUMAIN : libellé de l'onglet « Non abouties, annulées, remboursées » ; choix de garder dans l'onglet par défaut les commandes manuelles BO en attente de paiement.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : déploiement de cet onglet puis suivi de la première commande Chronopost Relais (étiquette, dépôt).
