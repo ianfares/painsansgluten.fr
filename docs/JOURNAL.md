@@ -1704,3 +1704,5 @@ DÉPLOIEMENT : non fait au moment de l'entrée ; config/auth.php → php artisan
 POINTS À RELIRE PAR UN HUMAIN : rendu de l'email (texte + lien) dans une vraie boîte mail.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : déploiement de ces 4 fichiers puis test réel d'une demande « Mot de passe oublié ».
+DÉPLOIEMENT (2026-11-10, go de Ian) : 4 fichiers serveur identiques au tag deploy-20261110-085602 ; sauvegarde ~/backups-ia/20261110-122001/ ; 4 fichiers envoyés ; php -l OK ; empreintes identiques au local ; php artisan optimize ; config:show auth.passwords.users.expire = 180 ; page /reset-password/x affiche « Lien expiré ? » (200), accueil 200. Tag deploy-20261110-122001. Email non testé en réel.
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261110-122001/{config,lang,resources}/ dans /var/www/painsansgluten/ puis php artisan optimize.
