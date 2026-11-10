@@ -31,6 +31,8 @@ Si Chronopost ne répond pas, le client voit un message et peut réessayer quelq
 ==================================================
 
 Menu « Commandes ». Les boutons sont sur la ligne de la commande ou en haut de la fiche commande.
+L'onglet « Commandes » (par défaut) ne montre que les commandes payées et les virements à valider ;
+les paiements carte non aboutis, annulées et remboursées sont dans l'onglet « Non abouties, annulées, remboursées ».
 
 ÉTAPE 1 — (facultatif) « Marquer en préparation »
    Quand vous commencez la commande.
