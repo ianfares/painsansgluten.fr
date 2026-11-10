@@ -112,7 +112,8 @@ return [
         'users' => [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
-            'expire' => 60,
+            // Durée de validité du lien « mot de passe oublié », en minutes (3 h, demande de Ian 10/11/2026).
+            'expire' => 180,
             'throttle' => 60,
         ],
     ],
