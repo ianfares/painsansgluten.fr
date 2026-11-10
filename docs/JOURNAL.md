@@ -1688,3 +1688,19 @@ AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : déploiement de cet onglet puis suivi de la première commande Chronopost Relais (étiquette, dépôt).
 DÉPLOIEMENT (2026-11-10, go de Ian) : fichier serveur identique au tag deploy-20261106-235254 ; sauvegarde ~/backups-ia/20261110-085602/ ; 1 fichier envoyé (ListOrders.php) ; php -l OK ; empreinte identique au local ; php artisan optimize ; /admin/orders 302 vers login, accueil 200. Tag deploy-20261110-085602.
 RETOUR ARRIÈRE : recopier ~/backups-ia/20261110-085602/app/ dans /var/www/painsansgluten/ puis php artisan optimize.
+
+## [2026-11-10 09:15] — [IA : Claude Opus 5.5] — Mot de passe oublié : lien valable 3 h + consigne en cas de lien expiré
+TÂCHE : hors numérotation, demande de Ian : passer la validité du lien de réinitialisation de 60 min à 3 h et indiquer au client qu'un lien expiré se redemande via « Mot de passe oublié ».
+RÉSUMÉ : expiration 180 min (broker `users`). Email : « Ce lien est valable 3 heures. Passé ce délai, demandez simplement un nouveau lien depuis la page « Mot de passe oublié » : <lien> ». Page de réinitialisation : ligne permanente « Lien expiré ? Demandez-en un nouveau » (lien vers password.request). Message d'erreur d'un lien invalide/expiré : « Ce lien de réinitialisation n'est plus valide : il a expiré ou a déjà été utilisé. Demandez un nouveau lien via « Mot de passe oublié ». »
+FICHIERS CRÉÉS / MODIFIÉS : config/auth.php (expire 60 → 180) ; lang/fr/passwords.php (clé token) ; resources/views/emails/auth/reset-password.blade.php ; resources/views/auth/reset-password.blade.php ; tests/Feature/Auth/PasswordResetTest.php (4 tests ajoutés) ; ce journal.
+ANALYSE D'IMPACT : réinitialisation du mot de passe client uniquement (broker `users`, seul broker défini). Throttle inchangé (60 s entre deux demandes). Lien toujours à usage unique ; une nouvelle demande invalide l'ancien lien (comportement Laravel). Durée affichée dans l'email lue depuis la config (heures si multiple de 60, sinon minutes). Les liens déjà envoyés avant le déploiement bénéficient aussi des 3 h (l'expiration est calculée à la vérification).
+SÉCURITÉ : fenêtre d'exploitation d'un lien intercepté portée de 1 h à 3 h (choix de Ian, raisonnable ; lien signé par jeton haché en base, usage unique, Turnstile sur la demande). Aucune entrée utilisateur nouvelle ; sorties Blade échappées ; message neutre inchangé sur l'existence d'un compte.
+PERFORMANCE : aucun impact.
+TESTS : 4 ajoutés (expiré à 3 h 01, valide à 2 h 59, page avec lien « Demandez-en un nouveau » + message, email « valable 3 heures » + lien Mot de passe oublié). Suite complète : 673 passés / 0 échec.
+QUALITÉ : pint OK, phpstan 0 erreur ; aucune dépendance.
+DOCUMENTATION : ce journal (commentaire dans config/auth.php).
+DÉPLOIEMENT : non fait au moment de l'entrée ; config/auth.php → php artisan optimize obligatoire après envoi (config en cache).
+À RENSEIGNER / QUESTIONS OUVERTES : aucune.
+POINTS À RELIRE PAR UN HUMAIN : rendu de l'email (texte + lien) dans une vraie boîte mail.
+AJOUTÉ AU BACKLOG : rien.
+PROCHAINE TÂCHE SUGGÉRÉE : déploiement de ces 4 fichiers puis test réel d'une demande « Mot de passe oublié ».

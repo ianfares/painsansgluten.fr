@@ -16,5 +16,7 @@
         <input id="password_confirmation" type="password" name="password_confirmation" required>
 
         <button type="submit">Réinitialiser le mot de passe</button>
+
+        <p>Lien expiré ? <a href="{{ route('password.request') }}">Demandez-en un nouveau</a>.</p>
     </form>
 </x-layouts.auth>

@@ -76,3 +76,55 @@ test('la réinitialisation elle-même (lien reçu par email) ne demande pas de c
 
     Http::assertNothingSent();
 });
+
+test('le lien de réinitialisation est valable 3 heures, puis expire', function () {
+    $user = User::factory()->create();
+    $token = Password::broker('users')->createToken($user);
+    $payload = fn () => [
+        'token' => $token,
+        'email' => $user->email,
+        'password' => 'nouveau-mot-de-passe',
+        'password_confirmation' => 'nouveau-mot-de-passe',
+    ];
+
+    $this->travel(181)->minutes();
+
+    $this->post(route('password.update'), $payload())
+        ->assertSessionHasErrors(['email' => __('passwords.token')]);
+    expect(Hash::check('nouveau-mot-de-passe', $user->fresh()->password))->toBeFalse();
+});
+
+test('un lien encore valide après 2 h 59 fonctionne', function () {
+    $user = User::factory()->create();
+    $token = Password::broker('users')->createToken($user);
+
+    $this->travel(179)->minutes();
+
+    $this->post(route('password.update'), [
+        'token' => $token,
+        'email' => $user->email,
+        'password' => 'nouveau-mot-de-passe',
+        'password_confirmation' => 'nouveau-mot-de-passe',
+    ]);
+
+    expect(Hash::check('nouveau-mot-de-passe', $user->fresh()->password))->toBeTrue();
+});
+
+test('lien expiré : le message invite à redemander un lien via « Mot de passe oublié »', function () {
+    expect(__('passwords.token'))->toContain('expiré')->toContain('Mot de passe oublié');
+
+    $user = User::factory()->create();
+    $this->get(route('password.reset', ['token' => 'x', 'email' => $user->email]))
+        ->assertOk()
+        ->assertSee('Lien expiré ?')
+        ->assertSee(route('password.request'), false);
+});
+
+test('l\'email indique la durée de 3 heures et le lien « Mot de passe oublié »', function () {
+    $user = User::factory()->create();
+    $html = (string) (new ResetPassword('jeton'))->toMail($user)->render();
+
+    expect($html)->toContain('valable 3 heures')
+        ->toContain('Mot de passe oublié')
+        ->toContain(route('password.request'));
+});

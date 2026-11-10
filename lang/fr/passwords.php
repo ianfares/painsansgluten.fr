@@ -11,6 +11,6 @@ return [
     'reset' => 'Votre mot de passe a été réinitialisé.',
     'sent' => 'Si un compte correspond à cette adresse, vous allez recevoir un e-mail avec le lien de réinitialisation.',
     'throttled' => 'Veuillez patienter avant de réessayer.',
-    'token' => 'Ce lien de réinitialisation du mot de passe n\'est plus valide.',
+    'token' => 'Ce lien de réinitialisation n\'est plus valide : il a expiré ou a déjà été utilisé. Demandez un nouveau lien via « Mot de passe oublié ».',
     'user' => 'Si un compte correspond à cette adresse, vous allez recevoir un e-mail avec le lien de réinitialisation.',
 ];
