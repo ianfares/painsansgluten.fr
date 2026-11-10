@@ -1686,3 +1686,5 @@ DÉPLOIEMENT : non fait, en attente de l'ordre de Ian (1 fichier : ListOrders.ph
 POINTS À RELIRE PAR UN HUMAIN : libellé de l'onglet « Non abouties, annulées, remboursées » ; choix de garder dans l'onglet par défaut les commandes manuelles BO en attente de paiement.
 AJOUTÉ AU BACKLOG : rien.
 PROCHAINE TÂCHE SUGGÉRÉE : déploiement de cet onglet puis suivi de la première commande Chronopost Relais (étiquette, dépôt).
+DÉPLOIEMENT (2026-11-10, go de Ian) : fichier serveur identique au tag deploy-20261106-235254 ; sauvegarde ~/backups-ia/20261110-085602/ ; 1 fichier envoyé (ListOrders.php) ; php -l OK ; empreinte identique au local ; php artisan optimize ; /admin/orders 302 vers login, accueil 200. Tag deploy-20261110-085602.
+RETOUR ARRIÈRE : recopier ~/backups-ia/20261110-085602/app/ dans /var/www/painsansgluten/ puis php artisan optimize.
